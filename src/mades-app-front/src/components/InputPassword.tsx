@@ -1,7 +1,15 @@
 import { useState } from "react";
 import { Eye, EyeOff } from "lucide-react";
 
-export const InputPassword = ({ label, type, placeholder }: { label: string; type: string; placeholder: string }) => {
+type InputPasswordProps = {
+  label: string;
+  type: string;
+  placeholder: string;
+  value: string;
+  onChange: (value: string) => void;
+};
+
+export const InputPassword = ({ label, type, placeholder, value, onChange }: InputPasswordProps) => {
   const [show, setShow] = useState(false);
   return (
     <div className=" mb-4">
@@ -12,6 +20,8 @@ export const InputPassword = ({ label, type, placeholder }: { label: string; typ
         <input
           type={type === "password" ? (show ? "text" : "password") : type}
           id={label}
+          value={value}
+          onChange={(event) => onChange(event.target.value)}
           className="bg-input-login mt-1 h-13 px-2 block w-full rounded-default border-gray-300 shadow-sm focus:border-primary focus:ring focus:ring-primary focus:ring-opacity-50"
           placeholder={placeholder}
         />

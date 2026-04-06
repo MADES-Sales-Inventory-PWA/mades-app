@@ -1,6 +1,15 @@
 import type { ReactNode } from "react";
 
-export const Input = ({ label, type, placeholder, icon }: { label: string; type: string; placeholder: string; icon?: ReactNode }) => {
+type InputProps = {
+  label: string;
+  type: string;
+  placeholder: string;
+  value: string;
+  onChange: (value: string) => void;
+  icon?: ReactNode;
+};
+
+export const Input = ({ label, type, placeholder, value, onChange, icon }: InputProps) => {
   return (
     <div className="mb-4">
       <label htmlFor={label} className=" text-white block text-m font-medium text-surface-variant">
@@ -8,7 +17,10 @@ export const Input = ({ label, type, placeholder, icon }: { label: string; type:
       </label>
       <div className="relative">
         <input
+          id={label}
           type={type}
+          value={value}
+          onChange={(event) => onChange(event.target.value)}
           className="bg-input-login mt-1 h-13 px-2 block w-full rounded-default border-gray-300 shadow-sm focus:border-primary focus:ring focus:ring-primary focus:ring-opacity-50"
           placeholder={placeholder}
         />
