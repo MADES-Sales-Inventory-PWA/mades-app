@@ -1,0 +1,120 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model InventoryMovements {
+  id              BigInt            @id(map: "inventoryMovements_pkey") @default(autoincrement())
+  movementType    movement_type
+  creationDate    DateTime          @db.Timestamp(6)
+  sellerId        BigInt?
+  asyncStatus     Boolean
+  description     String
+  Persons         Persons?          @relation(fields: [sellerId], references: [id], onDelete: NoAction)
+  Invoices        Invoices[]
+  MovementDetails MovementDetails[]
+}
+
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model Invoices {
+  id                 BigInt             @id @default(autoincrement())
+  movementId         BigInt
+  subTotal           Decimal            @db.Decimal
+  taxAmount          Decimal            @db.Decimal
+  total              Decimal            @db.Decimal
+  issueDate          DateTime           @db.Timestamp(6)
+  invoceNumber       String             @unique @db.VarChar
+  InventoryMovements InventoryMovements @relation(fields: [movementId], references: [id], onDelete: NoAction)
+}
+
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model MovementDetails {
+  id                 BigInt             @id @default(autoincrement())
+  movementId         BigInt
+  createdAt          DateTime           @db.Timestamp(6)
+  productId          BigInt
+  quantity           BigInt
+  price              Decimal            @db.Decimal
+  InventoryMovements InventoryMovements @relation(fields: [movementId], references: [id], onDelete: NoAction)
+  Products           Products           @relation(fields: [productId], references: [id], onDelete: NoAction)
+}
+
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model Persons {
+  id                 BigInt               @id @default(autoincrement())
+  name               String
+  lastName           String
+  email              String               @unique
+  phoneNumber        String
+  state              Boolean
+  documentType       document_type
+  documentNumber     String
+  userId             BigInt
+  InventoryMovements InventoryMovements[]
+  Users              Users                @relation(fields: [userId], references: [id], onDelete: NoAction)
+}
+
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model Products {
+  id              BigInt            @id @default(autoincrement())
+  name            String
+  state           Boolean
+  sellingPrice    Decimal           @db.Decimal
+  size            Decimal           @db.Decimal
+  barcode         String?
+  description     String?
+  imageUrl        String?
+  lastUpdate      DateTime          @db.Timestamp(6)
+  lastSyncDate    DateTime          @db.Timestamp(6)
+  MovementDetails MovementDetails[]
+  productDetails  productDetails[]
+}
+
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model Roles {
+  id      BigInt   @id @default(autoincrement())
+  rolName user_rol
+  Users   Users[]
+}
+
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model Users {
+  id       BigInt    @id @default(autoincrement())
+  userName String    @unique
+  password String
+  rolId    BigInt
+  Persons  Persons[]
+  Roles    Roles     @relation(fields: [rolId], references: [id], onDelete: NoAction)
+}
+
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model productDetails {
+  id            BigInt   @id @default(autoincrement())
+  productId     BigInt
+  purchasePrice Decimal  @db.Decimal
+  quantity      BigInt
+  minQuantity   BigInt
+  Products      Products @relation(fields: [productId], references: [id], onDelete: NoAction)
+}
+
+enum document_type {
+  CC
+  CE
+  PASSPORT
+}
+
+enum movement_type {
+  SALE
+  DECREASE
+}
+
+enum user_rol {
+  ADMIN
+  EMPLOYEE
+}
