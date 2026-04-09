@@ -1,7 +1,6 @@
 import express from "express";
 import cors from "cors";
-import personRoutes from "./modules/persons/persons.routes.js"
-import userRoutes from "./modules/users/users.routes.js"
+import userRoutes from "./modules/users/users.routes"
 
 (BigInt.prototype as any).toJSON = function () {
   return this.toString();
@@ -13,7 +12,6 @@ const PORT = 3000;
 app.use(cors());
 app.use(express.json());
 
-app.use("/api/persons", personRoutes)
 app.use("/api/users", userRoutes)
 
 app.get("/", (req, res) => {
