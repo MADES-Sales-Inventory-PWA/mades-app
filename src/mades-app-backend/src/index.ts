@@ -1,9 +1,20 @@
-import express = require("express");
-import cors = require("cors");
+import express from "express";
+import cors from "cors";
+import personRoutes from "./modules/persons/persons.routes.js"
+import userRoutes from "./modules/users/users.routes.js"
+
+(BigInt.prototype as any).toJSON = function () {
+  return this.toString();
+};
 
 const app = express();
+const PORT = 3000;
+
 app.use(cors());
 app.use(express.json());
+
+app.use("/api/persons", personRoutes)
+app.use("/api/users", userRoutes)
 
 app.get("/", (req, res) => {
   res.send("Backend corriendo");
@@ -17,6 +28,6 @@ app.post("/login", (req, res) => {
   return res.json({ message: `Intento de login con las credenciales: ${email}, ${password}` });
 });
 
-app.listen(3000, () => {
-  console.log("Servidor corriendo en http://localhost:3000");
+app.listen(PORT, () => {
+  console.log(`Servidor corriendo en el puerto ${PORT}`);
 });
