@@ -7,6 +7,7 @@ import { InputPassword } from '../components/InputPassword';
 import { LogIn, Text, Mail, Phone } from "lucide-react";
 import { Combobox } from '../components/Combobox';
 import { TIPOS_DOCUMENTO } from '../constants/documentTypes';
+import { getAuthHeaders } from '../utils/auth';
 
 type CreateAdminProps = {
   onCreated: () => void;
@@ -70,6 +71,7 @@ export default function CreateAdmin({ onCreated }: CreateAdminProps) {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
+          ...getAuthHeaders(),
         },
         body: JSON.stringify({
           name: names,

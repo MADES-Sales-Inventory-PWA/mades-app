@@ -22,6 +22,18 @@ export class UserRepository{
         });
     }
 
+    async login(userName: string, password: string) {
+        const cleanUserName = userName.trim().toLowerCase();
+        const cleanPassword = password.trim();
+
+        return await prisma.users.findFirst({
+            where: {
+                userName: cleanUserName,
+                password: cleanPassword,
+            },
+        });
+    }
+
     async findPersonByDocumentAndDocumentNumber(documentType: string, documentNumber: string) {
         const cleanDocument = documentNumber.replace(/\s+/g, '');
         return await prisma.persons.findFirst({
