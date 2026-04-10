@@ -5,8 +5,9 @@ import { Button } from '../components/Button';
 import { Icon } from '../components/Icon';
 import { Input } from '../components/Input';
 import { InputPassword } from '../components/InputPassword';
-import { Mail, LogIn } from "lucide-react";
+import { Mail, LogIn, WifiOff } from "lucide-react";
 import { saveSession } from '../utils/auth';
+import { useOnlineStatus } from '../hooks/useOnlineStatus';
 
 export default function Login() {
   const [email, setEmail] = useState("");
@@ -14,6 +15,7 @@ export default function Login() {
   const [errorMessage, setErrorMessage] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
+  const isOnline = useOnlineStatus();
 
   const login = async () => {
     if (isLoading) return;
@@ -79,6 +81,12 @@ export default function Login() {
   return (
     <div className="flex items-center justify-center min-h-screen w-full bg-gradient-to-tr from-background to-background-2">
       <div className="w-100 container mx-auto px-8 py-10 rounded-xl bg-card-bg shadow-md">
+        {!isOnline && (
+          <div className="mb-2 p-3 bg-red-100 border border-red-400 rounded-lg flex items-center gap-2">
+            <WifiOff size={20} className="text-red-600" />
+            <span className="text-red-700 font-semibold">Sin conexión a Internet</span>
+          </div>
+        )}
         <Icon />
         <h1 className=" brand-name text-surface-variant text-center"><strong>MADES</strong></h1>
         <h2 className=" brand-sub text-surface-variant text-center">The control mades reality</h2>
