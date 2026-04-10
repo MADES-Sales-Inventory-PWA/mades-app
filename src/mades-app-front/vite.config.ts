@@ -1,22 +1,29 @@
 import { readFile } from 'node:fs/promises'
 import type { IncomingMessage, ServerResponse } from 'node:http'
 import { resolve } from 'node:path'
-import { defineConfig, transformWithEsbuild } from 'vite'
+import { build as esbuildBuild } from 'esbuild'
+import { defineConfig } from 'vite'
 import type { Plugin, ViteDevServer } from 'vite'
 import react, { reactCompilerPreset } from '@vitejs/plugin-react'
 import babel from '@rolldown/plugin-babel'
 
 const serviceWorkerEntryPath = resolve(__dirname, 'src/sw/service-worker.ts')
 
-const compileServiceWorker = async (minify = false) => {
-  const source = await readFile(serviceWorkerEntryPath, 'utf8')
-  const result = await transformWithEsbuild(source, serviceWorkerEntryPath, {
-    loader: 'ts',
-    target: 'es2020',
-    minify
+const compileServiceWorker = async (buildAssetUrlsJson: string, minify = false) => {
+  const result = await esbuildBuild({
+    entryPoints: [serviceWorkerEntryPath],
+    bundle: true,
+    write: false,
+    format: 'iife',
+    platform: 'browser',
+    target: ['es2020'],
+    minify,
+    define: {
+      __BUILD_ASSET_URLS_JSON__: JSON.stringify(buildAssetUrlsJson)
+    }
   })
 
-  return result.code
+  return result.outputFiles[0]?.text ?? await readFile(serviceWorkerEntryPath, 'utf8')
 }
 
 const serviceWorkerFromSrc = (): Plugin => ({
@@ -24,7 +31,7 @@ const serviceWorkerFromSrc = (): Plugin => ({
   configureServer(server: ViteDevServer) {
     server.middlewares.use('/service-worker.js', async (_req: IncomingMessage, res: ServerResponse<IncomingMessage>) => {
       try {
-        const source = await compileServiceWorker()
+        const source = await compileServiceWorker('[]')
         res.setHeader('Content-Type', 'application/javascript; charset=utf-8')
         res.end(source)
       } catch {
@@ -38,17 +45,12 @@ const serviceWorkerFromSrc = (): Plugin => ({
       .map((output) => output.fileName)
       .filter((fileName) => fileName.startsWith('assets/'))
       .map((fileName) => `/${fileName}`)
-    const encodedAssetUrlsJson = JSON.stringify(assetUrls)
-      .replace(/\\/g, '\\\\')
-      .replace(/"/g, '\\"')
-
-    const source = await compileServiceWorker(true)
-    const sourceWithInjectedAssets = source.replace('__BUILD_ASSET_URLS_JSON__', encodedAssetUrlsJson)
+    const source = await compileServiceWorker(JSON.stringify(assetUrls), true)
 
     this.emitFile({
       type: 'asset',
       fileName: 'service-worker.js',
-      source: sourceWithInjectedAssets
+      source
     })
   }
 })
