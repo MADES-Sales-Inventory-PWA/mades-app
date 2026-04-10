@@ -5,25 +5,45 @@ import { Icon } from './components/Icon';
 import { Input } from './components/Input';
 import { InputPassword } from './components/InputPassword';
 import { Mail, LogIn } from "lucide-react";
+import { backendApi } from './services/backend-api';
 
 function App() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [message, setMessage] = useState("");
+  const [error, setError] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
 
   const login = async () => {
-    const res = await fetch("http://localhost:3000/login", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        email,
-        password,
-      }),
-    });
+    setError("");
+    setMessage("");
 
-    const data = await res.json();
-    console.log(data);
+    if (!email || !password) {
+      setError("Debes ingresar correo y contraseña");
+      return;
+    }
+
+    try {
+      setIsLoading(true);
+      const data = await backendApi.login({ email, password });
+
+      const token = data?.token;
+      const user = data?.user;
+
+      if (!token || !user) {
+        throw new Error("No se recibió la sesión del backend");
+      }
+
+      localStorage.setItem("auth_token", token);
+      localStorage.setItem("auth_user", JSON.stringify(user));
+
+      setMessage(`Bienvenido, ${user.name}`);
+    } catch (loginError) {
+      const messageText = loginError instanceof Error ? loginError.message : "No fue posible iniciar sesión";
+      setError(messageText);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -55,10 +75,13 @@ function App() {
           />
           <Button onClick={login} >
             <div className="flex items-center justify-center">
-              <b>Iniciar sesión</b>
+              <b>{isLoading ? "Iniciando..." : "Iniciar sesión"}</b>
               <LogIn className="ml-2" size={18} />
             </div>
           </Button>
+
+          {message && <p className="mt-3 text-sm text-center text-green-600">{message}</p>}
+          {error && <p className="mt-3 text-sm text-center text-red-600">{error}</p>}
       </div>
     </div>
   );

@@ -5,6 +5,7 @@ import { createUserSchema } from "./users.schema";
 
 export class UserController {
     private userService = new UserService();
+
     async createUser(req: Request, res: Response) {
         try {
             const userData = createUserSchema.parse(req.body);

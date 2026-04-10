@@ -1,6 +1,7 @@
 import express from "express";
 import cors from "cors";
 import userRoutes from "./modules/users/users.routes"
+import authRoutes from "./modules/auth/auth.routes"
 
 (BigInt.prototype as any).toJSON = function () {
   return this.toString();
@@ -13,17 +14,10 @@ app.use(cors());
 app.use(express.json());
 
 app.use("/api/users", userRoutes)
+app.use("/api/auth", authRoutes)
 
 app.get("/", (req, res) => {
   res.send("Backend corriendo");
-});
-
-app.post("/login", (req, res) => {
-  const { email, password } = req.body;
-
-  console.log("Intento de login con:", email, password);
-
-  return res.json({ message: `Intento de login con las credenciales: ${email}, ${password}` });
 });
 
 app.listen(PORT, () => {

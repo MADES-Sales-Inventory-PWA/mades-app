@@ -1,6 +1,6 @@
 import { Request, Response, NextFunction } from "express";
 import TokenService from "../services/token.service";
-import { TokenPayload, tokenPayloadSchema } from "../../shared/models/auth/token-payload.model";
+import { TokenPayload, isTokenPayload } from "../../shared/models/auth/token-payload.model";
 import { ApiErrorCode } from "../../shared/errors/api-error-codes";
 import { sendError } from "../utils/api-error-handler";
 
@@ -23,7 +23,16 @@ export function authMiddleware(
   try {
     const decoded = TokenService.verifyToken(token!);
 
-    req.user = tokenPayloadSchema.parse(decoded);
+    if (!isTokenPayload(decoded)) {
+      return sendError(
+        res,
+        401,
+        ApiErrorCode.INVALID_TOKEN,
+        "El token no contiene un payload válido"
+      );
+    }
+
+    req.user = decoded;
 
     next();
 

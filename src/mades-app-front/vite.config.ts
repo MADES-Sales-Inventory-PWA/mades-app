@@ -47,6 +47,17 @@ const serviceWorkerFromSrc = () => ({
 
 // https://vite.dev/config/
 export default defineConfig({
+  server: {
+    host: 'localhost',
+    port: 5173,
+    strictPort: true,
+    hmr: {
+      protocol: 'ws',
+      host: 'localhost',
+      port: 5173,
+      clientPort: 5173
+    }
+  },
   plugins: [
     react(),
     babel({ presets: [reactCompilerPreset()] }),
