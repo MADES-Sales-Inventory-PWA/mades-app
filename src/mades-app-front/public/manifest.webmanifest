@@ -1,0 +1,27 @@
+{
+  "name": "MADES",
+  "short_name": "MADES",
+  "description": "MADES es la aplicación frontend para acceso y gestión del portal.",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "display_override": ["standalone", "minimal-ui"],
+  "orientation": "portrait-primary",
+  "background_color": "#ffffff",
+  "theme_color": "#2f6fed",
+  "categories": ["business", "productivity"],
+  "icons": [
+    {
+      "src": "/icon.png",
+      "sizes": "429x482",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    }
+  ]
+}
