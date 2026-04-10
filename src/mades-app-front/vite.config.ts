@@ -33,12 +33,22 @@ const serviceWorkerFromSrc = (): Plugin => ({
       }
     })
   },
-  async generateBundle() {
+  async generateBundle(_options, bundle) {
+    const assetUrls = Object.values(bundle)
+      .map((output) => output.fileName)
+      .filter((fileName) => fileName.startsWith('assets/'))
+      .map((fileName) => `/${fileName}`)
+    const encodedAssetUrlsJson = JSON.stringify(assetUrls)
+      .replace(/\\/g, '\\\\')
+      .replace(/"/g, '\\"')
+
     const source = await compileServiceWorker(true)
+    const sourceWithInjectedAssets = source.replace('__BUILD_ASSET_URLS_JSON__', encodedAssetUrlsJson)
+
     this.emitFile({
       type: 'asset',
       fileName: 'service-worker.js',
-      source
+      source: sourceWithInjectedAssets
     })
   }
 })

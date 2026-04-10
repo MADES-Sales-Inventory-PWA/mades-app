@@ -5,13 +5,17 @@ import App from './App.tsx'
 
 if ('serviceWorker' in navigator) {
   if (import.meta.env.PROD) {
-    window.addEventListener('load', () => {
-      navigator.serviceWorker
-        .register('/service-worker.js')
-        .catch((error) => {
-          console.error('Error registrando service worker:', error)
-        })
-    })
+    const registerServiceWorker = () => {
+      navigator.serviceWorker.register('/service-worker.js').catch((error) => {
+        console.error('Error registrando service worker:', error)
+      })
+    }
+
+    if (document.readyState === 'complete' || document.readyState === 'interactive') {
+      registerServiceWorker()
+    } else {
+      window.addEventListener('DOMContentLoaded', registerServiceWorker, { once: true })
+    }
   } else {
     navigator.serviceWorker.getRegistrations().then((registrations) => {
       registrations.forEach((registration) => {
