@@ -7,6 +7,22 @@ import { userSchema } from "./users.schema";
 export class UserController{
     constructor(
             private readonly userService = new UserService()) { }
+
+    async getAdminExists(req: Request, res: Response) {
+            try {
+                const exists = await this.userService.adminExists();
+                return res.status(200).json({
+                    success: true,
+                    data: { exists }
+                });
+            } catch (error: any) {
+                return res.status(500).json({
+                    success: false,
+                    message: error.message || "Error al validar administrador"
+                });
+            }
+        }
+
     async createUser(req: Request, res: Response) {
             try {
                 const userData = userSchema.parse(req.body);

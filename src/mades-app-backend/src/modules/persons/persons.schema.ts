@@ -26,6 +26,7 @@ export const personSchema = z.object({
     userName: z.string().optional(),
     password: z.string().optional(),
     rolId: z.number().optional(),
+    firstAdminSecretCode: z.string().trim().optional(),
     userId: z.number().int("El ID del usuario debe ser un número entero.").positive("Id de usuario no valido").optional()
 
 });

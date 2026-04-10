@@ -14,7 +14,7 @@ export class PersonService {
             throw new Error("Ya existe una persona con ese tipo y numero de documento");
         }
     }
-    async createPerson(data: CreatePersonDTO, tx?: any) {
+    async createPerson(data: CreatePersonDTO) {
         await this.validateUniqueFields(data.documentType, data.documentNumber, data.email)
         if (data.userId) {
             const personByUserId = await personsRepository.findPersonByUserId(data.userId);
@@ -22,6 +22,6 @@ export class PersonService {
                 throw new Error("El usuario ya tiene asociada una persona");
             }
         }
-        return await personsRepository.create(data, tx);
+        return await personsRepository.create(data);
     }
 }

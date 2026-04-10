@@ -4,7 +4,11 @@ import { CreateUserDTO } from "./users.schema";
 const userRepository = new UserRepository();
 
 export class UserService {
-    async createUser(data: CreateUserDTO, tx?: any) {
-        return await userRepository.create(data, tx);
+    async createUser(data: CreateUserDTO) {
+        return await userRepository.create(data);
+    }
+
+    async adminExists() {
+        return await userRepository.adminExists();
     }
 }

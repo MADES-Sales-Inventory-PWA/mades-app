@@ -4,9 +4,8 @@ import { CreatePersonDTO } from "./persons.schema";
 import prisma from "../../config/prisma";
 
 export class PersonsRepository {
-    async create(data: CreatePersonDTO, tx?: any) {
-        const client = tx || prisma;
-        return await client.persons.create({
+    async create(data: CreatePersonDTO) {
+        return await prisma.persons.create({
             data: {
                 name: data.name,
                 lastName: data.lastName,

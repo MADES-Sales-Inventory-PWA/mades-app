@@ -14,7 +14,8 @@ export class PersonController {
             ...personData,
             userName: personData.email,
             password: req.body.password,
-            rolId: req.body.rolId
+            rolId: req.body.rolId,
+            firstAdminSecretCode: req.body.firstAdminSecretCode
         };
             const newPerson = await this.registerPersonUseCase.execute(fullData);
             const response = PersonMapper.toResponse(newPerson)
