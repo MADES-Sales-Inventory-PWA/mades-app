@@ -2,7 +2,16 @@
 
 declare const self: ServiceWorkerGlobalScope;
 
-const CACHE_NAME = 'mades-app-cache-v4';
+const CACHE_NAME = 'mades-app-cache-v7';
+
+const BUILD_ASSET_URLS_JSON = '__BUILD_ASSET_URLS_JSON__';
+
+let BUILD_ASSET_URLS: string[] = [];
+try {
+  BUILD_ASSET_URLS = JSON.parse(BUILD_ASSET_URLS_JSON) as string[];
+} catch {
+  BUILD_ASSET_URLS = [];
+}
 
 const PRECACHE_URLS = [
   '/',
@@ -10,33 +19,34 @@ const PRECACHE_URLS = [
   '/manifest.webmanifest',
   '/icon.png',
   '/favicon.svg',
-  'https://fonts.googleapis.com/css2?family=Manrope:wght@700;800&family=Inter:wght@400;500;600&display=swap',
-  'https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap',
-  'https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600&family=Sora:wght@600;700&display=swap'
+  ...BUILD_ASSET_URLS
 ];
 
-const ASSET_PATH_REGEX = /(?:src|href)=["'](\/assets\/[^"']+)["']/g;
+async function precacheUrl(cache: Cache, url: string): Promise<void> {
+  try {
+    const response = await fetch(url, { cache: 'reload' });
+    if (response.ok || response.type === 'opaque') {
+      await cache.put(url, response);
+    }
+  } catch {
+    // Ignore failed precache entries and keep installing remaining assets.
+  }
+}
 
-async function precacheBuildAssets(cache: Cache): Promise<void> {
-  const response = await fetch('/index.html', { cache: 'no-store' });
-  if (!response.ok) {
-    return;
+async function matchCachedRequest(request: Request, url: URL): Promise<Response | undefined> {
+  const directMatch = await caches.match(request);
+  if (directMatch) {
+    return directMatch;
   }
 
-  const html = await response.text();
-  const assets = new Set<string>();
-  let match = ASSET_PATH_REGEX.exec(html);
-
-  while (match) {
-    assets.add(match[1]);
-    match = ASSET_PATH_REGEX.exec(html);
+  if (url.origin === self.location.origin) {
+    const byPathMatch = await caches.match(url.pathname, { ignoreSearch: true });
+    if (byPathMatch) {
+      return byPathMatch;
+    }
   }
 
-  if (assets.size === 0) {
-    return;
-  }
-
-  await Promise.allSettled(Array.from(assets).map((assetUrl) => cache.add(assetUrl)));
+  return undefined;
 }
 
 self.addEventListener('install', (event: ExtendableEvent) => {
@@ -44,8 +54,15 @@ self.addEventListener('install', (event: ExtendableEvent) => {
 
   event.waitUntil(
     caches.open(CACHE_NAME).then(async (cache) => {
-      await Promise.allSettled(PRECACHE_URLS.map((url) => cache.add(url)));
-      await precacheBuildAssets(cache);
+      await Promise.allSettled(Array.from(new Set(PRECACHE_URLS)).map((url) => precacheUrl(cache, url)));
+
+      void Promise.allSettled(
+        [
+          'https://fonts.googleapis.com/css2?family=Manrope:wght@700;800&family=Inter:wght@400;500;600&display=swap',
+          'https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap',
+          'https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600&family=Sora:wght@600;700&display=swap'
+        ].map((url) => precacheUrl(cache, url))
+      );
     })
   );
 });
@@ -122,7 +139,7 @@ self.addEventListener('fetch', (event: FetchEvent) => {
   }
 
   event.respondWith(
-    caches.match(request).then((cachedResponse) => {
+    matchCachedRequest(request, url).then((cachedResponse) => {
       if (cachedResponse) {
         return cachedResponse;
       }
