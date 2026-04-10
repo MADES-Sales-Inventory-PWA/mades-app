@@ -1,4 +1,5 @@
 import { useNavigate } from "react-router-dom";
+import { clearSession } from "../utils/auth";
 
 export default function AdminHome() {
   const navigate = useNavigate();
@@ -12,7 +13,10 @@ export default function AdminHome() {
         </p>
         <button
           type="button"
-          onClick={() => navigate("/", { replace: true })}
+          onClick={() => {
+            clearSession();
+            navigate("/", { replace: true });
+          }}
           className="w-full mt-6 bg-gradient-to-b from-button-login-1 to-button-login-2 text-white py-2 px-4 rounded-[0.4rem]"
         >
           Cerrar sesión

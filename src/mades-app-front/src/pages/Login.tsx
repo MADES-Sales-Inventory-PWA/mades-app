@@ -6,6 +6,7 @@ import { Icon } from '../components/Icon';
 import { Input } from '../components/Input';
 import { InputPassword } from '../components/InputPassword';
 import { Mail, LogIn } from "lucide-react";
+import { saveSession } from '../utils/auth';
 
 export default function Login() {
   const [email, setEmail] = useState("");
@@ -45,7 +46,17 @@ export default function Login() {
         return;
       }
 
-      const roleId = Number(data?.data?.roleId);
+      const token = data?.data?.token;
+      const user = data?.data?.user;
+
+      if (!token || !user) {
+        setErrorMessage("La respuesta del servidor no incluye sesión válida.");
+        return;
+      }
+
+      saveSession({ token, user });
+
+      const roleId = Number(user.roleId);
 
       if (roleId === 1) {
         navigate("/inicio-admin", { replace: true });

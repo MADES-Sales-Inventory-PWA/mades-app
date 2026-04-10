@@ -1,5 +1,6 @@
 import { UserRepository } from "./users.repository";
 import { CreateUserDTO } from "./users.schema";
+import TokenService from "../../core/services/token.service";
 
 const userRepository = new UserRepository();
 
@@ -19,10 +20,21 @@ export class UserService {
             return null;
         }
 
-        return {
+        const normalizedUser = {
             id: Number(user.id),
             userName: user.userName,
             roleId: Number(user.rolId),
+        };
+
+        const token = TokenService.generateToken({
+            userId: normalizedUser.id,
+            userName: normalizedUser.userName,
+            roleId: normalizedUser.roleId,
+        });
+
+        return {
+            token,
+            user: normalizedUser,
         };
     }
 }
