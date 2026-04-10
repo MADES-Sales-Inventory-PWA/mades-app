@@ -18,7 +18,8 @@ export default {
         "button-login-hover-1": "#3b7bfd",
         "button-login-hover-2": "#2555cc",
         "icon-color": "#1152D4",
-        "input-border": "#C7D1D9"
+        "input-border": "#C7D1D9",
+        "subtitle": "#707070"
       },
       fontFamily: {
         "headline": ["Manrope", "sans-serif"],
