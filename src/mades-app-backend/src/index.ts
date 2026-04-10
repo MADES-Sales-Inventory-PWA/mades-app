@@ -3,7 +3,7 @@ import express from "express";
 import cors from "cors";
 import personRoutes from "./modules/persons/persons.routes"
 import userRoutes from "./modules/users/users.routes"
-import prisma from "./config/prisma";
+import { UserController } from "./modules/users/users.controller";
 
 (BigInt.prototype as any).toJSON = function () {
   return this.toString();
@@ -11,6 +11,7 @@ import prisma from "./config/prisma";
 
 const app = express();
 const PORT = 3000;
+const userController = new UserController();
 
 app.use(cors());
 app.use(express.json());
@@ -18,38 +19,13 @@ app.use(express.json());
 app.use("/api/persons", personRoutes)
 app.use("/api/users", userRoutes)
 
-app.get("/api/users/admin-exists", async (req, res) => {
-  try {
-    const totalAdmins = await prisma.users.count({
-      where: {
-        rolId: BigInt(1)
-      }
-    });
-
-    return res.status(200).json({
-      success: true,
-      data: {
-        exists: totalAdmins > 0
-      }
-    });
-  } catch (error: any) {
-    return res.status(500).json({
-      success: false,
-      message: error.message || "Error al validar administrador"
-    });
-  }
-});
+// Temporary compatibility aliases while clients migrate to /api/users/login
+app.post("/login", userController.login.bind(userController));
+app.post("/api/login", userController.login.bind(userController));
+app.post("/api/auth/login", userController.login.bind(userController));
 
 app.get("/", (req, res) => {
   res.send("Backend corriendo");
-});
-
-app.post("/login", (req, res) => {
-  const { email, password } = req.body;
-
-  console.log("Intento de login con:", email, password);
-
-  return res.json({ message: `Intento de login con las credenciales: ${email}, ${password}` });
 });
 
 app.listen(PORT, () => {

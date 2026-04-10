@@ -5,6 +5,7 @@ const router = Router();
 const userController = new UserController();
 
 router.get("/admin-exists", userController.getAdminExists.bind(userController));
+router.post("/login", userController.login.bind(userController));
 router.post("/", userController.createUser.bind(userController));
 
 export default router;

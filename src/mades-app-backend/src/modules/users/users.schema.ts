@@ -30,4 +30,10 @@ export const createUserSchema = z.object({
     rolId: z.number().int().positive("Id de rol no valido"),
 });
 
+export const loginSchema = z.object({
+    userName: z.string().trim().min(1, "El usuario es requerido"),
+    password: z.string().trim().min(1, "La contraseña es requerida"),
+});
+
 export type CreateUserDTO = z.infer<typeof createUserSchema>;
+export type LoginDTO = z.infer<typeof loginSchema>;

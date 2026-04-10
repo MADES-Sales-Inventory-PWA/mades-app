@@ -11,4 +11,18 @@ export class UserService {
     async adminExists() {
         return await userRepository.adminExists();
     }
+
+    async login(userName: string, password: string) {
+        const user = await userRepository.login(userName, password);
+
+        if (!user) {
+            return null;
+        }
+
+        return {
+            id: Number(user.id),
+            userName: user.userName,
+            roleId: Number(user.rolId),
+        };
+    }
 }

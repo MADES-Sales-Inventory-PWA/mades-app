@@ -2,6 +2,8 @@ import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 import Login from "./pages/Login";
 import CreateAdmin from "./pages/CreateAdmin";
+import AdminHome from "./pages/AdminHome";
+import EmployeeHome from "./pages/EmployeeHome";
 
 function App() {
   const [adminExists, setAdminExists] = useState(false);
@@ -40,6 +42,8 @@ function App() {
           path="/create-admin"
           element={adminExists ? <Navigate to="/" replace /> : <CreateAdmin onCreated={() => setAdminExists(true)} />}
         />
+        <Route path="/inicio-admin" element={<AdminHome />} />
+        <Route path="/inicio-employee" element={<EmployeeHome />} />
       </Routes>
     </BrowserRouter>
   );

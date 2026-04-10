@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { useNavigate } from 'react-router-dom';
 import '../App.css'
 import { Button } from '../components/Button';
 import { Icon } from '../components/Icon';
@@ -9,21 +10,59 @@ import { Mail, LogIn } from "lucide-react";
 export default function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [errorMessage, setErrorMessage] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+  const navigate = useNavigate();
 
   const login = async () => {
-    const res = await fetch("http://localhost:3000/login", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        email,
-        password,
-      }),
-    });
+    if (isLoading) return;
 
-    const data = await res.json();
-    console.log(data);
+    setErrorMessage("");
+
+    if (!email.trim() || !password.trim()) {
+      setErrorMessage("Debes completar usuario y contraseña.");
+      return;
+    }
+
+    try {
+      setIsLoading(true);
+
+      const res = await fetch("http://localhost:3000/api/users/login", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          userName: email,
+          password,
+        }),
+      });
+
+      const data = await res.json();
+
+      if (!res.ok || !data?.success) {
+        setErrorMessage(data?.message || "No fue posible iniciar sesión.");
+        return;
+      }
+
+      const roleId = Number(data?.data?.roleId);
+
+      if (roleId === 1) {
+        navigate("/inicio-admin", { replace: true });
+        return;
+      }
+
+      if (roleId === 2) {
+        navigate("/inicio-employee", { replace: true });
+        return;
+      }
+
+      setErrorMessage("El usuario no tiene un rol válido.");
+    } catch {
+      setErrorMessage("No fue posible conectar con el servidor.");
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -53,9 +92,10 @@ export default function Login() {
             value={password}
             onChange={setPassword}
           />
+          {errorMessage && <p className="mt-2 text-sm text-red-600">{errorMessage}</p>}
           <Button onClick={login} >
             <div className="flex items-center justify-center">
-              <b>Iniciar sesión</b>
+              <b>{isLoading ? "Ingresando..." : "Iniciar sesión"}</b>
               <LogIn className="ml-2" size={18} />
             </div>
           </Button>
