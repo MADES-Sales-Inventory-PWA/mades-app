@@ -5,7 +5,3 @@ export const ButtonImage = ({ src, alt, onClick }: { src: string; alt: string; o
     </button>
   );
 };
-
-<button type="button" onClick={() => setShow(!show)} className="absolute right-2 top-1/2 transform -translate-y-1/2">
-          {show ? <EyeOff /> : <Eye />}
-        </button>
