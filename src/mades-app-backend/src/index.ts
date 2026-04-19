@@ -16,7 +16,7 @@ const userController = new UserController();
 app.use(cors());
 app.use(express.json());
 
-app.use("/api/persons", personRoutes)
+app.use("/api/auth", personRoutes)
 app.use("/api/users", userRoutes)
 
 // Temporary compatibility aliases while clients migrate to /api/users/login

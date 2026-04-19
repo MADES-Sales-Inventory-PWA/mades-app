@@ -67,7 +67,7 @@ export default function CreateAdmin({ onCreated }: CreateAdminProps) {
 
     try {
       setIsCreating(true);
-      const response = await fetch("http://localhost:3000/api/persons", {
+      const response = await fetch("http://localhost:3000/api/auth/register-initial-admin", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
