@@ -16,7 +16,7 @@ export const SideButton = ({ children, onClick, icon, path }: { children: React.
     }`;
   return (
     <button
-      className={`flex flex-row items-center justify-start w-full mt-3 font-bold rounded-[0.4rem] hover:text-primary-blue focus:outline-none focus:ring focus:ring-primary focus:ring-opacity-50 ${className}`}
+      className={`flex flex-row items-center justify-start w-full mt-3 font-bold rounded-[0.4rem] hover:text-primary-blue hover:cursor-pointer focus:outline-none focus:ring focus:ring-primary focus:ring-opacity-50 ${className}`}
       onClick={onClick}
     >
       {icon && <span className="mr-2">{icon}</span>}

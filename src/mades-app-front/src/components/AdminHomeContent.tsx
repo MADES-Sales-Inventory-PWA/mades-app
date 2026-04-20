@@ -40,15 +40,17 @@ export const AdminHomeContent = () => {
             <h3 className="text-xl font-semibold mt-7 text-gray-700">Resumen del día</h3>
             <SummaryCard
                 title="Ventas hoy"
-                number={24}
-                text="$3,450.00 Total bruto"
+                number={"24"}
+                text={<h3 className="text-xs font-semibold text-gray-700 bg-gray-200 rounded-xl p-1">$3,450.00 Total bruto</h3>}
                 icon={<DollarSignIcon size={15} className="text-primary-blue" />}
+                withBackground={true}
             />
             <SummaryCard
                 title="Ajustes de inventario hoy"
-                number={24}
-                text="Modificaciones manuales registradas."
+                number={"24"}
+                text={<h3 className="text-xs font-semibold text-gray-700 bg-gray-200 rounded-xl p-1">Modificaciones manuales registradas.</h3>}
                 icon={<Text size={15} className="text-primary-blue" />}
+                withBackground={true}
             />
         </div>
     );

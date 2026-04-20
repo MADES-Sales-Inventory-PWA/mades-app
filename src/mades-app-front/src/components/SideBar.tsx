@@ -32,22 +32,20 @@ export const SideBar = ({ roleid }: { roleid: number }) => {
                 </SideButton>
             </div>
 
-            {roleid === constants.ADMIN_ROLE_ID && (
-                <SideButton
-                    onClick={() => {
-                    }}
-                    icon={<Box size={18} />}
-                    path={["/inventario"]}>
-                    Inventario
-                </SideButton>
-            )}
+            <SideButton
+                onClick={() => {
+                }}
+                icon={<Box size={18} />}
+                path={["/inventario"]}>
+                Inventario
+            </SideButton>
 
             <SideButton
                 onClick={() => {
                 }}
                 icon={<ShoppingCart size={18} />}
                 path={["/carrito"]}>
-                Carrito
+                Ventas
             </SideButton>
 
             {roleid === constants.ADMIN_ROLE_ID && (

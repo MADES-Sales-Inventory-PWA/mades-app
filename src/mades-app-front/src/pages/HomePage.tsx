@@ -12,8 +12,7 @@ export default function EmployeeHome({ roleid }: { roleid: number }) {
 
       <div className="flex-1 flex flex-col min-h-screen">
         <Header />
-        {roleid === constants.ADMIN_ROLE_ID ? <AdminHomeContent /> : <EmployeeHomeContent />}
-        
+        {roleid === constants.ADMIN_ROLE_ID ? <AdminHomeContent /> : <EmployeeHomeContent />}     
       </div>
     </div>
   );

@@ -26,6 +26,59 @@ function PrivateRoute({
   return children;
 }
 
+function AppRoutes({
+  adminExists,
+  setAdminExists,
+}: {
+  adminExists: boolean;
+  setAdminExists: React.Dispatch<React.SetStateAction<boolean>>;
+}) {
+  const currentSession = getSession();
+  const currentRoleId = Number(currentSession?.user?.roleId);
+
+  const homePathByRole =
+    currentRoleId === constants.ADMIN_ROLE_ID
+      ? constants.ADMIN_HOME_PATH
+      : currentRoleId === constants.EMPLOYEE_ROLE_ID
+        ? constants.EMPLOYEE_HOME_PATH
+        : null;
+
+  return (
+    <Routes>
+      <Route
+        path="/"
+        element={
+          adminExists
+            ? homePathByRole
+              ? <Navigate to={homePathByRole} replace />
+              : <Login />
+            : <Navigate to="/create-admin" replace />
+        }
+      />
+      <Route
+        path="/create-admin"
+        element={adminExists ? <Navigate to="/" replace /> : <CreateAdmin onCreated={() => setAdminExists(true)} />}
+      />
+      <Route
+        path="/inicio-admin"
+        element={
+          <PrivateRoute allowedRoleId={constants.ADMIN_ROLE_ID}>
+            <HomePage roleid={currentRoleId} />
+          </PrivateRoute>
+        }
+      />
+      <Route
+        path="/inicio-employee"
+        element={
+          <PrivateRoute allowedRoleId={constants.EMPLOYEE_ROLE_ID}>
+            <HomePage roleid={currentRoleId} />
+          </PrivateRoute>
+        }
+      />
+    </Routes>
+  );
+}
+
 function App() {
   const [adminExists, setAdminExists] = useState(false);
   const [isCheckingAdmin, setIsCheckingAdmin] = useState(true);
@@ -50,50 +103,9 @@ function App() {
     return null;
   }
 
-  const currentSession = getSession();
-  const currentRoleId = Number(currentSession?.user?.roleId);
-
-  const homePathByRole =
-    currentRoleId === constants.ADMIN_ROLE_ID
-      ? constants.ADMIN_HOME_PATH
-      : currentRoleId === constants.EMPLOYEE_ROLE_ID
-        ? constants.EMPLOYEE_HOME_PATH
-        : null;
-
   return (
     <BrowserRouter>
-      <Routes>
-        <Route
-          path="/"
-          element={
-            adminExists
-              ? homePathByRole
-                ? <Navigate to={homePathByRole} replace />
-                : <Login />
-              : <Navigate to="/create-admin" replace />
-          }
-        />
-        <Route
-          path="/create-admin"
-          element={adminExists ? <Navigate to="/" replace /> : <CreateAdmin onCreated={() => setAdminExists(true)} />}
-        />
-        <Route
-          path="/inicio-admin"
-          element={
-            <PrivateRoute allowedRoleId={constants.ADMIN_ROLE_ID}>
-              <HomePage roleid={currentRoleId} />
-            </PrivateRoute>
-          }
-        />
-        <Route
-          path="/inicio-employee"
-          element={
-            <PrivateRoute allowedRoleId={constants.EMPLOYEE_ROLE_ID}>
-              <HomePage roleid={currentRoleId} />
-            </PrivateRoute>
-          }
-        />
-      </Routes>
+      <AppRoutes adminExists={adminExists} setAdminExists={setAdminExists} />
     </BrowserRouter>
   );
 }
