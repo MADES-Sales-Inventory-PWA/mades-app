@@ -2,9 +2,9 @@ import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { useEffect, useState, type ReactElement } from "react";
 import Login from "./pages/Login";
 import CreateAdmin from "./pages/CreateAdmin";
-import AdminHome from "./pages/AdminHome";
-import EmployeeHome from "./pages/EmployeeHome";
+import HomePage from "./pages/HomePage";
 import { getSession } from "./utils/auth";
+import { constants } from "./constants/Constants";
 
 function PrivateRoute({
   allowedRoleId,
@@ -54,10 +54,10 @@ function App() {
   const currentRoleId = Number(currentSession?.user?.roleId);
 
   const homePathByRole =
-    currentRoleId === 1
-      ? "/inicio-admin"
-      : currentRoleId === 2
-        ? "/inicio-employee"
+    currentRoleId === constants.ADMIN_ROLE_ID
+      ? constants.ADMIN_HOME_PATH
+      : currentRoleId === constants.EMPLOYEE_ROLE_ID
+        ? constants.EMPLOYEE_HOME_PATH
         : null;
 
   return (
@@ -80,16 +80,16 @@ function App() {
         <Route
           path="/inicio-admin"
           element={
-            <PrivateRoute allowedRoleId={1}>
-              <AdminHome />
+            <PrivateRoute allowedRoleId={constants.ADMIN_ROLE_ID}>
+              <HomePage roleid={currentRoleId} />
             </PrivateRoute>
           }
         />
         <Route
           path="/inicio-employee"
           element={
-            <PrivateRoute allowedRoleId={2}>
-              <EmployeeHome />
+            <PrivateRoute allowedRoleId={constants.EMPLOYEE_ROLE_ID}>
+              <HomePage roleid={currentRoleId} />
             </PrivateRoute>
           }
         />

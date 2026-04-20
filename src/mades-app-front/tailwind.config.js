@@ -11,6 +11,8 @@ export default {
         background: "#ffffff",
         "background-2": "#d7e5ff",
         "card-bg": "#ffffff",
+        "side-panel": "#EBEBF7",
+        "side-panel2": "#FAF8FF",
         login: "#F2F2F2",
         "input-login": "#e9e9f200",
         "button-login-1": "#2f6fed",
@@ -19,7 +21,9 @@ export default {
         "button-login-hover-2": "#2555cc",
         "icon-color": "#1152D4",
         "input-border": "#C7D1D9",
-        "subtitle": "#707070"
+        "subtitle": "#707070",
+        "side-button": "#FEFFFE",
+        "side-button-hover": "#E0E0E0",
       },
       fontFamily: {
         "headline": ["Manrope", "sans-serif"],

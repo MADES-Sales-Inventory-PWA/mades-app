@@ -87,7 +87,7 @@ export default function Login() {
             <span className="text-red-700 font-semibold">Sin conexión a Internet</span>
           </div>
         )}
-        <Icon />
+        <Icon className='mx-auto' />
         <h1 className=" brand-name text-surface-variant text-center"><strong>MADES</strong></h1>
         <h2 className=" brand-sub text-surface-variant text-center">The control mades reality</h2>
         
