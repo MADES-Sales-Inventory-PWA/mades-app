@@ -15,7 +15,7 @@ export const SideBar = ({ roleid }: { roleid: number }) => {
             <div className="flex flex-row items-start justify-start">
                 <Icon className="mr-3" size={50} />
                 <div className="my-auto flex justify-start flex-col">
-                    <span className="text-lg font-bold text-left text-icon-color">MADES</span>
+                    <span className="text-lg font-bold text-left text-primary-blue">MADES</span>
                     <p className="greeting-sub text-surface-variant text-left mt-2">
                         {roleid === constants.ADMIN_ROLE_ID ? "Administrador" : "Empleado"}
                     </p>

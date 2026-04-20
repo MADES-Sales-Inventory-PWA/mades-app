@@ -11,12 +11,12 @@ export const SideButton = ({ children, onClick, icon, path }: { children: React.
     return false;
   }
   const className = `${isActive()
-    ? "bg-side-button shadow-sm py-3 px-4 text-icon-color"
+    ? "bg-side-button shadow-sm py-3 px-4 text-primary-blue p-2"
     : "py-1 px-4 text-gray-500"
     }`;
   return (
     <button
-      className={`flex flex-row items-center justify-start w-full mt-3 font-bold rounded-[0.4rem] hover:text-icon-color focus:outline-none focus:ring focus:ring-primary focus:ring-opacity-50 ${className}`}
+      className={`flex flex-row items-center justify-start w-full mt-3 font-bold rounded-[0.4rem] hover:text-primary-blue focus:outline-none focus:ring focus:ring-primary focus:ring-opacity-50 ${className}`}
       onClick={onClick}
     >
       {icon && <span className="mr-2">{icon}</span>}

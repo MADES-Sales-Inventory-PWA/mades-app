@@ -12,7 +12,7 @@ export const Icon = ({ size = 80, className }: IconProps) => {
             style={{ width: dimension, height: dimension }}
         >
             <svg
-                className="text-icon-color"
+                className="text-primary-blue"
                 style={{ width: `calc(${dimension} * 0.6)`, height: `calc(${dimension} * 0.6)` }}
                 viewBox="0 0 32 32"
                 fill="none"
