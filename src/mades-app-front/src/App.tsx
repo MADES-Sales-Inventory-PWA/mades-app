@@ -10,7 +10,7 @@ function PrivateRoute({
   allowedRoleId,
   children,
 }: {
-  allowedRoleId: number;
+  allowedRoleId: number[];
   children: ReactElement;
 }) {
   const session = getSession();
@@ -19,7 +19,7 @@ function PrivateRoute({
     return <Navigate to="/" replace />;
   }
 
-  if (Number(session.user?.roleId) !== allowedRoleId) {
+  if (!allowedRoleId.includes(Number(session.user?.roleId))) {
     return <Navigate to="/" replace />;
   }
 
@@ -66,17 +66,49 @@ function AppRoutes({
         }
       />
       <Route
-        path="/inicio-admin"
+        path={constants.ADMIN_HOME_PATH}
         element={
-          <PrivateRoute allowedRoleId={constants.ADMIN_ROLE_ID}>
+          <PrivateRoute allowedRoleId={constants.ADMIN_HOME_ALLOWED_ROLES}>
             <HomePage />
           </PrivateRoute>
         }
       />
       <Route
-        path="/inicio-employee"
+        path={constants.EMPLOYEE_HOME_PATH}
         element={
-          <PrivateRoute allowedRoleId={constants.EMPLOYEE_ROLE_ID}>
+          <PrivateRoute allowedRoleId={constants.EMPLOYEE_HOME_ALLOWED_ROLES}>
+            <HomePage />
+          </PrivateRoute>
+        }
+      />
+      <Route
+        path={constants.INVENTORY_PATH}
+        element={
+          <PrivateRoute allowedRoleId={constants.INVENTORY_ALLOWED_ROLES}>
+            <HomePage />
+          </PrivateRoute>
+        }
+      />
+      <Route
+        path={constants.SALES_PATH}
+        element={
+          <PrivateRoute allowedRoleId={constants.SALES_ALLOWED_ROLES}>
+            <HomePage />
+          </PrivateRoute>
+        }
+      />
+      <Route
+        path={constants.REPORTS_PATH}
+        element={
+          <PrivateRoute allowedRoleId={constants.REPORTS_ALLOWED_ROLES}>
+            <HomePage />
+          </PrivateRoute>
+        }
+      />
+      <Route
+        path={constants.EMPLOYEES_PATH}
+        element={
+          <PrivateRoute allowedRoleId={constants.EMPLOYEES_ALLOWED_ROLES}>
             <HomePage />
           </PrivateRoute>
         }

@@ -4,3 +4,8 @@ export const TIPOS_DOCUMENTO = [
   { value: "PP", label: "Pasaporte" },
   { value: "PPT", label: "Permiso por Protección Temporal" },
 ];
+
+export const ORDER_TYPES = [
+  { value: "DESC", label: "Más recientes" },
+  { value: "ASC", label: "Más antiguos" },
+];

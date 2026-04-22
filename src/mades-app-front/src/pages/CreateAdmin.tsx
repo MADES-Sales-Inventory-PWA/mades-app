@@ -162,6 +162,7 @@ export default function CreateAdmin({ onCreated }: CreateAdminProps) {
 
         <div className='grid grid-cols-2 gap-4'>
           <Combobox
+            className='mb-4'
             label="Tipo de documento"
             placeholder="Selecciona tu tipo de documento"
             value={documentType}
