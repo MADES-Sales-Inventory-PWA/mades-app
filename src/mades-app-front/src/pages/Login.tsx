@@ -58,13 +58,15 @@ export default function Login() {
 
       saveSession({ token, user });
 
+      console.log('Sesión guardada:', localStorage.getItem('mades.auth.session'));
+
       const roleId = Number(user.roleId);
 
       if (roleId === 1) {
         navigate("/inicio-admin", { replace: true });
         return;
       }
-
+      
       if (roleId === 2) {
         navigate("/inicio-employee", { replace: true });
         return;
@@ -90,34 +92,34 @@ export default function Login() {
         <Icon className='mx-auto' />
         <h1 className=" brand-name text-surface-variant text-center"><strong>MADES</strong></h1>
         <h2 className=" brand-sub text-surface-variant text-center">The control mades reality</h2>
-        
+
         <h3 className=" greeting-title mt-4 text-surface-variant text-center">¡Bienvenido de nuevo!</h3>
         <h3 className=" greeting-sub text-surface-variant text-center"> Ingresa tus credenciales para ingresar al portal</h3>
 
         <div className='h-[0.5px] bg-[#6b6b6b] my-4'></div>
 
-          <Input
-            label="Correo electrónico"
-            type="email"
-            placeholder="Ingresa tu correo electrónico"
-            value={email}
-            onChange={setEmail}
-            icon={<Mail size={18} />}
-          />
-          <InputPassword
-            label="Contraseña"
-            type="password"
-            placeholder="Ingresa tu contraseña"
-            value={password}
-            onChange={setPassword}
-          />
-          {errorMessage && <p className="mt-2 text-sm text-red-600">{errorMessage}</p>}
-          <Button onClick={login} >
-            <div className="flex items-center justify-center">
-              <b>{isLoading ? "Ingresando..." : "Iniciar sesión"}</b>
-              <LogIn className="ml-2" size={18} />
-            </div>
-          </Button>
+        <Input
+          label="Correo electrónico"
+          type="email"
+          placeholder="Ingresa tu correo electrónico"
+          value={email}
+          onChange={setEmail}
+          icon={<Mail size={18} />}
+        />
+        <InputPassword
+          label="Contraseña"
+          type="password"
+          placeholder="Ingresa tu contraseña"
+          value={password}
+          onChange={setPassword}
+        />
+        {errorMessage && <p className="mt-2 text-sm text-red-600">{errorMessage}</p>}
+        <Button onClick={login} >
+          <div className="flex items-center justify-center">
+            <b>{isLoading ? "Ingresando..." : "Iniciar sesión"}</b>
+            <LogIn className="ml-2" size={18} />
+          </div>
+        </Button>
       </div>
     </div>
   );

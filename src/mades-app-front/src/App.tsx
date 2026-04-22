@@ -33,8 +33,8 @@ function AppRoutes({
   adminExists: boolean;
   setAdminExists: React.Dispatch<React.SetStateAction<boolean>>;
 }) {
-  const currentSession = getSession();
-  const currentRoleId = Number(currentSession?.user?.roleId);
+  const session = getSession();
+  const currentRoleId = Number(session?.user?.roleId);
 
   const homePathByRole =
     currentRoleId === constants.ADMIN_ROLE_ID
@@ -48,22 +48,28 @@ function AppRoutes({
       <Route
         path="/"
         element={
-          adminExists
-            ? homePathByRole
-              ? <Navigate to={homePathByRole} replace />
-              : <Login />
-            : <Navigate to="/create-admin" replace />
+          !adminExists ? (
+            <Navigate to="/create-admin" replace />
+          ) : homePathByRole ? (
+            <Navigate to={homePathByRole} replace />
+          ) : (
+            <Login />
+          )
         }
       />
       <Route
         path="/create-admin"
-        element={adminExists ? <Navigate to="/" replace /> : <CreateAdmin onCreated={() => setAdminExists(true)} />}
+        element={
+          adminExists
+            ? <Navigate to="/" replace />
+            : <CreateAdmin onCreated={() => setAdminExists(true)} />
+        }
       />
       <Route
         path="/inicio-admin"
         element={
           <PrivateRoute allowedRoleId={constants.ADMIN_ROLE_ID}>
-            <HomePage roleid={currentRoleId} />
+            <HomePage />
           </PrivateRoute>
         }
       />
@@ -71,10 +77,11 @@ function AppRoutes({
         path="/inicio-employee"
         element={
           <PrivateRoute allowedRoleId={constants.EMPLOYEE_ROLE_ID}>
-            <HomePage roleid={currentRoleId} />
+            <HomePage />
           </PrivateRoute>
         }
       />
+      <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
   );
 }
