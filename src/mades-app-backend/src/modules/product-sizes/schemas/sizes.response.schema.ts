@@ -2,11 +2,14 @@ import z from "zod";
 import { sizeTypeSchema, sizeValueSchema } from "../sizes.schema";
 import { successResponseWithDataSchema } from "../../../core/models/base.responses.schema";
 
+export const sizeTypeDataSchema = sizeTypeSchema;
 
-const sizeTypeData = z.array(sizeTypeSchema);
+export const sizeValueDataSchema = sizeValueSchema.omit({ sizeTypeId: true, sortOrder: true });
 
-const sizeValueData = z.array(sizeValueSchema);
+const listSizeTypeDataSchema = z.array(sizeTypeDataSchema);
 
-export const listSizeTypesResponseSchema = successResponseWithDataSchema(sizeTypeData);
+const listSizeValueDataSchema = z.array(sizeValueDataSchema);
 
-export const listSizeValuesResponseSchema = successResponseWithDataSchema(sizeValueData);
+export const listSizeTypesResponseSchema = successResponseWithDataSchema(listSizeTypeDataSchema);
+
+export const listSizeValuesResponseSchema = successResponseWithDataSchema(listSizeValueDataSchema);
