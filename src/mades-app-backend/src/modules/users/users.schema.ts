@@ -32,9 +32,22 @@ export const updateUserSchema = createUserSchema.partial();
 export type CreateUserDTO = z.infer<typeof createUserSchema>;
 export type UpdateUserDTO = z.infer<typeof updateUserSchema>;
 
-export interface UserFilters {
-    id?: number;
-    email?: string;
-    docNumber?: string;
-    rolId?: number;
-}
+export const userQuerySchema = z.object({
+    id: z.coerce.number().optional(),
+    rolId: z.coerce.number().optional(),
+    documentNumber: z.string().optional().transform(val => val?.replace(/\s+/g, ''))
+        .refine(val => !val || (val.length >= 6 && val.length <= 12), {
+            message: "El número de documento debe tener entre 6 y 12 caracteres"
+        })
+        .refine(val => !val || /^\d+$/.test(val), {
+            message: "El número de documento solo debe contener números"
+        }),
+    state: z.preprocess(
+        (val) => (val === "true" ? true : val === "false" ? false : val),
+        z.boolean().optional()
+    ),
+    email: z.string().trim().toLowerCase().refine((val) => {
+        return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(val);
+    }, { message: "Formato de correo electrónico inválido" }).optional(),
+}).partial();
+export type UserFiltersDTO = z.infer<typeof userQuerySchema>;
