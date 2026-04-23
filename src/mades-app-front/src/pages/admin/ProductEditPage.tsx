@@ -1,6 +1,6 @@
 import { useMemo, useState } from "react";
 import { useLocation, useNavigate, useParams, useSearchParams } from "react-router-dom";
-import { BarChart3, Box, House, Plus, ShoppingCart, Trash2, Users } from "lucide-react";
+import { ArrowLeft, BarChart3, Box, House, Plus, ShoppingCart, Trash2, Users } from "lucide-react";
 import { SideBar } from "../../components/SideBar";
 import { Header } from "../../components/Header";
 import { constants } from "../../constants/Constants";
@@ -63,6 +63,14 @@ export default function ProductEditPage() {
 
   const selectedSize = searchParams.get("talla");
 
+  const goBack = () => {
+    if (window.history.length > 1) {
+      navigate(-1);
+      return;
+    }
+    navigate("/inventario");
+  };
+
   return (
     <div className="min-h-screen w-full bg-gradient-to-tr from-background to-background-2">
       <div className="mx-auto flex min-h-screen w-full max-w-[1600px]">
@@ -74,6 +82,14 @@ export default function ProductEditPage() {
           <Header title="Editar Producto" showMobileIcon={true} enableLogoMenu={true} />
 
           <section className="mx-auto flex w-full max-w-[1000px] flex-col gap-4 p-4 lg:p-6">
+            <button
+              type="button"
+              onClick={goBack}
+              className="inline-flex w-fit items-center gap-2 rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm font-semibold text-slate-700 transition hover:bg-slate-100"
+            >
+              <ArrowLeft size={16} />
+              Volver
+            </button>
             {selectedSize && (
               <p className="rounded-xl border border-blue-100 bg-blue-50 px-4 py-2 text-sm text-blue-700">
                 Editando talla seleccionada: <span className="font-semibold">{selectedSize}</span>

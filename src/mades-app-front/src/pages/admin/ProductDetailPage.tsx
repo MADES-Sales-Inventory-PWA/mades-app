@@ -1,6 +1,6 @@
 import { useMemo, useState } from "react";
 import { useLocation, useNavigate, useParams, useSearchParams } from "react-router-dom";
-import { BarChart3, Box, House, ShoppingCart, Trash2, Users, Pencil, ClipboardList } from "lucide-react";
+import { ArrowLeft, BarChart3, Box, House, ShoppingCart, Trash2, Users, Pencil, ClipboardList } from "lucide-react";
 import { SideBar } from "../../components/SideBar";
 import { Header } from "../../components/Header";
 import { constants } from "../../constants/Constants";
@@ -61,6 +61,14 @@ export default function ProductDetailPage() {
   const [showCartModal, setShowCartModal] = useState(action === "carrito");
   const [cartUnits, setCartUnits] = useState("1");
 
+  const goBack = () => {
+    if (window.history.length > 1) {
+      navigate(-1);
+      return;
+    }
+    navigate("/inventario");
+  };
+
   const totalUnits = product.tallasRegistradas.reduce((acc, size) => acc + size.cantidadExistente, 0);
 
   return (
@@ -74,6 +82,14 @@ export default function ProductDetailPage() {
           <Header title="Detalle de Producto" showMobileIcon={true} enableLogoMenu={true} />
 
           <section className="mx-auto flex w-full max-w-[1200px] flex-col gap-5 p-4 lg:p-6">
+            <button
+              type="button"
+              onClick={goBack}
+              className="inline-flex w-fit items-center gap-2 rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm font-semibold text-slate-700 transition hover:bg-slate-100"
+            >
+              <ArrowLeft size={16} />
+              Volver
+            </button>
             <article className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
               <div className="grid gap-5 p-5 md:grid-cols-[320px_1fr]">
                 <div className="overflow-hidden rounded-xl bg-slate-100">

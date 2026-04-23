@@ -1,6 +1,7 @@
 import { useMemo, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import {
+  ArrowLeft,
   AlertTriangle,
   BarChart3,
   Box,
@@ -67,6 +68,14 @@ const adjustmentTypes: AdjustmentType[] = [
 export default function InventoryAdjustPage() {
   const navigate = useNavigate();
   const location = useLocation();
+
+  const goBack = () => {
+    if (window.history.length > 1) {
+      navigate(-1);
+      return;
+    }
+    navigate("/inventario");
+  };
 
   const [selectedType, setSelectedType] = useState<string>("dano");
   const [operation, setOperation] = useState<"sumar" | "restar">("restar");
@@ -145,6 +154,14 @@ export default function InventoryAdjustPage() {
           <Header title="Ajuste de Inventario" showMobileIcon={true} enableLogoMenu={true} />
 
           <section className="mx-auto flex w-full max-w-[1100px] flex-col gap-5 p-4 lg:p-6">
+            <button
+              type="button"
+              onClick={goBack}
+              className="inline-flex w-fit items-center gap-2 rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm font-semibold text-slate-700 transition hover:bg-slate-100"
+            >
+              <ArrowLeft size={16} />
+              Volver
+            </button>
             <div className="grid grid-cols-1 gap-5 xl:grid-cols-[320px_1fr]">
               <article className="rounded-2xl border border-slate-200/80 bg-white p-5 shadow-sm">
                 <p className="mb-4 text-xs font-bold uppercase tracking-wide text-primary-blue">

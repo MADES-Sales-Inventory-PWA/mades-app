@@ -10,8 +10,8 @@ type ProductCardProps = {
   cantidadDisponible: number;
   cantidadAlerta: number;
   imagen?: string;
+  onOpen: (id: string) => void;
   onEdit: (id: string) => void;
-  onView?: (id: string) => void;
   onAddToCart: (id: string) => void;
   onDeactivate: (id: string) => void;
 };
@@ -32,13 +32,14 @@ export function ProductCard({
   cantidadDisponible,
   cantidadAlerta,
   imagen,
+  onOpen,
   onEdit,
-  onView,
   onAddToCart,
   onDeactivate,
 }: ProductCardProps) {
   return (
     <article
+      onClick={() => onOpen(id)}
       className={`flex flex-col rounded-2xl border p-3 shadow-sm transition hover:shadow-md sm:p-4 ${getStockStatusStyles(cantidadDisponible, cantidadAlerta)}`}
     >
       <div className="mb-3 h-28 w-full overflow-hidden rounded-xl bg-slate-200 sm:h-36 lg:h-48">
@@ -62,25 +63,22 @@ export function ProductCard({
       </div>
 
       <div className="flex gap-2">
-        {onView && (
-          <button
-            type="button"
-            onClick={() => onView(id)}
-            className="rounded-lg border border-slate-300 px-3 py-2 text-sm font-semibold text-slate-700 transition hover:bg-slate-100"
-          >
-            Ver
-          </button>
-        )}
         <button
           type="button"
-          onClick={() => onAddToCart(id)}
+          onClick={(event) => {
+            event.stopPropagation();
+            onAddToCart(id);
+          }}
           className="flex-1 rounded-lg bg-primary-blue py-2 text-sm font-semibold text-white transition hover:bg-primary-blue-hover"
         >
-          A Carrito
+          Agregar a carrito
         </button>
         <button
           type="button"
-          onClick={() => onEdit(id)}
+          onClick={(event) => {
+            event.stopPropagation();
+            onEdit(id);
+          }}
           className="rounded-lg border border-slate-300 p-2 text-slate-700 transition hover:bg-slate-100"
           aria-label="Editar"
         >
@@ -88,7 +86,10 @@ export function ProductCard({
         </button>
         <button
           type="button"
-          onClick={() => onDeactivate(id)}
+          onClick={(event) => {
+            event.stopPropagation();
+            onDeactivate(id);
+          }}
           className="rounded-lg border border-red-300 p-2 text-red-700 transition hover:bg-red-50"
           aria-label="Desactivar"
         >

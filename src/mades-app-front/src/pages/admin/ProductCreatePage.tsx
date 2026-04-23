@@ -1,6 +1,6 @@
 import { useMemo, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
-import { BarChart3, Box, House, Plus, ShoppingCart, Trash2, Users } from "lucide-react";
+import { ArrowLeft, BarChart3, Box, House, Plus, ShoppingCart, Trash2, Users } from "lucide-react";
 import { SideBar } from "../../components/SideBar";
 import { Header } from "../../components/Header";
 import { constants } from "../../constants/Constants";
@@ -16,6 +16,14 @@ type NavItem = {
 export default function ProductCreatePage() {
   const navigate = useNavigate();
   const location = useLocation();
+
+  const goBack = () => {
+    if (window.history.length > 1) {
+      navigate(-1);
+      return;
+    }
+    navigate("/inventario");
+  };
 
   const [form, setForm] = useState({
     sku: "",
@@ -51,6 +59,14 @@ export default function ProductCreatePage() {
           <Header title="Crear Producto" showMobileIcon={true} enableLogoMenu={true} />
 
           <section className="mx-auto flex w-full max-w-[1000px] flex-col gap-4 p-4 lg:p-6">
+            <button
+              type="button"
+              onClick={goBack}
+              className="inline-flex w-fit items-center gap-2 rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm font-semibold text-slate-700 transition hover:bg-slate-100"
+            >
+              <ArrowLeft size={16} />
+              Volver
+            </button>
             <form
               className="space-y-4 rounded-2xl border border-slate-200 bg-white p-5"
               onSubmit={(event) => {

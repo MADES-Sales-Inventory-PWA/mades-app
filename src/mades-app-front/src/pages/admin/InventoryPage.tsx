@@ -60,6 +60,7 @@ export default function InventoryPage() {
   const [unitsRange, setUnitsRange] = useState({ min: 0, max: 500 });
   const [currentPage, setCurrentPage] = useState(1);
   const [showFilters, setShowFilters] = useState(false);
+  const [skuToDelete, setSkuToDelete] = useState<string | null>(null);
 
   const inventoryItems = useMemo<InventoryItem[]>(
     () =>
@@ -367,6 +368,7 @@ export default function InventoryPage() {
               {productosVisibles.length > 0 ? (
                 <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5">
                   {productosVisibles.map((producto) => {
+                    const unitsInStock = producto.cantidadDisponible;
                     return (
                       <ProductCard
                         key={producto.id}
@@ -379,10 +381,10 @@ export default function InventoryPage() {
                         cantidadDisponible={producto.cantidadDisponible}
                         cantidadAlerta={producto.cantidadAlerta}
                         imagen={producto.imagen}
-                        onView={(id) => navigate(`/productos/${id}`)}
+                        onOpen={(id) => navigate(`/productos/${id}`)}
                         onEdit={(id) => navigate(`/productos/editar/${id}`)}
                         onAddToCart={(id) => navigate(`/productos/${id}?accion=carrito`)}
-                        onDeactivate={(id) => navigate(`/productos/${id}?accion=eliminar`)}
+                        onDeactivate={() => setSkuToDelete(`${producto.id}|${unitsInStock}|${producto.nombre}`)}
                       />
                     );
                   })}
@@ -440,6 +442,56 @@ export default function InventoryPage() {
             </section>
           </main>
         </div>
+
+        {skuToDelete && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 p-4">
+            <div className="w-full max-w-md rounded-2xl bg-white p-5 shadow-xl">
+              <h2 className="text-xl font-bold text-slate-900">Confirmar eliminación</h2>
+              <p className="mt-2 text-slate-600">
+                {(() => {
+                  const [, , nombre] = skuToDelete.split("|");
+                  return (
+                    <>
+                      ¿Deseas eliminar el producto <span className="font-semibold">{nombre}</span>?
+                    </>
+                  );
+                })()}
+              </p>
+              {(() => {
+                const [, units] = skuToDelete.split("|");
+                const parsedUnits = Number(units);
+                if (parsedUnits <= 0) {
+                  return null;
+                }
+                return (
+                  <p className="mt-3 rounded-lg bg-amber-50 px-3 py-2 text-sm text-amber-700">
+                    Este producto aún tiene {parsedUnits} unidad(es) existentes en inventario.
+                  </p>
+                );
+              })()}
+              <div className="mt-5 flex justify-end gap-2">
+                <button
+                  type="button"
+                  onClick={() => setSkuToDelete(null)}
+                  className="rounded-lg border border-slate-300 px-4 py-2 font-semibold text-slate-700"
+                >
+                  Cancelar
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    const [sku] = skuToDelete.split("|");
+                    setSkuToDelete(null);
+                    alert(`Producto ${sku} eliminado (mock).`);
+                  }}
+                  className="rounded-lg bg-red-600 px-4 py-2 font-semibold text-white"
+                >
+                  Eliminar
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
 
         <nav className="fixed inset-x-0 bottom-0 z-30 border-t border-slate-200/80 bg-white px-1 py-2 shadow-[0_-6px_20px_rgba(15,23,42,0.08)] lg:hidden">
           <div className="mx-auto grid max-w-[700px] grid-cols-5 gap-1">
