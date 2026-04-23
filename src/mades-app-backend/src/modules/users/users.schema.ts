@@ -31,3 +31,10 @@ export const createUserSchema = z.object({
 export const updateUserSchema = createUserSchema.partial();
 export type CreateUserDTO = z.infer<typeof createUserSchema>;
 export type UpdateUserDTO = z.infer<typeof updateUserSchema>;
+
+export interface UserFilters {
+    id?: number;
+    email?: string;
+    docNumber?: string;
+    rolId?: number;
+}
