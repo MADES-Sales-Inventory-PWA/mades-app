@@ -1,5 +1,4 @@
 import { z } from "zod";
-
 const DOCUMENT_TYPES = ['CC', 'CE', 'PASSPORT'] as const;
 export const createUserSchema = z.object({
     name: z.string().min(1, "Ingrese el nombre del usuario").
@@ -29,11 +28,4 @@ export const createUserSchema = z.object({
     password: z.string().min(8, "La contraseña debe tener al menos 8 caracteres"),
     rolId: z.number().int().positive("Id de rol no valido"),
 });
-
-export const loginSchema = z.object({
-    userName: z.string().trim().min(1, "El usuario es requerido"),
-    password: z.string().trim().min(1, "La contraseña es requerida"),
-});
-
 export type CreateUserDTO = z.infer<typeof createUserSchema>;
-export type LoginDTO = z.infer<typeof loginSchema>;
