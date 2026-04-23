@@ -3,6 +3,7 @@ import express from "express";
 import cors from "cors";
 import authRoutes from "./modules/auth/auth.routes"
 import userRoutes from "./modules/users/users.routes"
+import inventoryRoutes from "./modules/inventory/inventory.routes"
 import { AuthController } from "./modules/auth/auth.controller"
 
 (BigInt.prototype as any).toJSON = function () {
@@ -18,6 +19,7 @@ app.use(express.json());
 
 app.use("/api/auth", authRoutes)
 app.use("/api/users", userRoutes)
+app.use("/api/inventory", inventoryRoutes)
 
 // Temporary compatibility aliases while clients migrate to /api/users/login
 app.post("/login", authController.login.bind(authController));
