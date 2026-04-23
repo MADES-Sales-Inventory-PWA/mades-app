@@ -1,4 +1,4 @@
-import { House, Box, ShoppingCart, BarChart, PersonStanding } from "lucide-react";
+import { House, Box, ShoppingCart, BarChart3, Users } from "lucide-react";
 import { Icon } from "./Icon";
 import { SideButton } from "./SideButton";
 import { Button } from "./Button";
@@ -11,7 +11,7 @@ export const SideBar = ({ roleid }: { roleid: number }) => {
     const navigate = useNavigate();
 
     return (
-        <div className="flex flex-col w-full min-h-screen max-w-[250px] px-4 py-5 bg-gradient-to-tr from-side-panel to-side-panel2 shadow-md">
+        <div className="sticky top-0 flex h-screen w-full max-w-[250px] flex-col overflow-y-auto px-4 py-5 bg-gradient-to-tr from-side-panel to-side-panel2 shadow-md">
             <div className="flex flex-row items-start justify-start">
                 <Icon className="mr-3" size={50} />
                 <div className="my-auto flex justify-start flex-col">
@@ -36,7 +36,7 @@ export const SideBar = ({ roleid }: { roleid: number }) => {
                 onClick={() => {
                 }}
                 icon={<Box size={18} />}
-                path={["/inventario"]}>
+                path={["/ajusteInventario"]}>
                 Inventario
             </SideButton>
 
@@ -52,7 +52,7 @@ export const SideBar = ({ roleid }: { roleid: number }) => {
                 <SideButton
                     onClick={() => {
                     }}
-                    icon={<BarChart size={18} />}
+                    icon={<BarChart3 size={18} />}
                     path={["/reportes"]}>
                     Reportes
                 </SideButton>
@@ -62,7 +62,7 @@ export const SideBar = ({ roleid }: { roleid: number }) => {
                 <SideButton
                     onClick={() => {
                     }}
-                    icon={<PersonStanding size={18} />}
+                    icon={<Users size={18} />}
                     path={["/empleados"]}>
                     Empleados
                 </SideButton>

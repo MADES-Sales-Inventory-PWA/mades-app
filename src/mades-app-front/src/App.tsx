@@ -3,6 +3,7 @@ import { useEffect, useState, type ReactElement } from "react";
 import Login from "./pages/Login";
 import CreateAdmin from "./pages/CreateAdmin";
 import HomePage from "./pages/HomePage";
+import InventoryAdjustPage from "./pages/InventoryAdjustPage";
 import { getSession } from "./utils/auth";
 import { constants } from "./constants/Constants";
 
@@ -81,6 +82,15 @@ function AppRoutes({
           </PrivateRoute>
         }
       />
+      <Route
+        path="/ajusteInventario"
+        element={
+          <PrivateRoute allowedRoleId={constants.ADMIN_ROLE_ID}>
+            <InventoryAdjustPage />
+          </PrivateRoute>
+        }
+      />
+      <Route path="/inventario" element={<Navigate to="/ajusteInventario" replace />} />
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
   );
