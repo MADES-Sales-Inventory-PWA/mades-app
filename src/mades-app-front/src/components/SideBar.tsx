@@ -2,12 +2,14 @@ import { House, Box, ShoppingCart, BarChart, PersonStanding } from "lucide-react
 import { Icon } from "./Icon";
 import { SideButton } from "./SideButton";
 import { Button } from "./Button";
-import { clearSession } from "../utils/auth";
+import { clearSession, getSession } from "../utils/auth";
 import { useNavigate } from "react-router-dom";
 import { constants } from "../constants/Constants";
 
 
-export const SideBar = ({ roleid }: { roleid: number }) => {
+export const SideBar = () => {
+    const session = getSession();
+    const roleId = Number(session?.user?.roleId);
     const navigate = useNavigate();
 
     return (
@@ -17,56 +19,74 @@ export const SideBar = ({ roleid }: { roleid: number }) => {
                 <div className="my-auto flex justify-start flex-col">
                     <span className="text-lg font-bold text-left text-primary-blue">MADES</span>
                     <p className="greeting-sub text-surface-variant text-left mt-2">
-                        {roleid === constants.ADMIN_ROLE_ID ? "Administrador" : "Empleado"}
+                        {roleId === constants.ADMIN_ROLE_ID ? "Administrador" : "Empleado"}
                     </p>
                 </div>
             </div>
 
-            <div className="flex flex-col gap-2 mt-4">
-                <SideButton
-                    onClick={() => {
-                    }}
-                    icon={<House size={18} />}
-                    path={["/inicio-employee", "/inicio-admin"]}>
-                    Inicio
-                </SideButton>
+            <div className="flex flex-col mt-4">
+                {constants.HOME_ALLOWED_ROLES.includes(roleId) && (
+                    <SideButton
+                        onClick={() => {
+                            const path = roleId === constants.ADMIN_ROLE_ID ? "/inicio-admin" : "/inicio-employee";
+                            navigate(path, { replace: true });
+                            return;
+                        }}
+                        icon={<House size={18} />}
+                        path={[constants.ADMIN_HOME_PATH, constants.EMPLOYEE_HOME_PATH]}>
+                        Inicio
+                    </SideButton>
+                )}
+
+                {constants.INVENTORY_ALLOWED_ROLES.includes(roleId) && (
+                    <SideButton
+                        onClick={() => {
+                            navigate(constants.INVENTORY_PATH, { replace: true });
+                            return;
+                        }}
+                        icon={<Box size={18} />}
+                        path={[constants.INVENTORY_PATH]}>
+                        Inventario
+                    </SideButton>
+                )}
+
+                {constants.SALES_ALLOWED_ROLES.includes(roleId) && (
+                    <SideButton
+                        onClick={() => {
+                            navigate(constants.SALES_PATH, { replace: true });
+                            return;
+                        }}
+                        icon={<ShoppingCart size={18} />}
+                        path={[constants.SALES_PATH]}>
+                        Ventas
+                    </SideButton>
+                )}
+
+                {constants.REPORTS_ALLOWED_ROLES.includes(roleId) && (
+                    <SideButton
+                        onClick={() => {
+                            navigate(constants.REPORTS_PATH, { replace: true });
+                            return;
+                        }}
+                        icon={<BarChart size={18} />}
+                        path={[constants.REPORTS_PATH]}>
+                        Reportes
+                    </SideButton>
+                )}
+
+                {constants.EMPLOYEES_ALLOWED_ROLES.includes(roleId) && (
+                    <SideButton
+                        onClick={() => {
+                            navigate(constants.EMPLOYEES_PATH, { replace: true });
+                            return;
+                        }}
+                        icon={<PersonStanding size={18} />}
+                        path={[constants.EMPLOYEES_PATH]}>
+                        Empleados
+                    </SideButton>
+                )}
+
             </div>
-
-            <SideButton
-                onClick={() => {
-                }}
-                icon={<Box size={18} />}
-                path={["/inventario"]}>
-                Inventario
-            </SideButton>
-
-            <SideButton
-                onClick={() => {
-                }}
-                icon={<ShoppingCart size={18} />}
-                path={["/carrito"]}>
-                Ventas
-            </SideButton>
-
-            {roleid === constants.ADMIN_ROLE_ID && (
-                <SideButton
-                    onClick={() => {
-                    }}
-                    icon={<BarChart size={18} />}
-                    path={["/reportes"]}>
-                    Reportes
-                </SideButton>
-            )}
-
-            {roleid === constants.ADMIN_ROLE_ID && (
-                <SideButton
-                    onClick={() => {
-                    }}
-                    icon={<PersonStanding size={18} />}
-                    path={["/empleados"]}>
-                    Empleados
-                </SideButton>
-            )}
 
             <Button
                 className="mt-auto"

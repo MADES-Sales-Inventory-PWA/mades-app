@@ -1,27 +1,31 @@
 import type { ReactNode } from "react";
 
 type InputProps = {
-  label: string;
+  label?: string;
   type: string;
   placeholder: string;
-  value: string;
+  value: string | number;
   onChange: (value: string) => void;
   icon?: ReactNode;
+  height?: string;
+  className?: string;
 };
 
-export const Input = ({ label, type, placeholder, value, onChange, icon }: InputProps) => {
+export const Input = ({ label, type, placeholder, value, onChange, icon, height, className }: InputProps) => {
   return (
-    <div className="mb-4">
-      <label htmlFor={label} className="  block text-m font-medium text-surface-variant">
-        <b>{label}</b>
-      </label>
+    <div>
+      {label && (
+        <label htmlFor={label} className="  block text-m font-medium text-surface-variant">
+          <b>{label}</b>
+        </label>
+      )}
       <div className="relative">
         <input
           id={label}
           type={type}
           value={value}
           onChange={(event) => onChange(event.target.value)}
-          className="font-sans text-s text-gray-500 bg-input-login border border-input-border border-[1.5px] mt-1 h-13 px-2 block w-full rounded-default shadow-sm focus:border-primary focus:ring focus:ring-primary focus:ring-opacity-50 placeholder:font-sans placeholder:text-gray-500 placeholder:italic"
+          className={`font-sans text-s text-gray-500 bg-input-login border border-input-border border-[1.5px] mt-1 ${height || 'h-13'} px-2 block w-full rounded-default shadow-sm focus:border-primary focus:ring focus:ring-primary focus:ring-opacity-50 placeholder:font-sans placeholder:text-gray-500 placeholder:italic ${className || ''}`}
           placeholder={placeholder}
         />
 

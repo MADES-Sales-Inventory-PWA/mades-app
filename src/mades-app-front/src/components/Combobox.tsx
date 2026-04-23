@@ -6,17 +6,19 @@ type Option = {
 };
 
 type ComboboxProps = {
-  label: string;
+  label?: string;
   placeholder: string;
   value: string;
   onChange: (value: string) => void;
   options: Option[];
   icon?: ReactNode;
+  className?: string;
+  height?: string;
 };
 
-export const Combobox = ({ label, placeholder, value, onChange, options, icon }: ComboboxProps) => {
+export const Combobox = ({ label, placeholder, value, onChange, options, icon, className, height }: ComboboxProps) => {
   return (
-    <div className="mb-4">
+    <div className={`${className}`}>
       <label htmlFor={label} className="  block text-m font-medium text-surface-variant">
         <b>{label}</b>
       </label>
@@ -26,7 +28,7 @@ export const Combobox = ({ label, placeholder, value, onChange, options, icon }:
           id={label}
           value={value}
           onChange={(event) => onChange(event.target.value)}
-            className="font-sans text-s text-gray-500 italic bg-input-login border border-input-border border-[1.5px] mt-1 h-13 px-2 block w-full rounded-default shadow-sm focus:border-primary focus:ring focus:ring-primary focus:ring-opacity-50"
+            className={`font-sans text-s text-gray-500 italic bg-input-login border border-input-border border-[1.5px] mt-1 ${height || 'h-13'} px-2 block w-full rounded-default shadow-sm focus:border-primary focus:ring focus:ring-primary focus:ring-opacity-50`}
         >
           <option value="" disabled>
             {placeholder}
