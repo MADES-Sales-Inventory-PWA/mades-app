@@ -31,8 +31,8 @@ export default function HomePage() {
     {
       label: "Inventario",
       icon: <Box size={18} />,
-      path: "/ajuste-inventario",
-      enabled: false,
+      path: "/inventario",
+      enabled: true,
     },
     {
       label: "Carrito",

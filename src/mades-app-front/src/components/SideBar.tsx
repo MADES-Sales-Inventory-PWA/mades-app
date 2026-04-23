@@ -35,9 +35,10 @@ export const SideBar = ({ roleid }: { roleid: number }) => {
 
             <SideButton
                 onClick={() => {
+                    navigate("/inventario");
                 }}
                 icon={<Box size={18} />}
-                path={["/ajuste-inventario"]}>
+                path={["/inventario", "/ajuste-inventario"]}>
                 Inventario
             </SideButton>
 

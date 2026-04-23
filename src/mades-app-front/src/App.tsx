@@ -4,6 +4,7 @@ import Login from "./pages/Login";
 import CreateAdmin from "./pages/CreateAdmin";
 import HomePage from "./pages/admin/HomePage";
 import InventoryAdjustPage from "./pages/admin/InventoryAdjustPage";
+import InventoryPage from "./pages/admin/InventoryPage";
 import { getSession } from "./utils/auth";
 import { constants } from "./constants/Constants";
 
@@ -91,7 +92,14 @@ function AppRoutes({
         }
       />
       <Route path="/ajusteInventario" element={<Navigate to="/ajuste-inventario" replace />} />
-      <Route path="/inventario" element={<Navigate to="/ajuste-inventario" replace />} />
+      <Route
+        path="/inventario"
+        element={
+          <PrivateRoute allowedRoleId={constants.ADMIN_ROLE_ID}>
+            <InventoryPage />
+          </PrivateRoute>
+        }
+      />
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
   );
