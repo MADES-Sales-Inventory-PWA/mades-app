@@ -69,7 +69,8 @@ export default function InventoryAdjustPage() {
   const location = useLocation();
 
   const [selectedType, setSelectedType] = useState<string>("dano");
-  const [units, setUnits] = useState(1);
+  const [operation, setOperation] = useState<"sumar" | "restar">("restar");
+  const [unitsInput, setUnitsInput] = useState("1");
   const [comments, setComments] = useState("");
 
   const navItems = useMemo<NavItem[]>(
@@ -109,9 +110,24 @@ export default function InventoryAdjustPage() {
   );
 
   const stockActual = 15;
+  const parsedUnits = Number.parseInt(unitsInput, 10);
+  const units = Number.isFinite(parsedUnits)
+    ? Math.min(stockActual, Math.max(1, parsedUnits))
+    : 1;
   const nuevoStock = Math.max(0, stockActual - units);
 
   return (
+    <>
+      <style>{`
+        input[type="number"]::-webkit-outer-spin-button,
+        input[type="number"]::-webkit-inner-spin-button {
+          -webkit-appearance: none;
+          margin: 0;
+        }
+        input[type="number"] {
+          -moz-appearance: textfield;
+        }
+      `}</style>
     <div className="min-h-screen w-full bg-gradient-to-tr from-background to-background-2">
       <div className="mx-auto flex min-h-screen w-full max-w-[1600px]">
         <aside className="hidden lg:block">
@@ -167,7 +183,7 @@ export default function InventoryAdjustPage() {
                               type="checkbox"
                               checked={checked}
                               onChange={() => setSelectedType(type.id)}
-                              className="h-4 w-4 rounded border-slate-300 accent-primary-blue"
+                              className="h-4 w-4 shrink-0 rounded border-slate-300 accent-primary-blue sm:h-5 sm:w-5"
                             />
                           </label>
                         );
@@ -175,24 +191,86 @@ export default function InventoryAdjustPage() {
                     </div>
                   </div>
 
+                  {selectedType === "correccion-manual" && (
+                    <div>
+                      <p className="mb-2 text-base font-semibold text-slate-800">Operación</p>
+                      <div className="flex flex-wrap gap-4">
+                        <label className="inline-flex items-center gap-2 text-slate-700">
+                          <input
+                            type="radio"
+                            name="operation"
+                            value="restar"
+                            checked={operation === "restar"}
+                            onChange={() => setOperation("restar")}
+                            className="h-4 w-4 shrink-0 accent-primary-blue sm:h-5 sm:w-5"
+                          />
+                          Restar
+                        </label>
+                        <label className="inline-flex items-center gap-2 text-slate-700">
+                          <input
+                            type="radio"
+                            name="operation"
+                            value="sumar"
+                            checked={operation === "sumar"}
+                            onChange={() => setOperation("sumar")}
+                            className="h-4 w-4 shrink-0 accent-primary-blue sm:h-5 sm:w-5"
+                          />
+                          Sumar
+                        </label>
+                      </div>
+                    </div>
+                  )}
+
                   <div>
                     <p className="mb-2 text-base font-semibold text-slate-800">Unidades</p>
-                    <div className="flex h-14 items-center rounded-xl border border-input-border bg-[#F3F4FE] px-2">
+                    <div className="flex h-12 items-center rounded-xl border border-input-border bg-[#F3F4FE] px-2 sm:h-14">
                       <button
                         type="button"
-                        onClick={() => setUnits((current) => Math.max(1, current - 1))}
-                        className="h-10 w-10 rounded-lg text-3xl text-primary-blue transition hover:bg-blue-50"
+                        onClick={() => {
+                          setUnitsInput((current) => {
+                            const value = Number.parseInt(current, 10);
+                            const safeValue = Number.isFinite(value) && value >= 1 ? value : 1;
+                            return String(Math.max(1, safeValue - 1));
+                          });
+                        }}
+                        className="h-8 w-8 rounded-lg text-2xl text-primary-blue transition hover:bg-blue-50 sm:h-10 sm:w-10 sm:text-3xl"
                         aria-label="Restar unidad"
                       >
                         -
                       </button>
 
-                      <span className="flex-1 text-center text-3xl font-semibold text-slate-800">{units}</span>
+                      <input
+                        type="number"
+                        value={unitsInput}
+                        min={1}
+                        max={stockActual}
+                        onChange={(event) => {
+                          const nextValue = event.target.value;
+                          if (/^\d*$/.test(nextValue)) {
+                            setUnitsInput(nextValue);
+                          }
+                        }}
+                        onBlur={() => {
+                          const value = Number.parseInt(unitsInput, 10);
+                          if (!Number.isFinite(value) || value < 1) {
+                            setUnitsInput("1");
+                            return;
+                          }
+                          setUnitsInput(String(Math.min(stockActual, value)));
+                        }}
+                        className="flex-1 bg-transparent text-center text-lg font-semibold text-slate-800 outline-none sm:text-xl"
+                      />
 
                       <button
                         type="button"
-                        onClick={() => setUnits((current) => current + 1)}
-                        className="h-10 w-10 rounded-lg text-3xl text-primary-blue transition hover:bg-blue-50"
+                        onClick={() => {
+                          setUnitsInput((current) => {
+                            const value = Number.parseInt(current, 10);
+                            const safeValue = Number.isFinite(value) && value >= 1 ? value : 1;
+                            return String(Math.min(stockActual, safeValue + 1));
+                          });
+                        }}
+                        className="h-8 w-8 rounded-lg text-2xl text-primary-blue transition hover:bg-blue-50 sm:h-10 sm:w-10 sm:text-3xl"
                         aria-label="Sumar unidad"
                       >
                         +
@@ -268,5 +346,6 @@ export default function InventoryAdjustPage() {
         </div>
       </nav>
     </div>
+    </>
   );
 }
