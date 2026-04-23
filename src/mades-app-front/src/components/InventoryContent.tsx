@@ -3,37 +3,57 @@ import { ORDER_TYPES } from "../constants/documentTypes";
 import { Button } from "./Button";
 import { Combobox } from "./Combobox";
 import { Input } from "./Input";
-import { Search, Pencil } from "lucide-react";
-import { BasicButton } from "./BasicButton";
+import { Search } from "lucide-react";
+import { ProductsTable } from "./ProductsTable";
+import { ProductForm } from "./ProductForm";
+import type { Product } from "../types/Types";
+
+const initialProducts: Product[] = [
+    {
+        "name": "Producto 1",
+        "sellingPrice": 12000,
+        "size": "500",
+        "barcode": "123456789012",
+        "description": "Descripción del producto 1",
+        "imageUrl": "/imgs/product1.jpg",
+        "purchasePrice": 8000,
+        "quantity": 50,
+        "minQuantity": 10,
+        "isActive": true
+    },
+    {
+        "name": "Producto 2",
+        "sellingPrice": 20000,
+        "size": "500",
+        "barcode": "123456789013",
+        "description": "Descripción del producto 2",
+        "imageUrl": "/imgs/product1.jpg",
+        "purchasePrice": 12000,
+        "quantity": 50,
+        "minQuantity": 10,
+        "isActive": false
+    }
+];
 
 export const InventoryContent = () => {
-    const jsonTest = [
-        {
-            "name": "Producto 1",
-            "sellingPrice": 12000,
-            "size": 500,
-            "barcode": "123456789012",
-            "description": "Descripción del producto 1",
-            "imageUrl": "/imgs/product1.jpg",
-            "purchasePrice": 8000,
-            "quantity": 50,
-            "minQuantity": 10
-        },
-        {
-            "name": "Producto 2",
-            "sellingPrice": 20000,
-            "size": 500,
-            "barcode": "123456789013",
-            "description": "Descripción del producto 2",
-            "imageUrl": "/imgs/product1.jpg",
-            "purchasePrice": 12000,
-            "quantity": 50,
-            "minQuantity": 10
-        }
-    ];
+    const [products, setProducts] = React.useState<Product[]>(initialProducts);
+    const [isCreateOpen, setIsCreateOpen] = React.useState(false);
+    const [isEditOpen, setIsEditOpen] = React.useState(false);
+    const [productCodeToEdit, setProductCodeToEdit] = React.useState("");
 
-    const [isOpen, setIsOpen] = React.useState(false);
+    function deactivateProduct(code: string) {
+        setProducts((prevProducts) =>
+            prevProducts.map((product) =>
+                product.barcode === code
+                    ? { ...product, isActive: !product.isActive }
+                    : product
+            )
+        );
+    }
 
+    function getProductByCode(code: string) {
+        return products.find(product => product.barcode === code);
+    }
     return (
         <div className="px-10">
             <div className=" w-full flex flex-row justify-start">
@@ -41,7 +61,7 @@ export const InventoryContent = () => {
                     <h2 className="text-3xl font-semibold text-gray-800">Inventario de productos</h2>
                     <p className="text-gray-600 mt-2">Administra los precios y niveles de stock del inventario.</p>
                 </div>
-                <Button className="ml-auto my-auto" onClick={() => setIsOpen(true)}>
+                <Button className="ml-auto my-auto" onClick={() => setIsCreateOpen(true)}>
                     Agregar producto
                 </Button>
 
@@ -52,49 +72,10 @@ export const InventoryContent = () => {
                 <Combobox className="ml-4" options={ORDER_TYPES} placeholder="Ordenar por..." onChange={() => { }} value="" height="h-8" />
             </div>
 
-            <table className="w-full mt-5 rounded-xl overflow-hidden">
-                <thead>
-                    <tr className="bg-tr-bg">
-                        <th className="text-left p-2">Imagen</th>
-                        <th className="text-left p-2">Código de barras</th>
-                        <th className="text-left p-2">Nombre</th>
-                        <th className="text-left p-2">Precio</th>
-                        <th className="text-left p-2">Stock</th>
-                        <th className="text-left p-2">Registrar ajuste</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {jsonTest.map((product) => (
-                        <tr key={product.barcode} className="bg-white">
-                            <td className="border border-gray-300 p-2">
-                                <img src={product.imageUrl} alt={product.name} className="w-16 h-16 object-cover" />
-                            </td>
-                            <td className="border border-gray-300 p-2">{product.barcode}</td>
-                            <td className="border border-gray-300 p-2">{product.name}</td>
-                            <td className="border border-gray-300 p-2">${(product.sellingPrice / 100).toFixed(2)}</td>
-                            <td className="border border-gray-300 p-2">{product.quantity}</td>
-                            <td className="border border-gray-300 p-2">
-                                <BasicButton onClick={() => alert("Funcionalidad de editar producto en construcción")}className="p-1">
-                                    <Pencil size={16} />
-                                </BasicButton>
-                                <Button onClick={() => alert("Funcionalidad de registrar ajuste en construcción")}>
-                                    Registrar ajuste
-                                </Button>
-                            </td>
-                        </tr>
-                    ))}
-                </tbody>
-            </table>
+            <ProductsTable json={products} setEditOpen={setIsEditOpen} setProductCodeToEdit={setProductCodeToEdit} deactivateProduct={deactivateProduct} />
 
-            {isOpen && (
-                <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-                    <div className="bg-white rounded-xl p-6 shadow-lg w-96">
-                        <h2>Título</h2>
-                        <p>Contenido del modal</p>
-                        <button onClick={() => setIsOpen(false)}>Cerrar</button>
-                    </div>
-                </div>
-            )}
+            {isCreateOpen && (<ProductForm setIsOpen={setIsCreateOpen} title="Crear producto" actionText="Añadir producto" />)}
+            {isEditOpen && (<ProductForm setIsOpen={setIsEditOpen} title="Editar producto" actionText="Guardar cambios" product={getProductByCode(productCodeToEdit)} />)}
         </div>
     );
 }
