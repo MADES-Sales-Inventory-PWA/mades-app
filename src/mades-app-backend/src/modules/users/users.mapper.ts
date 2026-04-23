@@ -1,20 +1,15 @@
 export class UserMapper {
     static toResponse(user: any) {
+        if (!user.Persons) return null;
         return {
-            id: Number(user.id), 
-            correo: user.userName,
-            rol: {
-                id: user.rolId,
-                nombre: user.Roles?.rolName || "Sin Rol" 
+            id: Number(user.Persons.id),
+            name: user.Persons.name,
+            lastName: user.Persons.lastName,
+            email: user.Persons.email,
+            user: {
+                id: Number(user.id),
+                roleId: user.Roles ? Number(user.Roles.id) : Number(user.rolId)
             },
-            perfil: user.Persons ? {
-                nombre: user.Persons.name,
-                apellido: user.Persons.lastName,
-                numeroTelefonico: user.Persons.phoneNumber,
-                tipoDocumento: user.Persons.documentType,
-                numeroDocumento: user.Persons.documentNumber,
-                estado: user.Persons.state
-            } : null,
         };
     }
 }

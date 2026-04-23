@@ -1,6 +1,6 @@
 import { document_type } from "@prisma/client";
 import prisma from "../../config/prisma";
-import { CreateUserDTO, UpdateUserDTO } from "./users.schema";
+import { CreateUserDTO, UpdateUserDTO, UserFiltersDTO } from "./users.schema";
 
 export class UserRepository {
     async adminExists() {
@@ -113,28 +113,46 @@ export class UserRepository {
             include: { Persons: true }
         });
     }
-    async findAll(rolId?: number) {
+    async findAll(filters: UserFiltersDTO) {
+        const where: any = {};
+
+        if (filters.id) where.id = BigInt(filters.id);
+        if (filters.rolId) where.rolId = BigInt(filters.rolId);
+        if (filters.email) {
+            where.userName = { contains: filters.email, mode: 'insensitive' };
+        }
+        if (filters.documentNumber || filters.state !== undefined) {
+            where.Persons = {
+                ...(filters.documentNumber && { documentNumber: { contains: filters.documentNumber } }),
+                ...(filters.state !== undefined && { state: filters.state })
+            };
+        }
         return await prisma.users.findMany({
-            where: {
-                ...(rolId && { rolId })
-            },
-            include: { Persons: true, Roles: true },
-            orderBy: { id: 'asc' }
-        });
-    }
-    async updateStatus(id: number, newState: boolean) {
-    return await prisma.$transaction(async (tx) => {
-        await tx.persons.update({
-            where: { userId: BigInt(id) },
-            data: { state: newState }
-        });
-        return await tx.users.findUnique({
-            where: { id: BigInt(id) },
+            where,
             include: {
                 Persons: true,
                 Roles: true
+            },
+            orderBy: {
+                Persons: {
+                    name: 'asc'
+                }
             }
         });
-    });
-}
+    }
+    async updateStatus(id: number, newState: boolean) {
+        return await prisma.$transaction(async (tx) => {
+            await tx.persons.update({
+                where: { userId: BigInt(id) },
+                data: { state: newState }
+            });
+            return await tx.users.findUnique({
+                where: { id: BigInt(id) },
+                include: {
+                    Persons: true,
+                    Roles: true
+                }
+            });
+        });
+    }
 }

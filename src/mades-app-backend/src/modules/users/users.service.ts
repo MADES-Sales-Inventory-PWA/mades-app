@@ -1,6 +1,6 @@
 import { UserMapper } from "./users.mapper";
 import { UserRepository } from "./users.repository";
-import { CreateUserDTO, UpdateUserDTO, UserFilters } from "./users.schema";
+import { CreateUserDTO, UpdateUserDTO, UserFiltersDTO } from "./users.schema";
 
 
 export class UserService {
@@ -59,24 +59,10 @@ export class UserService {
         }
         return UserMapper.toResponse(updatedUser);
     }
-    async getAll(filters: UserFilters) {
-        if (filters.id) {
-            const user = await this.userRepository.findUserById(filters.id);
-            return user ? [UserMapper.toResponse(user)] : [];
-        }
-
-        if (filters.email) {
-            const user = await this.userRepository.findByEmail(filters.email);
-            return user ? [UserMapper.toResponse(user)] : [];
-        }
-
-        if (filters.docNumber) {
-            const users = await this.userRepository.findByDocumentNumber(filters.docNumber);
-            return users.map(u => UserMapper.toResponse(u));
-        }
-
-        const all = await this.userRepository.findAll(filters.rolId);
-        return all.map(u => UserMapper.toResponse(u));
+    async getAll(filters: UserFiltersDTO) {
+        const users = await this.userRepository.findAll(filters);
+        if (!users) return [];
+        return users.map(u => UserMapper.toResponse(u));
     }
     async changeStatus(userId: number, newState: boolean) {
     const user = await this.userRepository.findUserById(userId);
