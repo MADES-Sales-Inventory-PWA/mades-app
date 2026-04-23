@@ -66,13 +66,15 @@ model Products {
   name            String
   state           Boolean
   sellingPrice    Decimal           @db.Decimal
-  size            Decimal           @db.Decimal
+  size            String
   barcode         String?
   description     String?
   imageUrl        String?
   lastUpdate      DateTime          @db.Timestamp(6)
   lastSyncDate    DateTime          @db.Timestamp(6)
+  sizeTypeId      BigInt
   MovementDetails MovementDetails[]
+  SizeTypes       SizeTypes         @relation(fields: [sizeTypeId], references: [id], onDelete: SetNull, onUpdate: NoAction)
   productDetails  productDetails[]
 }
 
@@ -101,6 +103,25 @@ model productDetails {
   quantity      BigInt
   minQuantity   BigInt
   Products      Products @relation(fields: [productId], references: [id], onDelete: NoAction)
+}
+
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model SizeTypes {
+  id         BigInt       @id @default(autoincrement())
+  name       String
+  Products   Products[]
+  SizeValues SizeValues[]
+}
+
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model SizeValues {
+  id         BigInt    @id @default(autoincrement())
+  sizeTypeId BigInt
+  value      String
+  sortOrder  Int       @default(0) @db.SmallInt
+  SizeTypes  SizeTypes @relation(fields: [sizeTypeId], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@unique([sizeTypeId, value], map: "SizeValues_unique")
 }
 
 enum document_type {
