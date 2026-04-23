@@ -2,8 +2,8 @@ import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { useEffect, useState, type ReactElement } from "react";
 import Login from "./pages/Login";
 import CreateAdmin from "./pages/CreateAdmin";
-import HomePage from "./pages/HomePage";
-import InventoryAdjustPage from "./pages/InventoryAdjustPage";
+import HomePage from "./pages/admin/HomePage";
+import InventoryAdjustPage from "./pages/admin/InventoryAdjustPage";
 import { getSession } from "./utils/auth";
 import { constants } from "./constants/Constants";
 

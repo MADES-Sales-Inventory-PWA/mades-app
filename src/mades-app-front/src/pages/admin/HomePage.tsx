@@ -1,10 +1,10 @@
 import type { ReactNode } from "react";
-import { AdminHomeContent } from "../components/AdminHomeContent";
-import { EmployeeHomeContent } from "../components/EmployeeHomeContent";
-import { Header } from "../components/Header";
-import { SideBar } from "../components/SideBar";
-import { constants } from "../constants/Constants";
-import { getSession } from "../utils/auth";
+import { AdminHomeContent } from "../../components/AdminHomeContent";
+import { EmployeeHomeContent } from "../../components/EmployeeHomeContent";
+import { Header } from "../../components/Header";
+import { SideBar } from "../../components/SideBar";
+import { constants } from "../../constants/Constants";
+import { getSession } from "../../utils/auth";
 import { useLocation, useNavigate } from "react-router-dom";
 import { BarChart3, Box, House, ShoppingCart, Users } from "lucide-react";
 

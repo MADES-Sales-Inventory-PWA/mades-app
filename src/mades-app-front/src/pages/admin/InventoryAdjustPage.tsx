@@ -14,9 +14,9 @@ import {
   ShieldAlert,
   Users,
 } from "lucide-react";
-import { SideBar } from "../components/SideBar";
-import { Header } from "../components/Header";
-import { constants } from "../constants/Constants";
+import { SideBar } from "../../components/SideBar";
+import { Header } from "../../components/Header";
+import { constants } from "../../constants/Constants";
 
 type AdjustmentType = {
   id: string;
@@ -114,7 +114,14 @@ export default function InventoryAdjustPage() {
   const units = Number.isFinite(parsedUnits)
     ? Math.min(stockActual, Math.max(1, parsedUnits))
     : 1;
-  const nuevoStock = Math.max(0, stockActual - units);
+  const nuevoStock =
+    selectedType === "reembolso" || selectedType === "restock"
+      ? stockActual + units
+      : selectedType === "correccion-manual"
+        ? operation === "sumar"
+          ? stockActual + units
+          : Math.max(0, stockActual - units)
+        : Math.max(0, stockActual - units);
 
   return (
     <>
