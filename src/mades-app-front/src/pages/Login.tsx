@@ -66,7 +66,7 @@ export default function Login() {
         navigate("/inicio-admin", { replace: true });
         return;
       }
-      
+
       if (roleId === 2) {
         navigate("/inicio-employee", { replace: true });
         return;
@@ -98,23 +98,25 @@ export default function Login() {
 
         <div className='h-[0.5px] bg-[#6b6b6b] my-4'></div>
 
-        <Input
-          label="Correo electrónico"
-          type="email"
-          placeholder="Ingresa tu correo electrónico"
-          value={email}
-          onChange={setEmail}
-          icon={<Mail size={18} />}
-        />
-        <InputPassword
-          label="Contraseña"
-          type="password"
-          placeholder="Ingresa tu contraseña"
-          value={password}
-          onChange={setPassword}
-        />
+        <div className='flex flex-col gap-2'>
+          <Input
+            label="Correo electrónico"
+            type="email"
+            placeholder="Ingresa tu correo electrónico"
+            value={email}
+            onChange={setEmail}
+            icon={<Mail size={18} />}
+          />
+          <InputPassword
+            label="Contraseña"
+            type="password"
+            placeholder="Ingresa tu contraseña"
+            value={password}
+            onChange={setPassword}
+          />
+        </div>
         {errorMessage && <p className="mt-2 text-sm text-red-600">{errorMessage}</p>}
-        <Button onClick={login} >
+        <Button onClick={login} className="w-full mt-2">
           <div className="flex items-center justify-center">
             <b>{isLoading ? "Ingresando..." : "Iniciar sesión"}</b>
             <LogIn className="ml-2" size={18} />

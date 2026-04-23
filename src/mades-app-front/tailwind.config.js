@@ -26,6 +26,7 @@ export default {
         "subtitle": "#707070",
         "side-button": "#FEFFFE",
         "side-button-hover": "#E0E0E0",
+        "tr-bg": "#E9E9F2"
       },
       fontFamily: {
         "headline": ["Manrope", "sans-serif"],
