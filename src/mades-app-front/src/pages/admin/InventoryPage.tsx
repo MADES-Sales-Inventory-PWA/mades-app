@@ -13,14 +13,14 @@ import {
   ChevronRight,
   Sliders,
   ArrowUpDown,
-  Edit2,
-  X,
 } from "lucide-react";
 import { SideBar } from "../../components/SideBar";
 import { Header } from "../../components/Header";
 import { constants } from "../../constants/Constants";
+import { ProductCard } from "../../components/ProductCard";
+import { getTotalUnits, mockProducts } from "../../data/products";
 
-type Product = {
+type InventoryItem = {
   id: string;
   nombre: string;
   descripcion: string;
@@ -42,65 +42,6 @@ type NavItem = {
   enabled: boolean;
 };
 
-// Datos de ejemplo
-const productosEjemplo: Product[] = [
-  {
-    id: "1",
-    nombre: "Camiseta Básica",
-    descripcion: "Camiseta de algodón 100%",
-    codigoBarras: "7401234567890",
-    talla: "M",
-    precio: 25000,
-    cantidadDisponible: 45,
-    cantidadAlerta: 10,
-    imagen: "https://via.placeholder.com/200?text=Camiseta",
-  },
-  {
-    id: "2",
-    nombre: "Pantalón Denim",
-    descripcion: "Pantalón denim azul oscuro",
-    codigoBarras: "7401234567891",
-    talla: "32",
-    precio: 65000,
-    cantidadDisponible: 3,
-    cantidadAlerta: 5,
-    imagen: "https://via.placeholder.com/200?text=Pantalón",
-  },
-  {
-    id: "3",
-    nombre: "Sudadera Deportiva",
-    descripcion: "Sudadera de poliéster",
-    codigoBarras: "7401234567892",
-    talla: "L",
-    precio: 45000,
-    cantidadDisponible: 0,
-    cantidadAlerta: 8,
-    imagen: "https://via.placeholder.com/200?text=Sudadera",
-  },
-  {
-    id: "4",
-    nombre: "Polo Clásico",
-    descripcion: "Polo de algodón premium",
-    codigoBarras: "7401234567893",
-    talla: "XL",
-    precio: 35000,
-    cantidadDisponible: 120,
-    cantidadAlerta: 15,
-    imagen: "https://via.placeholder.com/200?text=Polo",
-  },
-  {
-    id: "5",
-    nombre: "Chaqueta Casual",
-    descripcion: "Chaqueta de lona",
-    codigoBarras: "7401234567894",
-    talla: "M",
-    precio: 85000,
-    cantidadDisponible: 8,
-    cantidadAlerta: 10,
-    imagen: "https://via.placeholder.com/200?text=Chaqueta",
-  },
-];
-
 const getStockStatus = (disponible: number, alerta: number) => {
   if (disponible === 0) return "agotado";
   if (disponible <= alerta) return "bajo";
@@ -119,6 +60,25 @@ export default function InventoryPage() {
   const [unitsRange, setUnitsRange] = useState({ min: 0, max: 500 });
   const [currentPage, setCurrentPage] = useState(1);
   const [showFilters, setShowFilters] = useState(false);
+
+  const inventoryItems = useMemo<InventoryItem[]>(
+    () =>
+      mockProducts.map((product) => {
+        const firstSize = product.tallasRegistradas[0];
+        return {
+          id: product.sku,
+          nombre: product.nombre,
+          descripcion: product.descripcion,
+          codigoBarras: product.sku,
+          talla: firstSize?.talla ?? "N/A",
+          precio: product.precio,
+          cantidadDisponible: getTotalUnits(product),
+          cantidadAlerta: Math.max(...product.tallasRegistradas.map((size) => size.unidadesAlerta)),
+          imagen: product.imagen,
+        };
+      }),
+    []
+  );
 
   const navItems = useMemo<NavItem[]>(
     () => [
@@ -158,7 +118,7 @@ export default function InventoryPage() {
 
   // Filtrar productos
   const productosFiltrados = useMemo(() => {
-    let resultado = productosEjemplo.filter((producto) => {
+    let resultado = inventoryItems.filter((producto) => {
       const matchBusqueda =
         producto.nombre.toLowerCase().includes(searchTerm.toLowerCase()) ||
         producto.codigoBarras.includes(searchTerm);
@@ -197,10 +157,10 @@ export default function InventoryPage() {
     }
 
     return resultado;
-  }, [searchTerm, sortBy, sortDirection, selectedFilters, priceRange, unitsRange]);
+  }, [searchTerm, sortBy, sortDirection, selectedFilters, priceRange, unitsRange, inventoryItems]);
 
   // Paginación
-  const itemsPerPage = 10;
+  const itemsPerPage = 30;
   const totalPages = Math.ceil(productosFiltrados.length / itemsPerPage);
   const startIndex = (currentPage - 1) * itemsPerPage;
   const productosVisibles = productosFiltrados.slice(startIndex, startIndex + itemsPerPage);
@@ -407,76 +367,23 @@ export default function InventoryPage() {
               {productosVisibles.length > 0 ? (
                 <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5">
                   {productosVisibles.map((producto) => {
-                    const status = getStockStatus(producto.cantidadDisponible, producto.cantidadAlerta);
-                    const statusColor =
-                      status === "agotado"
-                        ? "bg-red-50 border-red-200"
-                        : status === "bajo"
-                          ? "bg-yellow-50 border-yellow-200"
-                          : "bg-green-50 border-green-200";
-
                     return (
-                      <div
+                      <ProductCard
                         key={producto.id}
-                        className={`flex flex-col rounded-2xl border p-4 shadow-sm transition hover:shadow-md ${statusColor}`}
-                      >
-                        {/* Imagen */}
-                        <div className="mb-3 h-48 w-full overflow-hidden rounded-xl bg-slate-200">
-                          <img
-                            src={producto.imagen}
-                            alt={producto.nombre}
-                            className="h-full w-full object-cover"
-                          />
-                        </div>
-
-                        {/* Nombre y talla */}
-                        <h3 className="text-sm font-bold text-slate-900">{producto.nombre}</h3>
-                        <p className="text-xs text-slate-500">Talla: {producto.talla}</p>
-
-                        {/* Código de barras */}
-                        <p className="mb-2 text-xs text-slate-600">SKU: {producto.codigoBarras}</p>
-
-                        {/* Cantidad */}
-                        <div className="mb-3 flex items-center justify-between">
-                          <div>
-                            <p className="text-xs text-slate-600">Disponibles</p>
-                            <p className="text-lg font-bold text-slate-900">
-                              {producto.cantidadDisponible}
-                            </p>
-                          </div>
-                          <div className="text-right">
-                            <p className="text-xs text-slate-600">Precio</p>
-                            <p className="text-lg font-bold text-primary-blue">
-                              ${producto.precio.toLocaleString()}
-                            </p>
-                          </div>
-                        </div>
-
-                        {/* Botones */}
-                        <div className="flex gap-2">
-                          <button
-                            type="button"
-                            className="flex-1 rounded-lg bg-primary-blue py-2 text-sm font-semibold text-white transition hover:bg-primary-blue-hover"
-                          >
-                            A Carrito
-                          </button>
-                          <button
-                            type="button"
-                            onClick={() => navigate(`/productos/editar/${producto.id}`)}
-                            className="rounded-lg border border-slate-300 p-2 text-slate-700 transition hover:bg-slate-100"
-                            aria-label="Editar"
-                          >
-                            <Edit2 size={16} />
-                          </button>
-                          <button
-                            type="button"
-                            className="rounded-lg border border-red-300 p-2 text-red-700 transition hover:bg-red-50"
-                            aria-label="Desactivar"
-                          >
-                            <X size={16} />
-                          </button>
-                        </div>
-                      </div>
+                        id={producto.id}
+                        nombre={producto.nombre}
+                        descripcion={producto.descripcion}
+                        codigoBarras={producto.codigoBarras}
+                        talla={producto.talla}
+                        precio={producto.precio}
+                        cantidadDisponible={producto.cantidadDisponible}
+                        cantidadAlerta={producto.cantidadAlerta}
+                        imagen={producto.imagen}
+                        onView={(id) => navigate(`/productos/${id}`)}
+                        onEdit={(id) => navigate(`/productos/editar/${id}`)}
+                        onAddToCart={(id) => navigate(`/productos/${id}?accion=carrito`)}
+                        onDeactivate={(id) => navigate(`/productos/${id}?accion=eliminar`)}
+                      />
                     );
                   })}
                 </div>

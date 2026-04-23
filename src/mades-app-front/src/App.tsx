@@ -5,6 +5,9 @@ import CreateAdmin from "./pages/CreateAdmin";
 import HomePage from "./pages/admin/HomePage";
 import InventoryAdjustPage from "./pages/admin/InventoryAdjustPage";
 import InventoryPage from "./pages/admin/InventoryPage";
+import ProductCreatePage from "./pages/admin/ProductCreatePage";
+import ProductDetailPage from "./pages/admin/ProductDetailPage";
+import ProductEditPage from "./pages/admin/ProductEditPage";
 import { getSession } from "./utils/auth";
 import { constants } from "./constants/Constants";
 
@@ -97,6 +100,30 @@ function AppRoutes({
         element={
           <PrivateRoute allowedRoleId={constants.ADMIN_ROLE_ID}>
             <InventoryPage />
+          </PrivateRoute>
+        }
+      />
+      <Route
+        path="/productos/crear"
+        element={
+          <PrivateRoute allowedRoleId={constants.ADMIN_ROLE_ID}>
+            <ProductCreatePage />
+          </PrivateRoute>
+        }
+      />
+      <Route
+        path="/productos/:sku"
+        element={
+          <PrivateRoute allowedRoleId={constants.ADMIN_ROLE_ID}>
+            <ProductDetailPage />
+          </PrivateRoute>
+        }
+      />
+      <Route
+        path="/productos/editar/:sku"
+        element={
+          <PrivateRoute allowedRoleId={constants.ADMIN_ROLE_ID}>
+            <ProductEditPage />
           </PrivateRoute>
         }
       />
