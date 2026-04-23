@@ -1,40 +1,40 @@
 import { UserRepository } from "./users.repository";
 import { CreateUserDTO } from "./users.schema";
-import TokenService from "../../core/services/token.service";
 
-const userRepository = new UserRepository();
 
 export class UserService {
+    constructor(
+        private readonly userRepository = new UserRepository()
+    ) { }
+    async validateUniqueFields(documentType: any, documentNumber: string, email: string, currentPersonId?: bigint) {
+        const personByEmail = await this.userRepository.findByEmail(email);
+        if (personByEmail && personByEmail.id !== currentPersonId) {
+            throw new Error("El correo electrónico ya se encuentra registrado");
+        }
+        const personByDocument = await this.userRepository.findByDocumentAndDocumentNumber(documentType, documentNumber);
+        if (personByDocument && personByDocument.id !== currentPersonId) {
+            throw new Error("Ya existe una persona con ese tipo y numero de documento");
+        }
+    }
     async createUser(data: CreateUserDTO) {
-        return await userRepository.create(data);
+        await this.validateUniqueFields(data.documentType, data.documentNumber, data.email)
+        return this.userRepository.create(data);
     }
 
     async adminExists() {
-        return await userRepository.adminExists();
+        return await this.userRepository.adminExists();
     }
-
-    async login(userName: string, password: string) {
-        const user = await userRepository.login(userName, password);
-
-        if (!user) {
-            return null;
+    async createFirstAdmin(data: any) {
+        if (Number(data.rolId) === 1) {
+            const hasAdmin = await this.adminExists();
+            if (!hasAdmin) {
+                const secret = process.env.FIRST_ADMIN_SECRET_CODE;
+                if (!secret || data.firstAdminSecretCode !== secret) {
+                    throw new Error("Código de validación inválido para crear el primer administrador");
+                }
+            }
+            await this.validateUniqueFields(data.documentType, data.documentNumber, data.email)
+            return await this.userRepository.create(data);
         }
-
-        const normalizedUser = {
-            id: Number(user.id),
-            userName: user.userName,
-            roleId: Number(user.rolId),
-        };
-
-        const token = TokenService.generateToken({
-            userId: normalizedUser.id,
-            userName: normalizedUser.userName,
-            roleId: normalizedUser.roleId,
-        });
-
-        return {
-            token,
-            user: normalizedUser,
-        };
     }
 }
