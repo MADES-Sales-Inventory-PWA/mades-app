@@ -8,6 +8,7 @@ import { InputPassword } from '../components/InputPassword';
 import { Mail, LogIn, WifiOff } from "lucide-react";
 import { saveSession } from '../utils/auth';
 import { useOnlineStatus } from '../hooks/useOnlineStatus';
+import { constants } from '../constants/Constants';
 
 export default function Login() {
   const [email, setEmail] = useState("");
@@ -30,7 +31,7 @@ export default function Login() {
     try {
       setIsLoading(true);
 
-      const res = await fetch("http://localhost:3000/api/users/login", {
+      const res = await fetch(constants.BACKEND_LOGIN_URL, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -63,12 +64,12 @@ export default function Login() {
       const roleId = Number(user.roleId);
 
       if (roleId === 1) {
-        navigate("/inicio-admin", { replace: true });
+        navigate(constants.ADMIN_HOME_PATH, { replace: true });
         return;
       }
 
       if (roleId === 2) {
-        navigate("/inicio-employee", { replace: true });
+        navigate(constants.EMPLOYEE_HOME_PATH, { replace: true });
         return;
       }
 

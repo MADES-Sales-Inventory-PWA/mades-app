@@ -49,7 +49,7 @@ function AppRoutes({
         path="/"
         element={
           !adminExists ? (
-            <Navigate to="/create-admin" replace />
+            <Navigate to={constants.CREATE_ADMIN_PATH} replace />
           ) : homePathByRole ? (
             <Navigate to={homePathByRole} replace />
           ) : (
@@ -61,7 +61,7 @@ function AppRoutes({
         path="/create-admin"
         element={
           adminExists
-            ? <Navigate to="/" replace />
+            ? <Navigate to={constants.HOME_PATH} replace />
             : <CreateAdmin onCreated={() => setAdminExists(true)} />
         }
       />
@@ -125,7 +125,7 @@ function App() {
   useEffect(() => {
     const checkAdmin = async () => {
       try {
-        const response = await fetch("http://localhost:3000/api/users/admin-exists");
+        const response = await fetch(constants.BACKEND_CHECK_ADMIN_URL);
         const data = await response.json();
         setAdminExists(Boolean(data?.data?.exists));
       } catch {
