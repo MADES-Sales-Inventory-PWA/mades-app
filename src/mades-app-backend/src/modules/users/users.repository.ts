@@ -1,6 +1,6 @@
 import { document_type } from "@prisma/client";
 import prisma from "../../config/prisma";
-import { CreateUserDTO } from "./users.schema";
+import { CreateUserDTO, UpdateUserDTO } from "./users.schema";
 
 export class UserRepository {
     async adminExists() {
@@ -52,5 +52,35 @@ export class UserRepository {
             });
             return { ...user, person };
         })
+    }
+    async update(id: number, data: UpdateUserDTO) {
+        return await prisma.$transaction(async (tx) => {
+            const user = await tx.users.update({
+                where: { id: BigInt(id) },
+                data: {
+                    ...(data.password && { password: data.password }),
+                    ...(data.rolId && { rolId: data.rolId }),
+                }
+            });
+            const { email, password, rolId, ...personData } = data;
+            const person = await tx.persons.update({
+                where: { userId: BigInt(id) },
+                data: {
+                    ...personData,
+                    documentType: personData.documentType as document_type,
+                }
+            });
+            return { ...user, person };
+        });
+    }
+    async findUserById(id: number) {
+        return await prisma.users.findUnique({
+            where: {
+                id: BigInt(id)
+            },
+            include: {
+                Persons: true
+            }
+        });
     }
 }

@@ -1,7 +1,7 @@
 import { Request, Response } from "express";
 import { UserService } from "./users.service"
 import { z } from "zod";
-import { createUserSchema } from "./users.schema";
+import { createUserSchema, updateUserSchema } from "./users.schema";
 
 export class UserController {
     private userService = new UserService();
@@ -59,6 +59,26 @@ export class UserController {
                 success: false,
                 message: error.message || "Error al crear el usuario"
             });
+        }
+    }
+    async updateUser(req: Request, res: Response) {
+        try {
+            const userId = Number(req.params.id);
+            const validatedData = updateUserSchema.parse(req.body);
+            await this.userService.updateUser(userId, validatedData);
+
+            res.status(200).json({
+                success: true,
+                message: "Datos actualizados correctamente",
+            });
+        } catch (error: any) {
+            if (error instanceof z.ZodError) {
+                return res.status(400).json({
+                    success: false,
+                    message: error.issues[0]?.message ?? "Error de validación"
+                });
+            }
+            return res.status(400).json({ success: false, message: error.message });
         }
     }
 }
