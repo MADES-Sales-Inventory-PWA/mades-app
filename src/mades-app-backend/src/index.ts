@@ -23,6 +23,7 @@ app.use("/api/users", userRoutes)
 app.post("/login", authController.login.bind(authController));
 app.post("/api/login", authController.login.bind(authController));
 app.post("/api/auth/login", authController.login.bind(authController));
+app.post("/api/users/login", authController.login.bind(authController));
 
 app.get("/", (req, res) => {
   res.send("Backend corriendo");

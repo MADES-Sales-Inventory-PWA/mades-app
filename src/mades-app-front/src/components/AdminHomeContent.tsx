@@ -8,32 +8,34 @@ export const AdminHomeContent = () => {
             <h2 className="text-2xl font-semibold text-gray-800 sm:text-3xl">Resumen General</h2>
             <p className="mt-2 text-gray-600">Vista rápida del inventario y operaciones de hoy.</p>
 
-            <div className="mt-7 flex flex-col gap-3 sm:flex-row sm:items-center">
-                <h3 className="text-xl font-semibold text-gray-700">Alertas de stock</h3>
-                <BasicButton onClick={() => { }} className="sm:ml-auto text-primary-blue hover:text-primary-blue-hover font-bold active:text-primary-blue-active">Ver todo el inventario</BasicButton>
-            </div>
-            <div className="mt-3 flex flex-col gap-4 rounded-xl bg-white p-3 shadow-md lg:flex-row lg:items-center">
-                <div className="flex flex-row items-center gap-3 lg:flex-1">
-                    <div className="bg-orange-100 flex items-center p-2 border-orange-400 border-[1px] rounded-xl">
-                        <TriangleAlert size={25} className="text-orange-600" />
-                    </div>
-                    <div>
-                        <h1 className="text-lg font-semibold text-gray-600">Bajo</h1>
-                        <h1 className="text-3xl font-semibold text-black-700">24</h1>
-                        <h3 className="text-xs font-semibold text-gray-700">Productos con stock mínimo crítico.</h3>
-                    </div>
+            <div className="mt-7 rounded-2xl border border-slate-200/80 bg-white p-4 shadow-sm">
+                <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
+                    <h3 className="text-xl font-semibold text-gray-700">Alertas de stock</h3>
+                    <BasicButton onClick={() => { }} className="sm:ml-auto text-primary-blue hover:text-primary-blue-hover font-bold active:text-primary-blue-active">Ver todo el inventario</BasicButton>
                 </div>
-
-                <div className="hidden h-full border-l border-gray-400 lg:block lg:mx-4"></div>
-
-                <div className="flex flex-row items-center gap-3 lg:flex-1">
-                    <div className="bg-red-100 flex items-center p-2 border-red-400 border-[1px] rounded-xl">
-                        <XCircle size={25} className="text-red-600" />
+                <div className="mt-4 flex flex-col gap-4 lg:flex-row lg:items-center">
+                    <div className="flex flex-row items-center gap-3 lg:flex-1">
+                        <div className="bg-orange-100 flex items-center p-2 border-orange-400 border-[1px] rounded-xl">
+                            <TriangleAlert size={25} className="text-orange-600" />
+                        </div>
+                        <div>
+                            <h1 className="text-lg font-semibold text-gray-600">Bajo</h1>
+                            <h1 className="text-3xl font-semibold text-black-700">24</h1>
+                            <h3 className="text-xs font-semibold text-gray-700">Productos con stock mínimo crítico.</h3>
+                        </div>
                     </div>
-                    <div>
-                        <h1 className="text-lg font-semibold text-gray-600">Agotados</h1>
-                        <h1 className="text-3xl font-semibold text-red-700">3</h1>
-                        <h3 className="text-xs font-semibold text-gray-700">Productos sin existencia en almacén.</h3>
+
+                    <div className="hidden h-full border-l border-gray-400 lg:block lg:mx-4"></div>
+
+                    <div className="flex flex-row items-center gap-3 lg:flex-1">
+                        <div className="bg-red-100 flex items-center p-2 border-red-400 border-[1px] rounded-xl">
+                            <XCircle size={25} className="text-red-600" />
+                        </div>
+                        <div>
+                            <h1 className="text-lg font-semibold text-gray-600">Agotados</h1>
+                            <h1 className="text-3xl font-semibold text-red-700">3</h1>
+                            <h3 className="text-xs font-semibold text-gray-700">Productos sin existencia en almacén.</h3>
+                        </div>
                     </div>
                 </div>
             </div>

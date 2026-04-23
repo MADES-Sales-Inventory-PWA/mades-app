@@ -62,7 +62,7 @@ export default function HomePage() {
         </aside>
 
         <div className="flex min-h-screen w-full flex-col pb-24 lg:pb-0">
-        <Header />
+        <Header title="MADES" />
         {roleId === constants.ADMIN_ROLE_ID 
           ? <AdminHomeContent /> 
           : <EmployeeHomeContent />

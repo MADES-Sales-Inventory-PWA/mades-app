@@ -14,9 +14,9 @@ import {
   ShieldAlert,
   Users,
 } from "lucide-react";
-import { Icon } from "../components/Icon";
-import { OnlineIndicator } from "../components/OnlineIndicator";
-import { useOnlineStatus } from "../hooks/useOnlineStatus";
+import { SideBar } from "../components/SideBar";
+import { Header } from "../components/Header";
+import { constants } from "../constants/Constants";
 
 type AdjustmentType = {
   id: string;
@@ -67,7 +67,6 @@ const adjustmentTypes: AdjustmentType[] = [
 export default function InventoryAdjustPage() {
   const navigate = useNavigate();
   const location = useLocation();
-  const isOnline = useOnlineStatus();
 
   const [selectedType, setSelectedType] = useState<string>("dano");
   const [units, setUnits] = useState(1);
@@ -114,55 +113,13 @@ export default function InventoryAdjustPage() {
 
   return (
     <div className="min-h-screen w-full bg-gradient-to-tr from-background to-background-2">
-      <div className="mx-auto flex w-full max-w-[1600px]">
-        <aside className="hidden min-h-screen w-[250px] flex-col border-r border-slate-200/70 bg-gradient-to-b from-side-panel to-side-panel2 p-4 lg:flex">
-          <div className="mb-6 flex items-center gap-3">
-            <Icon size={42} />
-            <div>
-              <p className="text-xl font-bold text-primary-blue">MADES</p>
-              <p className="text-sm text-slate-500">Gestión de Retail</p>
-            </div>
-          </div>
-
-          <nav className="flex flex-col gap-2">
-            {navItems.map((item) => {
-              const isActive = location.pathname === item.path;
-
-              return (
-                <button
-                  key={item.path}
-                  type="button"
-                  onClick={() => {
-                    if (item.enabled) {
-                      navigate(item.path);
-                    }
-                  }}
-                  className={`flex items-center gap-3 rounded-lg px-3 py-2 text-left font-medium transition ${
-                    isActive
-                      ? "bg-white text-primary-blue shadow-sm"
-                      : item.enabled
-                        ? "text-slate-600 hover:bg-white/80"
-                        : "cursor-not-allowed text-slate-400"
-                  }`}
-                >
-                  {item.icon}
-                  <span>{item.label}</span>
-                </button>
-              );
-            })}
-          </nav>
+      <div className="mx-auto flex min-h-screen w-full max-w-[1600px]">
+        <aside className="hidden lg:block">
+          <SideBar roleid={constants.ADMIN_ROLE_ID} />
         </aside>
 
         <main className="flex min-h-screen w-full flex-col pb-24 lg:pb-8">
-          <header className="flex items-center justify-between border-b border-slate-200/70 bg-white px-5 py-4">
-            <div className="flex items-center gap-3">
-              <div className="lg:hidden">
-                <Icon size={42} />
-              </div>
-              <h1 className="text-3xl font-bold text-slate-900">Ajuste de Inventario</h1>
-            </div>
-            <OnlineIndicator isOnline={isOnline} />
-          </header>
+          <Header title="Ajuste de Inventario" showMobileIcon={true} />
 
           <section className="mx-auto flex w-full max-w-[1100px] flex-col gap-5 p-4 lg:p-6">
             <div className="grid grid-cols-1 gap-5 xl:grid-cols-[320px_1fr]">
@@ -297,9 +254,9 @@ export default function InventoryAdjustPage() {
                 }}
                 className={`flex flex-col items-center justify-center gap-1 rounded-xl px-1 py-2 text-xs font-semibold transition ${
                   isActive
-                    ? "bg-blue-50 text-primary-blue"
+                    ? "bg-side-button shadow-sm text-primary-blue"
                     : item.enabled
-                      ? "text-slate-500 hover:bg-slate-100"
+                      ? "text-slate-500 hover:bg-white hover:text-primary-blue"
                       : "cursor-not-allowed text-slate-400"
                 }`}
               >

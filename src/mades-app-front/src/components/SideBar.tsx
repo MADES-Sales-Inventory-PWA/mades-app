@@ -1,4 +1,4 @@
-import { House, Box, ShoppingCart, BarChart3, Users } from "lucide-react";
+import { House, Box, ShoppingCart, BarChart3, Users, LogOut } from "lucide-react";
 import { Icon } from "./Icon";
 import { SideButton } from "./SideButton";
 import { Button } from "./Button";
@@ -74,6 +74,7 @@ export const SideBar = ({ roleid }: { roleid: number }) => {
                     clearSession();
                     navigate("/", { replace: true });
                 }}>
+                <LogOut size={16} />
                 Cerrar sesión
             </Button>
 
