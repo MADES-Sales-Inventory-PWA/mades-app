@@ -55,7 +55,7 @@ model Persons {
   state              Boolean
   documentType       document_type
   documentNumber     String
-  userId             BigInt
+  userId             BigInt               @unique
   InventoryMovements InventoryMovements[]
   Users              Users                @relation(fields: [userId], references: [id], onDelete: NoAction)
 }
@@ -64,18 +64,21 @@ model Persons {
 model Products {
   id              BigInt            @id @default(autoincrement())
   name            String
-  state           Boolean
+  state           Boolean           @default(true)
   sellingPrice    Decimal           @db.Decimal
-  size            String
   barcode         String?
   description     String?
   imageUrl        String?
   lastUpdate      DateTime          @db.Timestamp(6)
   lastSyncDate    DateTime          @db.Timestamp(6)
+  sizeValueId     BigInt
   sizeTypeId      BigInt
   MovementDetails MovementDetails[]
   SizeTypes       SizeTypes         @relation(fields: [sizeTypeId], references: [id], onDelete: SetNull, onUpdate: NoAction)
+  SizeValues      SizeValues        @relation(fields: [sizeValueId], references: [id], onDelete: SetNull, onUpdate: NoAction)
   productDetails  productDetails[]
+
+  @@unique([name, sizeTypeId, sizeValueId], map: "Products_name_sizeTypeId_sizeValueId_unique")
 }
 
 /// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
@@ -87,12 +90,12 @@ model Roles {
 
 /// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
 model Users {
-  id       BigInt    @id @default(autoincrement())
-  userName String    @unique
+  id       BigInt   @id @default(autoincrement())
+  userName String   @unique
   password String
   rolId    BigInt
-  Persons  Persons[]
-  Roles    Roles     @relation(fields: [rolId], references: [id], onDelete: NoAction)
+  Persons  Persons?
+  Roles    Roles    @relation(fields: [rolId], references: [id], onDelete: NoAction)
 }
 
 /// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
@@ -102,7 +105,7 @@ model productDetails {
   purchasePrice Decimal  @db.Decimal
   quantity      BigInt
   minQuantity   BigInt
-  Products      Products @relation(fields: [productId], references: [id], onDelete: NoAction)
+  Products      Products @relation(fields: [productId], references: [id], onDelete: Cascade)
 }
 
 /// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
@@ -115,11 +118,12 @@ model SizeTypes {
 
 /// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
 model SizeValues {
-  id         BigInt    @id @default(autoincrement())
+  id         BigInt     @id @default(autoincrement())
   sizeTypeId BigInt
   value      String
-  sortOrder  Int       @default(0) @db.SmallInt
-  SizeTypes  SizeTypes @relation(fields: [sizeTypeId], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  sortOrder  Int        @default(0) @db.SmallInt
+  Products   Products[]
+  SizeTypes  SizeTypes  @relation(fields: [sizeTypeId], references: [id], onDelete: Cascade, onUpdate: NoAction)
 
   @@unique([sizeTypeId, value], map: "SizeValues_unique")
 }
