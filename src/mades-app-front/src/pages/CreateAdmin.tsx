@@ -8,6 +8,7 @@ import { LogIn, Text, Mail, Phone } from "lucide-react";
 import { Combobox } from '../components/Combobox';
 import { TIPOS_DOCUMENTO } from '../constants/documentTypes';
 import { getAuthHeaders } from '../utils/auth';
+import { constants } from '../constants/Constants';
 
 type CreateAdminProps = {
   onCreated: () => void;
@@ -67,7 +68,7 @@ export default function CreateAdmin({ onCreated }: CreateAdminProps) {
 
     try {
       setIsCreating(true);
-      const response = await fetch("http://localhost:3000/api/auth/register-initial-admin", {
+      const response = await fetch(constants.BACKEND_REGISTER_ADMIN_URL, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -162,6 +163,7 @@ export default function CreateAdmin({ onCreated }: CreateAdminProps) {
 
         <div className='grid grid-cols-2 gap-4'>
           <Combobox
+            className='mb-4'
             label="Tipo de documento"
             placeholder="Selecciona tu tipo de documento"
             value={documentType}

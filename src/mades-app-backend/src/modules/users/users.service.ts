@@ -1,12 +1,13 @@
+import { UserMapper } from "./users.mapper";
 import { UserRepository } from "./users.repository";
-import { CreateUserDTO } from "./users.schema";
+import { CreateUserDTO, UpdateUserDTO, UserFilters } from "./users.schema";
 
 
 export class UserService {
     constructor(
         private readonly userRepository = new UserRepository()
     ) { }
-    async validateUniqueFields(documentType: any, documentNumber: string, email: string, currentPersonId?: bigint) {
+    async validateUniqueFields(documentType: string, documentNumber: string, email: string, currentPersonId?: bigint) {
         const personByEmail = await this.userRepository.findByEmail(email);
         if (personByEmail && personByEmail.id !== currentPersonId) {
             throw new Error("El correo electrónico ya se encuentra registrado");
@@ -18,7 +19,8 @@ export class UserService {
     }
     async createUser(data: CreateUserDTO) {
         await this.validateUniqueFields(data.documentType, data.documentNumber, data.email)
-        return this.userRepository.create(data);
+        const newUser = await this.userRepository.create(data);
+        return UserMapper.toResponse(newUser);;
     }
 
     async adminExists() {
@@ -37,4 +39,51 @@ export class UserService {
             return await this.userRepository.create(data);
         }
     }
+    async updateUser(userId: number, data: UpdateUserDTO) {
+        const user = await this.userRepository.findUserById(userId);
+        if (!user || !user.Persons) {
+            throw new Error("Usuario no encontrado");
+        }
+        const currentPerson = user.Persons;
+
+        await this.validateUniqueFields(
+            data.documentType || currentPerson.documentType,
+            data.documentNumber || currentPerson.documentNumber,
+            currentPerson.email,
+            currentPerson.id
+        );
+        const updatedUser = await this.userRepository.update(userId, data);
+
+        if (!updatedUser) {
+            throw new Error("No se pudo actualizar el usuario");
+        }
+        return UserMapper.toResponse(updatedUser);
+    }
+    async getAll(filters: UserFilters) {
+        if (filters.id) {
+            const user = await this.userRepository.findUserById(filters.id);
+            return user ? [UserMapper.toResponse(user)] : [];
+        }
+
+        if (filters.email) {
+            const user = await this.userRepository.findByEmail(filters.email);
+            return user ? [UserMapper.toResponse(user)] : [];
+        }
+
+        if (filters.docNumber) {
+            const users = await this.userRepository.findByDocumentNumber(filters.docNumber);
+            return users.map(u => UserMapper.toResponse(u));
+        }
+
+        const all = await this.userRepository.findAll(filters.rolId);
+        return all.map(u => UserMapper.toResponse(u));
+    }
+    async changeStatus(userId: number, newState: boolean) {
+    const user = await this.userRepository.findUserById(userId);
+    if (!user) throw new Error("Usuario no encontrado");
+
+    const updatedUser = await this.userRepository.updateStatus(userId, newState);
+
+    return UserMapper.toResponse(updatedUser);
+}
 }

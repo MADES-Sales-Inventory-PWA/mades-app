@@ -1,6 +1,6 @@
 import { document_type } from "@prisma/client";
 import prisma from "../../config/prisma";
-import { CreateUserDTO } from "./users.schema";
+import { CreateUserDTO, UpdateUserDTO } from "./users.schema";
 
 export class UserRepository {
     async adminExists() {
@@ -38,7 +38,7 @@ export class UserRepository {
                     rolId: data.rolId
                 }
             });
-            const person = await tx.persons.create({
+            await tx.persons.create({
                 data: {
                     name: data.name,
                     lastName: data.lastName,
@@ -50,7 +50,91 @@ export class UserRepository {
                     userId: user.id
                 }
             });
-            return { ...user, person };
+            return await tx.users.findUnique({
+                where: { id: user.id },
+                include: {
+                    Persons: true,
+                    Roles: true
+                }
+            })
         })
     }
+    async update(id: number, data: UpdateUserDTO) {
+        return await prisma.$transaction(async (tx) => {
+            const user = await tx.users.update({
+                where: { id: BigInt(id) },
+                data: {
+                    ...(data.password && { password: data.password }),
+                    ...(data.rolId && { rolId: data.rolId }),
+                }
+            });
+            const { email, password, rolId, ...personData } = data;
+            const person = await tx.persons.update({
+                where: { userId: BigInt(id) },
+                data: {
+                    ...personData,
+                    documentType: personData.documentType as document_type,
+                }
+            });
+            return await tx.users.findUnique({
+                where: { id: BigInt(id) },
+                include: {
+                    Persons: true,
+                    Roles: true
+                }
+            });
+        });
+    }
+    async findUserById(id: number) {
+        return await prisma.users.findUnique({
+            where: {
+                id: BigInt(id)
+            },
+            include: {
+                Persons: true, Roles: true
+            }
+        });
+    }
+    async findUserByEmail(email: string) {
+        return await prisma.users.findFirst({
+            where: {
+                userName: { equals: email, mode: 'insensitive' }
+            },
+            include: { Persons: true }
+        });
+    }
+    async findByDocumentNumber(docNumber: string) {
+        return await prisma.users.findMany({
+            where: {
+                Persons: {
+                    documentNumber: docNumber
+                }
+            },
+            include: { Persons: true }
+        });
+    }
+    async findAll(rolId?: number) {
+        return await prisma.users.findMany({
+            where: {
+                ...(rolId && { rolId })
+            },
+            include: { Persons: true, Roles: true },
+            orderBy: { id: 'asc' }
+        });
+    }
+    async updateStatus(id: number, newState: boolean) {
+    return await prisma.$transaction(async (tx) => {
+        await tx.persons.update({
+            where: { userId: BigInt(id) },
+            data: { state: newState }
+        });
+        return await tx.users.findUnique({
+            where: { id: BigInt(id) },
+            include: {
+                Persons: true,
+                Roles: true
+            }
+        });
+    });
+}
 }
