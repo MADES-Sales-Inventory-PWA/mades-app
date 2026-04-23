@@ -1,5 +1,6 @@
+import { UserMapper } from "./users.mapper";
 import { UserRepository } from "./users.repository";
-import { CreateUserDTO, UpdateUserDTO } from "./users.schema";
+import { CreateUserDTO, UpdateUserDTO, UserFilters } from "./users.schema";
 
 
 export class UserService {
@@ -18,7 +19,8 @@ export class UserService {
     }
     async createUser(data: CreateUserDTO) {
         await this.validateUniqueFields(data.documentType, data.documentNumber, data.email)
-        return this.userRepository.create(data);
+        const newUser = await this.userRepository.create(data);
+        return UserMapper.toResponse(newUser);;
     }
 
     async adminExists() {
@@ -50,6 +52,30 @@ export class UserService {
             currentPerson.email,
             currentPerson.id
         );
-        return await this.userRepository.update(userId, data);
+        const updatedUser = await this.userRepository.update(userId, data);
+
+        if (!updatedUser) {
+            throw new Error("No se pudo actualizar el usuario");
+        }
+        return UserMapper.toResponse(updatedUser);
+    }
+    async getAll(filters: UserFilters) {
+        if (filters.id) {
+            const user = await this.userRepository.findUserById(filters.id);
+            return user ? [UserMapper.toResponse(user)] : [];
+        }
+
+        if (filters.email) {
+            const user = await this.userRepository.findByEmail(filters.email);
+            return user ? [UserMapper.toResponse(user)] : [];
+        }
+
+        if (filters.docNumber) {
+            const users = await this.userRepository.findByDocumentNumber(filters.docNumber);
+            return users.map(u => UserMapper.toResponse(u));
+        }
+
+        const all = await this.userRepository.findAll(filters.rolId);
+        return all.map(u => UserMapper.toResponse(u));
     }
 }

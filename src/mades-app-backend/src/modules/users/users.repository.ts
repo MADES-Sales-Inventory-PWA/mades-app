@@ -38,7 +38,7 @@ export class UserRepository {
                     rolId: data.rolId
                 }
             });
-            const person = await tx.persons.create({
+            await tx.persons.create({
                 data: {
                     name: data.name,
                     lastName: data.lastName,
@@ -50,7 +50,13 @@ export class UserRepository {
                     userId: user.id
                 }
             });
-            return { ...user, person };
+            return await tx.users.findUnique({
+                where: { id: user.id },
+                include: {
+                    Persons: true,
+                    Roles: true
+                }
+            })
         })
     }
     async update(id: number, data: UpdateUserDTO) {
@@ -70,7 +76,13 @@ export class UserRepository {
                     documentType: personData.documentType as document_type,
                 }
             });
-            return { ...user, person };
+            return await tx.users.findUnique({
+                where: { id: BigInt(id) },
+                include: {
+                    Persons: true,
+                    Roles: true
+                }
+            });
         });
     }
     async findUserById(id: number) {
@@ -79,8 +91,35 @@ export class UserRepository {
                 id: BigInt(id)
             },
             include: {
-                Persons: true
+                Persons: true, Roles: true
             }
+        });
+    }
+    async findUserByEmail(email: string) {
+        return await prisma.users.findFirst({
+            where: {
+                userName: { equals: email, mode: 'insensitive' }
+            },
+            include: { Persons: true }
+        });
+    }
+    async findByDocumentNumber(docNumber: string) {
+        return await prisma.users.findMany({
+            where: {
+                Persons: {
+                    documentNumber: docNumber
+                }
+            },
+            include: { Persons: true }
+        });
+    }
+    async findAll(rolId?: number) {
+        return await prisma.users.findMany({
+            where: {
+                ...(rolId && { rolId })
+            },
+            include: { Persons: true, Roles: true },
+            orderBy: { id: 'asc' }
         });
     }
 }
