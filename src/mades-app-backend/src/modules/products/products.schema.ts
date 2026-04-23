@@ -12,28 +12,29 @@ export const productSchema = z.object({
     
     sizeTypeId: z.number("El tipo de talla debe ser un número")
         .int()
-        .positive("El tipo de talla debe ser un ID válido")
-        .nullable(),
+        .positive("El tipo de talla debe ser un ID válido"),
 
     sizeValueId: z.number("El valor de talla debe ser un número")
         .int()
-        .positive("El valor de talla debe ser un ID válido")
-        .nullable(),
+        .positive("El valor de talla debe ser un ID válido"),
 
     barcode: z.string()
         .min(8, "El código de barras debe tener al menos 8 dígitos")
         .max(14, "El código de barras no puede superar los 14 dígitos")
-        .regex(/^[0-9]{8,14}$/, "El código de barras debe contener solo dígitos (EAN-8 a EAN-14)"),
+        .regex(/^[0-9]{8,14}$/, "El código de barras debe contener solo dígitos (EAN-8 a EAN-14)")
+        .nullable(),
 
     description: z.string()
         .min(10, "La descripción debe tener al menos 10 caracteres")
         .max(1000, "La descripción no puede superar los 1000 caracteres")
-        .regex(/^[a-zA-ZáéíóúÁÉÍÓÚñÑ0-9\s\-_.,()'"/!?%&]+$/, "La descripción contiene caracteres no permitidos"),
+        .regex(/^[a-zA-ZáéíóúÁÉÍÓÚñÑ0-9\s\-_.,()'"/!?%&]+$/, "La descripción contiene caracteres no permitidos")
+        .nullable(),
 
     imageUrl: z.string()
         .min(10, "La URL de la imagen es demasiado corta")
         .max(500, "La URL de la imagen no puede superar los 500 caracteres")
-        .regex(/^https?:\/\/(www\.)?[-a-zA-Z0-9@:%._+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_+.~#?&/=]*)$/, "Debe ser una URL válida (http o https)"),
+        .regex(/^https?:\/\/(www\.)?[-a-zA-Z0-9@:%._+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_+.~#?&/=]*)$/, "Debe ser una URL válida (http o https)")
+        .nullable(),
 
     purchasePrice: z.number("El precio de compra debe ser un número")
         .positive("El precio debe ser mayor a 0")
