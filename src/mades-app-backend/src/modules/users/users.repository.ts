@@ -122,4 +122,19 @@ export class UserRepository {
             orderBy: { id: 'asc' }
         });
     }
+    async updateStatus(id: number, newState: boolean) {
+    return await prisma.$transaction(async (tx) => {
+        await tx.persons.update({
+            where: { userId: BigInt(id) },
+            data: { state: newState }
+        });
+        return await tx.users.findUnique({
+            where: { id: BigInt(id) },
+            include: {
+                Persons: true,
+                Roles: true
+            }
+        });
+    });
+}
 }

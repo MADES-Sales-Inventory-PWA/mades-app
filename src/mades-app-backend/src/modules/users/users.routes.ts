@@ -9,5 +9,6 @@ router.post("/register-initial-admin", userController.createFirstAdmin.bind(user
 router.post("/", userController.createUser.bind(userController));
 router.patch("/:id", userController.updateUser.bind(userController));
 router.get("/", userController.findAll.bind(userController));
+router.patch("/:id/status", userController.changeStatus.bind(userController));
 
 export default router;
