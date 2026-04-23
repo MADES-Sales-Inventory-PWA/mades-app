@@ -1,9 +1,9 @@
 import "dotenv/config";
 import express from "express";
 import cors from "cors";
-import personRoutes from "./modules/persons/persons.routes"
+import authRoutes from "./modules/auth/auth.routes"
 import userRoutes from "./modules/users/users.routes"
-import { UserController } from "./modules/users/users.controller";
+import { AuthController } from "./modules/auth/auth.controller"
 
 (BigInt.prototype as any).toJSON = function () {
   return this.toString();
@@ -11,18 +11,18 @@ import { UserController } from "./modules/users/users.controller";
 
 const app = express();
 const PORT = 3000;
-const userController = new UserController();
+const authController = new AuthController();
 
 app.use(cors());
 app.use(express.json());
 
-app.use("/api/auth", personRoutes)
+app.use("/api/auth", authRoutes)
 app.use("/api/users", userRoutes)
 
 // Temporary compatibility aliases while clients migrate to /api/users/login
-app.post("/login", userController.login.bind(userController));
-app.post("/api/login", userController.login.bind(userController));
-app.post("/api/auth/login", userController.login.bind(userController));
+app.post("/login", authController.login.bind(authController));
+app.post("/api/login", authController.login.bind(authController));
+app.post("/api/auth/login", authController.login.bind(authController));
 
 app.get("/", (req, res) => {
   res.send("Backend corriendo");
