@@ -2,7 +2,7 @@ const ADMIN_ROLE_ID = 1;
 const EMPLOYEE_ROLE_ID = 2;
 const ADMIN_HOME_PATH = "/inicio-admin";
 const EMPLOYEE_HOME_PATH = "/inicio-employee";
-const INVENTORY_ADJUST_PATH = "/ajusteInventario";
+const INVENTORY_ADJUST_PATH = "/ajuste-inventario";
 const CREATE_ADMIN_PATH = "/create-admin";
 
 export const constants = {

@@ -31,8 +31,8 @@ export default function HomePage() {
     {
       label: "Inventario",
       icon: <Box size={18} />,
-      path: "/ajusteInventario",
-      enabled: roleId === constants.ADMIN_ROLE_ID,
+      path: "/ajuste-inventario",
+      enabled: false,
     },
     {
       label: "Carrito",
@@ -44,13 +44,13 @@ export default function HomePage() {
       label: "Reportes",
       icon: <BarChart3 size={18} />,
       path: "/reportes",
-      enabled: roleId === constants.ADMIN_ROLE_ID,
+      enabled: false,
     },
     {
       label: "Empleados",
       icon: <Users size={18} />,
       path: "/empleados",
-      enabled: roleId === constants.ADMIN_ROLE_ID,
+      enabled: false,
     },
   ];
 
@@ -62,7 +62,11 @@ export default function HomePage() {
         </aside>
 
         <div className="flex min-h-screen w-full flex-col pb-24 lg:pb-0">
-        <Header title="MADES" />
+        <Header
+          title="MADES"
+          showMobileIcon={roleId === constants.ADMIN_ROLE_ID}
+          enableLogoMenu={roleId === constants.ADMIN_ROLE_ID}
+        />
         {roleId === constants.ADMIN_ROLE_ID 
           ? <AdminHomeContent /> 
           : <EmployeeHomeContent />

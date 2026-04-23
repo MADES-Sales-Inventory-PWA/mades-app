@@ -83,7 +83,7 @@ export default function InventoryAdjustPage() {
       {
         label: "Inventario",
         icon: <Box size={18} />,
-        path: "/ajusteInventario",
+        path: "/ajuste-inventario",
         enabled: true,
       },
       {
@@ -119,7 +119,7 @@ export default function InventoryAdjustPage() {
         </aside>
 
         <main className="flex min-h-screen w-full flex-col pb-24 lg:pb-8">
-          <Header title="Ajuste de Inventario" showMobileIcon={true} />
+          <Header title="Ajuste de Inventario" showMobileIcon={true} enableLogoMenu={true} />
 
           <section className="mx-auto flex w-full max-w-[1100px] flex-col gap-5 p-4 lg:p-6">
             <div className="grid grid-cols-1 gap-5 xl:grid-cols-[320px_1fr]">

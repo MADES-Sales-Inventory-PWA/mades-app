@@ -25,6 +25,7 @@ export const SideBar = ({ roleid }: { roleid: number }) => {
             <div className="flex flex-col gap-2 mt-4">
                 <SideButton
                     onClick={() => {
+                        navigate(roleid === constants.ADMIN_ROLE_ID ? "/inicio-admin" : "/inicio-employee");
                     }}
                     icon={<House size={18} />}
                     path={["/inicio-employee", "/inicio-admin"]}>
@@ -36,7 +37,7 @@ export const SideBar = ({ roleid }: { roleid: number }) => {
                 onClick={() => {
                 }}
                 icon={<Box size={18} />}
-                path={["/ajusteInventario"]}>
+                path={["/ajuste-inventario"]}>
                 Inventario
             </SideButton>
 
@@ -45,7 +46,7 @@ export const SideBar = ({ roleid }: { roleid: number }) => {
                 }}
                 icon={<ShoppingCart size={18} />}
                 path={["/carrito"]}>
-                Ventas
+                Carrito
             </SideButton>
 
             {roleid === constants.ADMIN_ROLE_ID && (

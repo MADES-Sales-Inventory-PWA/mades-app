@@ -83,14 +83,15 @@ function AppRoutes({
         }
       />
       <Route
-        path="/ajusteInventario"
+        path="/ajuste-inventario"
         element={
           <PrivateRoute allowedRoleId={constants.ADMIN_ROLE_ID}>
             <InventoryAdjustPage />
           </PrivateRoute>
         }
       />
-      <Route path="/inventario" element={<Navigate to="/ajusteInventario" replace />} />
+      <Route path="/ajusteInventario" element={<Navigate to="/ajuste-inventario" replace />} />
+      <Route path="/inventario" element={<Navigate to="/ajuste-inventario" replace />} />
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
   );
