@@ -78,4 +78,12 @@ export class UserService {
         const all = await this.userRepository.findAll(filters.rolId);
         return all.map(u => UserMapper.toResponse(u));
     }
+    async changeStatus(userId: number, newState: boolean) {
+    const user = await this.userRepository.findUserById(userId);
+    if (!user) throw new Error("Usuario no encontrado");
+
+    const updatedUser = await this.userRepository.updateStatus(userId, newState);
+
+    return UserMapper.toResponse(updatedUser);
+}
 }

@@ -101,4 +101,19 @@ export class UserController {
             res.status(500).json({ success: false, message: error.message });
         }
     }
+    async changeStatus(req: Request, res: Response) {
+    try {
+        const userId = Number(req.params.id);
+        const { state } = req.body; 
+
+        await this.userService.changeStatus(userId, state);
+
+        res.status(200).json({
+            success: true,
+            message: state ? "Usuario activado" : "Usuario inactivado",
+        });
+    } catch (error: any) {
+        res.status(400).json({ success: false, message: error.message });
+    }
+}
 }
