@@ -62,7 +62,9 @@ export class UserService {
     async getAll(filters: UserFiltersDTO) {
         const users = await this.userRepository.findAll(filters);
         if (!users) return [];
-        return users.map(u => UserMapper.toResponse(u));
+        return users
+            .map(u => UserMapper.toResponse(u))
+            .filter((user): user is NonNullable<typeof user> => user !== null);
     }
     async changeStatus(userId: number, newState: boolean) {
     const user = await this.userRepository.findUserById(userId);

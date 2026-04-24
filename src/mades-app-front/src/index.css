@@ -10,13 +10,22 @@
 body {
   margin: 0;
   font-family: "DM Sans", sans-serif;
+  overflow-x: hidden;
 }
 
 #root {
   width: 100%;
+  max-width: 100%;
   min-height: 100vh;
   display: flex;
   flex-direction: column;
+  overflow-x: hidden;
+}
+
+html {
+  width: 100%;
+  max-width: 100%;
+  overflow-x: hidden;
 }
 
 code {

@@ -1,6 +1,7 @@
 import { useLocation, useNavigate } from "react-router-dom";
 import { AdminHomeContent } from "../components/AdminHomeContent";
 import { EmployeeHomeContent } from "../components/EmployeeHomeContent";
+import { EmployeeManagementContent } from "../components/EmployeeManagementContent";
 import { Header } from "../components/Header";
 import { SideBar } from "../components/SideBar";
 import { constants } from "../constants/Constants";
@@ -32,32 +33,32 @@ export default function HomePage() {
     {
       label: "Inventario",
       icon: <Box size={18} />,
-      path: "/inventario",
-      enabled: true,
+      path: constants.INVENTORY_PATH,
+      enabled: constants.INVENTORY_ALLOWED_ROLES.includes(roleId),
     },
     {
       label: "Carrito",
       icon: <ShoppingCart size={18} />,
-      path: "/carrito",
-      enabled: false,
+      path: constants.SALES_PATH,
+      enabled: constants.SALES_ALLOWED_ROLES.includes(roleId),
     },
     {
       label: "Reportes",
       icon: <BarChart3 size={18} />,
-      path: "/reportes",
-      enabled: false,
+      path: constants.REPORTS_PATH,
+      enabled: constants.REPORTS_ALLOWED_ROLES.includes(roleId),
     },
     {
       label: "Empleados",
       icon: <Users size={18} />,
-      path: "/empleados",
-      enabled: false,
+      path: constants.EMPLOYEES_PATH,
+      enabled: constants.EMPLOYEES_ALLOWED_ROLES.includes(roleId),
     },
   ];
 
   return (
-    <div className="min-h-screen w-full bg-gradient-to-tr from-background to-background-2">
-      <div className="mx-auto flex min-h-screen w-full max-w-[1600px]">
+    <div className="min-h-screen w-full overflow-x-hidden bg-gradient-to-tr from-background to-background-2">
+      <div className="mx-auto flex min-h-screen w-full max-w-[1600px] overflow-x-hidden">
         <aside className="hidden lg:block">
           <SideBar />
         </aside>
@@ -85,10 +86,8 @@ export default function HomePage() {
             </div>
           )}
 
-          {location.pathname === constants.EMPLOYEES_PATH && (
-            <div className="flex items-center justify-center h-full">
-              <h2 className="text-2xl font-bold text-gray-700">Sección de Empleados (en construcción)</h2>
-            </div>
+          {location.pathname === constants.EMPLOYEES_PATH && roleId === constants.ADMIN_ROLE_ID && (
+            <EmployeeManagementContent />
           )}
         </div>
       </div>
