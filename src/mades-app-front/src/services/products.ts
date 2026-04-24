@@ -34,6 +34,18 @@ type ApiResponse<T> = {
   data: T;
 };
 
+type ErrorPayload = {
+  message?: string;
+  error?: {
+    message?: string;
+  };
+};
+
+async function getBackendErrorMessage(response: Response, fallbackMessage: string) {
+  const payload = (await response.json().catch(() => null)) as ErrorPayload | null;
+  return payload?.message ?? payload?.error?.message ?? fallbackMessage;
+}
+
 function getProductsUrl() {
   return `${constants.BACKEND_BASE_URL}/api/products`;
 }
@@ -68,7 +80,8 @@ export async function fetchProducts() {
   });
 
   if (!response.ok) {
-    throw new Error("No se pudieron obtener los productos");
+    const message = await getBackendErrorMessage(response, "No se pudieron obtener los productos");
+    throw new Error(message);
   }
 
   const payload = (await response.json()) as ApiResponse<BackendProduct[]>;
@@ -86,7 +99,8 @@ export async function toggleProductState(id: number, state: boolean) {
   });
 
   if (!response.ok) {
-    throw new Error("No se pudo cambiar el estado del producto");
+    const message = await getBackendErrorMessage(response, "No se pudo cambiar el estado del producto");
+    throw new Error(message);
   }
 
   return (await response.json()) as ApiResponse<null>;
@@ -103,7 +117,8 @@ export async function createProduct(payload: ProductFormValues) {
   });
 
   if (!response.ok) {
-    throw new Error("No se pudo crear el producto");
+    const message = await getBackendErrorMessage(response, "No se pudo crear el producto");
+    throw new Error(message);
   }
 
   return (await response.json()) as ApiResponse<BackendProduct>;
@@ -120,7 +135,8 @@ export async function updateProduct(id: number, payload: Partial<ProductFormValu
   });
 
   if (!response.ok) {
-    throw new Error("No se pudo actualizar el producto");
+    const message = await getBackendErrorMessage(response, "No se pudo actualizar el producto");
+    throw new Error(message);
   }
 
   return (await response.json()) as ApiResponse<BackendProduct>;

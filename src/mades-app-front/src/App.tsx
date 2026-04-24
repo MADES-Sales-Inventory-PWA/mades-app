@@ -5,6 +5,7 @@ import CreateAdmin from "./pages/CreateAdmin";
 import HomePage from "./pages/HomePage";
 import { getSession } from "./utils/auth";
 import { constants } from "./constants/Constants";
+import { ToastProvider } from "./components/ToastProvider";
 
 function PrivateRoute({
   allowedRoleId,
@@ -143,9 +144,11 @@ function App() {
   }
 
   return (
-    <BrowserRouter>
-      <AppRoutes adminExists={adminExists} setAdminExists={setAdminExists} />
-    </BrowserRouter>
+    <ToastProvider>
+      <BrowserRouter>
+        <AppRoutes adminExists={adminExists} setAdminExists={setAdminExists} />
+      </BrowserRouter>
+    </ToastProvider>
   );
 }
 

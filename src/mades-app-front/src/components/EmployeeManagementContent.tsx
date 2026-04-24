@@ -6,6 +6,7 @@ import { BasicButton } from "./BasicButton";
 import { InputPassword } from "./InputPassword";
 import { changeEmployeeStatus, createEmployee, fetchEmployees, updateEmployee, type EmployeeItem } from "../services/users";
 import { constants } from "../constants/Constants";
+import { useToast } from "./ToastProvider";
 
 const documentTypeLabels: Record<string, string> = {
   CC: "Cédula",
@@ -51,22 +52,20 @@ export const EmployeeManagementContent = () => {
   const [isEmployeeFormOpen, setIsEmployeeFormOpen] = React.useState(false);
   const [employeeToEdit, setEmployeeToEdit] = React.useState<EmployeeItem | null>(null);
   const [employeeForm, setEmployeeForm] = React.useState<EmployeeFormState>(emptyForm);
-  const [employeeFormError, setEmployeeFormError] = React.useState<string | null>(null);
-  const [errorMessage, setErrorMessage] = React.useState<string | null>(null);
+  const { showToast } = useToast();
 
   const loadEmployees = React.useCallback(async () => {
     try {
       setIsLoading(true);
-      setErrorMessage(null);
       const data = await fetchEmployees();
       setEmployees(data);
-    } catch {
-      setErrorMessage("No se pudieron cargar los empleados desde el backend.");
+    } catch (error) {
+      showToast(error instanceof Error ? error.message : "No se pudieron cargar los empleados desde el backend.");
       setEmployees([]);
     } finally {
       setIsLoading(false);
     }
-  }, []);
+  }, [showToast]);
 
   React.useEffect(() => {
     void loadEmployees();
@@ -129,7 +128,7 @@ export const EmployeeManagementContent = () => {
       await changeEmployeeStatus(employee.user?.id ?? employee.id, !employee.state);
       await loadEmployees();
     } catch (error) {
-      setErrorMessage(error instanceof Error ? error.message : "No se pudo cambiar el estado del empleado.");
+      showToast(error instanceof Error ? error.message : "No se pudo cambiar el estado del empleado.");
     } finally {
       setIsUpdatingId(null);
     }
@@ -138,7 +137,6 @@ export const EmployeeManagementContent = () => {
   const openCreateEmployee = () => {
     setEmployeeToEdit(null);
     setEmployeeForm(emptyForm);
-    setEmployeeFormError(null);
     setIsEmployeeFormOpen(true);
   };
 
@@ -153,7 +151,6 @@ export const EmployeeManagementContent = () => {
       documentNumber: employee.documentNumber ?? "",
       password: "",
     });
-    setEmployeeFormError(null);
     setIsEmployeeFormOpen(true);
   };
 
@@ -163,7 +160,6 @@ export const EmployeeManagementContent = () => {
     }
     setIsEmployeeFormOpen(false);
     setEmployeeToEdit(null);
-    setEmployeeFormError(null);
   };
 
   const handleSaveEmployee = async () => {
@@ -175,18 +171,17 @@ export const EmployeeManagementContent = () => {
     const trimmedPassword = employeeForm.password.trim();
 
     if (!trimmedName || !trimmedLastName || !trimmedEmail || !trimmedPhone || !trimmedDocument) {
-      setEmployeeFormError("Completa todos los campos obligatorios.");
+      showToast("Completa todos los campos obligatorios.");
       return;
     }
 
     if (!employeeToEdit && !trimmedPassword) {
-      setEmployeeFormError("La contraseña es obligatoria para crear empleados.");
+      showToast("La contraseña es obligatoria para crear empleados.");
       return;
     }
 
     try {
       setIsSavingEmployee(true);
-      setEmployeeFormError(null);
 
       if (!employeeToEdit) {
         await createEmployee({
@@ -215,7 +210,7 @@ export const EmployeeManagementContent = () => {
       await loadEmployees();
       closeEmployeeForm();
     } catch (error) {
-      setEmployeeFormError(error instanceof Error ? error.message : "No se pudo guardar el empleado.");
+      showToast(error instanceof Error ? error.message : "No se pudo guardar el empleado.");
     } finally {
       setIsSavingEmployee(false);
     }
@@ -259,12 +254,6 @@ export const EmployeeManagementContent = () => {
           </label>
         </div>
       </div>
-
-      {errorMessage && (
-        <div className="mt-4 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800">
-          {errorMessage}
-        </div>
-      )}
 
       {isLoading ? (
         <div className="mt-5 rounded-xl border border-dashed border-slate-300 bg-white p-6 text-center text-slate-600">
@@ -448,12 +437,6 @@ export const EmployeeManagementContent = () => {
                 onChange={(value) => setEmployeeForm((current) => ({ ...current, password: value }))}
               />
             </div>
-
-            {employeeFormError && (
-              <div className="mt-4 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
-                {employeeFormError}
-              </div>
-            )}
 
             <div className="mt-5 flex flex-col gap-2 sm:flex-row sm:justify-end">
               <BasicButton onClick={closeEmployeeForm}>

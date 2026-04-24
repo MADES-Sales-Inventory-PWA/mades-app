@@ -9,6 +9,7 @@ import { Combobox } from '../components/Combobox';
 import { TIPOS_DOCUMENTO } from '../constants/documentTypes';
 import { getAuthHeaders } from '../utils/auth';
 import { constants } from '../constants/Constants';
+import { useToast } from '../components/ToastProvider';
 
 type CreateAdminProps = {
   onCreated: () => void;
@@ -25,8 +26,8 @@ export default function CreateAdmin({ onCreated }: CreateAdminProps) {
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [isCreating, setIsCreating] = useState(false);
-  const [errorMessage, setErrorMessage] = useState("");
   const [successMessage, setSuccessMessage] = useState("");
+  const { showToast } = useToast();
 
   const mapDocumentTypeForApi = (value: string) => {
     if (value === "PP") return "PASSPORT";
@@ -37,7 +38,6 @@ export default function CreateAdmin({ onCreated }: CreateAdminProps) {
   const createAdmin = async () => {
     if (isCreating) return;
 
-    setErrorMessage("");
     setSuccessMessage("");
 
     if (
@@ -51,18 +51,18 @@ export default function CreateAdmin({ onCreated }: CreateAdminProps) {
       !password ||
       !confirmPassword
     ) {
-      setErrorMessage("Completa todos los campos obligatorios.");
+      showToast("Completa todos los campos obligatorios.");
       return;
     }
 
     if (password !== confirmPassword) {
-      setErrorMessage("Las contraseñas no coinciden.");
+      showToast("Las contraseñas no coinciden.");
       return;
     }
 
     const apiDocumentType = mapDocumentTypeForApi(documentType);
     if (!apiDocumentType) {
-      setErrorMessage("Tipo de documento no soportado por el backend.");
+      showToast("Tipo de documento no soportado por el backend.");
       return;
     }
 
@@ -107,7 +107,7 @@ export default function CreateAdmin({ onCreated }: CreateAdminProps) {
       onCreated();
     } catch (error) {
       const message = error instanceof Error ? error.message : "Ocurrió un error inesperado.";
-      setErrorMessage(message);
+      showToast(message);
     } finally {
       setIsCreating(false);
     }
@@ -207,7 +207,6 @@ export default function CreateAdmin({ onCreated }: CreateAdminProps) {
             onChange={setConfirmPassword}
           />
         </div>
-        {errorMessage && <p className="mt-2 text-sm text-red-600">{errorMessage}</p>}
         {successMessage && <p className="mt-2 text-sm text-green-700">{successMessage}</p>}
         <Button onClick={createAdmin} >
           <div className="flex items-center justify-center">

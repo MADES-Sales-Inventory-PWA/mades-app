@@ -17,6 +17,18 @@ type ApiResponse<T> = {
   data: T;
 };
 
+type ErrorPayload = {
+  message?: string;
+  error?: {
+    message?: string;
+  };
+};
+
+async function getBackendErrorMessage(response: Response, fallbackMessage: string) {
+  const payload = (await response.json().catch(() => null)) as ErrorPayload | null;
+  return payload?.message ?? payload?.error?.message ?? fallbackMessage;
+}
+
 function getSizesTypesUrl() {
   return `${constants.BACKEND_BASE_URL}/api/sizes/types`;
 }
@@ -33,7 +45,8 @@ export async function fetchSizeTypes() {
   });
 
   if (!response.ok) {
-    throw new Error("No se pudieron obtener los tipos de talla");
+    const message = await getBackendErrorMessage(response, "No se pudieron obtener los tipos de talla");
+    throw new Error(message);
   }
 
   const payload = (await response.json()) as ApiResponse<SizeTypeDTO[]>;
@@ -48,7 +61,8 @@ export async function fetchSizeValues(sizeTypeId: number) {
   });
 
   if (!response.ok) {
-    throw new Error("No se pudieron obtener los valores de talla");
+    const message = await getBackendErrorMessage(response, "No se pudieron obtener los valores de talla");
+    throw new Error(message);
   }
 
   const payload = (await response.json()) as ApiResponse<SizeValueDTO[]>;

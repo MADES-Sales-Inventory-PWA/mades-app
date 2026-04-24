@@ -36,6 +36,18 @@ type ApiResponse<T> = {
   data: T;
 };
 
+type ErrorPayload = {
+  message?: string;
+  error?: {
+    message?: string;
+  };
+};
+
+async function getBackendErrorMessage(response: Response, fallbackMessage: string) {
+  const payload = (await response.json().catch(() => null)) as ErrorPayload | null;
+  return payload?.message ?? payload?.error?.message ?? fallbackMessage;
+}
+
 function getUsersUrl() {
   return `${constants.BACKEND_BASE_URL}/api/users`;
 }
@@ -55,7 +67,8 @@ export async function fetchEmployees() {
   });
 
   if (!response.ok) {
-    throw new Error("No se pudieron obtener los empleados");
+    const message = await getBackendErrorMessage(response, "No se pudieron obtener los empleados");
+    throw new Error(message);
   }
 
   const payload = (await response.json()) as ApiResponse<Array<EmployeeItem | null>>;
