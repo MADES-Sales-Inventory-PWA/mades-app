@@ -7,9 +7,11 @@ import { Search } from "lucide-react";
 import { ProductsTable } from "./ProductsTable";
 import { ProductForm } from "./ProductForm";
 import type { Product } from "../types/Types";
+import { fetchProducts, toggleProductState } from "../services/products";
 
 const initialProducts: Product[] = [
     {
+        id: 1,
         "name": "Producto 1",
         "sellingPrice": 12000,
         "size": "500",
@@ -22,6 +24,7 @@ const initialProducts: Product[] = [
         "isActive": true
     },
     {
+        id: 2,
         "name": "Producto 2",
         "sellingPrice": 20000,
         "size": "500",
@@ -36,23 +39,70 @@ const initialProducts: Product[] = [
 ];
 
 export const InventoryContent = () => {
-    const [products, setProducts] = React.useState<Product[]>(initialProducts);
+    const [products, setProducts] = React.useState<Product[]>([]);
     const [isCreateOpen, setIsCreateOpen] = React.useState(false);
     const [isEditOpen, setIsEditOpen] = React.useState(false);
-    const [productCodeToEdit, setProductCodeToEdit] = React.useState("");
+    const [productIdToEdit, setProductIdToEdit] = React.useState<number | null>(null);
+    const [isLoading, setIsLoading] = React.useState(true);
+    const [errorMessage, setErrorMessage] = React.useState<string | null>(null);
 
-    function deactivateProduct(code: string) {
-        setProducts((prevProducts) =>
-            prevProducts.map((product) =>
-                product.barcode === code
-                    ? { ...product, isActive: !product.isActive }
-                    : product
-            )
-        );
+    React.useEffect(() => {
+        let isMounted = true;
+
+        const loadProducts = async () => {
+            try {
+                setIsLoading(true);
+                setErrorMessage(null);
+                const remoteProducts = await fetchProducts();
+
+                if (isMounted) {
+                    setProducts(remoteProducts);
+                }
+            } catch {
+                if (isMounted) {
+                    setErrorMessage("No se pudieron cargar los productos desde el backend.");
+                    setProducts(initialProducts);
+                }
+            } finally {
+                if (isMounted) {
+                    setIsLoading(false);
+                }
+            }
+        };
+
+        void loadProducts();
+
+        return () => {
+            isMounted = false;
+        };
+    }, []);
+
+    async function deactivateProduct(id: number) {
+        const currentProduct = products.find((product) => product.id === id);
+
+        if (!currentProduct) {
+            return;
+        }
+
+        const nextState = !currentProduct.isActive;
+
+        try {
+            await toggleProductState(id, nextState);
+
+            setProducts((prevProducts) =>
+                prevProducts.map((product) =>
+                    product.id === id
+                        ? { ...product, isActive: nextState }
+                        : product
+                )
+            );
+        } catch {
+            setErrorMessage("No se pudo actualizar el estado del producto.");
+        }
     }
 
-    function getProductByCode(code: string) {
-        return products.find(product => product.barcode === code);
+    function getProductById(id: number | null) {
+        return products.find(product => product.id === id);
     }
     return (
         <div className="px-4 sm:px-6 lg:px-10">
@@ -75,10 +125,22 @@ export const InventoryContent = () => {
                 </div>
             </div>
 
-            <ProductsTable json={products} setEditOpen={setIsEditOpen} setProductCodeToEdit={setProductCodeToEdit} deactivateProduct={deactivateProduct} />
+            {errorMessage && (
+                <div className="mt-4 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800">
+                    {errorMessage}
+                </div>
+            )}
+
+            {isLoading ? (
+                <div className="mt-5 rounded-xl border border-dashed border-slate-300 bg-white p-6 text-center text-slate-600">
+                    Cargando productos...
+                </div>
+            ) : (
+                <ProductsTable json={products} setEditOpen={setIsEditOpen} setProductIdToEdit={setProductIdToEdit} deactivateProduct={deactivateProduct} />
+            )}
 
             {isCreateOpen && (<ProductForm setIsOpen={setIsCreateOpen} title="Crear producto" actionText="Añadir producto" />)}
-            {isEditOpen && (<ProductForm setIsOpen={setIsEditOpen} title="Editar producto" actionText="Guardar cambios" product={getProductByCode(productCodeToEdit)} />)}
+            {isEditOpen && (<ProductForm setIsOpen={setIsEditOpen} title="Editar producto" actionText="Guardar cambios" product={getProductById(productIdToEdit)} />)}
         </div>
     );
 }

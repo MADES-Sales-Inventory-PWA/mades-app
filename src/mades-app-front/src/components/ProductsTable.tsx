@@ -2,25 +2,25 @@ import type { Product } from "../types/Types";
 import { BasicButton } from "./BasicButton";
 import { Pencil, Diff, Ban } from "lucide-react";
 
-export const ProductsTable = ({ json, setEditOpen, setProductCodeToEdit, deactivateProduct }: { json: Product[]; setEditOpen: (isOpen: boolean) => void; setProductCodeToEdit: (code: string) => void; deactivateProduct: (code: string) => void }) => {
-    const handleEdit = (barcode: string) => {
-        setProductCodeToEdit(barcode);
+export const ProductsTable = ({ json, setEditOpen, setProductIdToEdit, deactivateProduct }: { json: Product[]; setEditOpen: (isOpen: boolean) => void; setProductIdToEdit: (id: number) => void; deactivateProduct: (id: number) => void }) => {
+    const handleEdit = (id: number) => {
+        setProductIdToEdit(id);
         setEditOpen(true);
     };
 
-    const renderActions = (barcode: string) => (
+    const renderActions = (id: number) => (
         <div className="flex flex-row gap-1">
-            <BasicButton id={barcode} title="Editar producto" onClick={() => handleEdit(barcode)} className="p-1">
+            <BasicButton id={String(id)} title="Editar producto" onClick={() => handleEdit(id)} className="p-1">
                 <div className="flex flex-row items-center gap-1 rounded-default bg-gray-300 p-1 hover:bg-gray-200">
                     <Pencil size={16} />
                 </div>
             </BasicButton>
-            <BasicButton id={barcode} title="Registrar ajuste" onClick={() => alert("Funcionalidad de registrar ajuste en construcción")} className="p-1">
+            <BasicButton id={String(id)} title="Registrar ajuste" onClick={() => alert("Funcionalidad de registrar ajuste en construcción")} className="p-1">
                 <div className="flex flex-row items-center gap-1 rounded-default bg-gray-300 p-1 hover:bg-gray-200">
                     <Diff size={16} />
                 </div>
             </BasicButton>
-            <BasicButton id={barcode} title="Eliminar producto" onClick={() => deactivateProduct(barcode)} className="p-1">
+            <BasicButton id={String(id)} title="Eliminar producto" onClick={() => deactivateProduct(id)} className="p-1">
                 <div className="flex flex-row items-center gap-1 rounded-default bg-gray-300 p-1 hover:bg-gray-200">
                     <Ban size={16} />
                 </div>
@@ -32,7 +32,7 @@ export const ProductsTable = ({ json, setEditOpen, setProductCodeToEdit, deactiv
         <>
             <div className="mt-5 grid gap-3 md:hidden">
                 {json.map((product) => (
-                    <article key={product.barcode} className={`rounded-xl border border-gray-300 bg-white p-3 shadow-sm ${product.isActive ? "" : "text-gray-500"}`}>
+                    <article key={product.id} className={`rounded-xl border border-gray-300 bg-white p-3 shadow-sm ${product.isActive ? "" : "text-gray-500"}`}>
                         <div className="flex items-start gap-3">
                             <img src={product.imageUrl} alt={product.name} className="h-16 w-16 rounded-lg object-cover" />
                             <div className={`min-w-0 flex-1 ${product.isActive ? "" : "line-through"}`}>
@@ -43,7 +43,7 @@ export const ProductsTable = ({ json, setEditOpen, setProductCodeToEdit, deactiv
                             </div>
                         </div>
                         <div className="mt-2 flex justify-end">
-                            {renderActions(product.barcode)}
+                            {renderActions(product.id)}
                         </div>
                     </article>
                 ))}
@@ -63,7 +63,7 @@ export const ProductsTable = ({ json, setEditOpen, setProductCodeToEdit, deactiv
                     </thead>
                     <tbody>
                         {json.map((product) => (
-                            <tr key={product.barcode} className={product.isActive ? "bg-white" : "line-through text-gray-500"}>
+                            <tr key={product.id} className={product.isActive ? "bg-white" : "line-through text-gray-500"}>
                                 <td className="border border-gray-300 p-2">
                                     <img src={product.imageUrl} alt={product.name} className="h-16 w-16 object-cover" />
                                 </td>
@@ -72,7 +72,7 @@ export const ProductsTable = ({ json, setEditOpen, setProductCodeToEdit, deactiv
                                 <td className="border border-gray-300 p-2">${(product.sellingPrice / 100).toFixed(2)}</td>
                                 <td className="border border-gray-300 p-2">{product.quantity}</td>
                                 <td className="border border-gray-300 p-2">
-                                    {renderActions(product.barcode)}
+                                    {renderActions(product.id)}
                                 </td>
                             </tr>
                         ))}
