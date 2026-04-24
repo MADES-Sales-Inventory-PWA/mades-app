@@ -10,3 +10,11 @@ export type Product = {
     minQuantity: number;
     isActive: boolean;
 };
+
+export type SizeType = "letras" | "numerica";
+
+export type ProductSize = {
+  talla: string;
+  cantidadExistente: number;
+  unidadesAlerta: number;
+};
