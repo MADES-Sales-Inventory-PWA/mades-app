@@ -1,6 +1,7 @@
 import { useLocation, useNavigate } from "react-router-dom";
 import { AdminHomeContent } from "../components/AdminHomeContent";
 import { EmployeeHomeContent } from "../components/EmployeeHomeContent";
+import { EmployeeManagementContent } from "../components/EmployeeManagementContent";
 import { Header } from "../components/Header";
 import { SideBar } from "../components/SideBar";
 import { constants } from "../constants/Constants";
@@ -85,10 +86,8 @@ export default function HomePage() {
             </div>
           )}
 
-          {location.pathname === constants.EMPLOYEES_PATH && (
-            <div className="flex items-center justify-center h-full">
-              <h2 className="text-2xl font-bold text-gray-700">Sección de Empleados (en construcción)</h2>
-            </div>
+          {location.pathname === constants.EMPLOYEES_PATH && roleId === constants.ADMIN_ROLE_ID && (
+            <EmployeeManagementContent />
           )}
         </div>
       </div>
