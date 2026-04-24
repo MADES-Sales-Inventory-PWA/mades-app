@@ -9,7 +9,7 @@ const authListProducts    = withAuth(listProducts)
 const authGetProductById  = withAuth(getProductById)
 
 export function registerProductsRoutes() {
-  // GET /api/products  (lista con filtros)
+  // GET /api/products 
   registerRoute(
     ({ url }) => url.pathname === '/api/products',
     ({ request }) => authListProducts(request, createContext()),
@@ -20,13 +20,6 @@ export function registerProductsRoutes() {
   registerRoute(
     ({ url }) => /^\/api\/products\/\d+$/.test(url.pathname),
     ({ request }) => authGetProductById(request, createContext()),
-    'GET'
-  )
-
-  // GET /api/sizes/* — solo red, sin fallback offline
-  registerRoute(
-    ({ url }) => url.pathname.startsWith('/api/sizes/'),
-    new NetworkOnly({ plugins: [offlineErrorPlugin] }),
     'GET'
   )
 

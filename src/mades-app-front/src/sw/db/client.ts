@@ -28,6 +28,17 @@ export interface StoredProduct {
   minQuantity: number
 }
 
+export interface StoredSizeType {
+  id: number
+  name: string
+}
+
+export interface StoredSizeValue {
+  id: number
+  sizeTypeId: number
+  value: string
+}
+
 interface MADESDb extends DBSchema {
   adjustments: {
     key: number
@@ -42,6 +53,17 @@ interface MADESDb extends DBSchema {
     key: number
     value: StoredProduct
   }
+  sizeTypes: {
+    key: number
+    value: StoredSizeType
+  }
+  sizeValues: {
+    key: number
+    value: StoredSizeValue
+    indexes: {
+      'by-sizeTypeId': number
+    }
+  }
 }
 
 let _db: IDBPDatabase<MADESDb> | null = null
@@ -49,14 +71,25 @@ let _db: IDBPDatabase<MADESDb> | null = null
 export async function getDb(): Promise<IDBPDatabase<MADESDb>> {
   if (_db) return _db
 
-  _db = await openDB<MADESDb>('mades-db', 1, {
-    upgrade(db) {
-      const adjStore = db.createObjectStore('adjustments', { keyPath: 'id' })
-      adjStore.createIndex('by-product', 'productId')
-      adjStore.createIndex('by-type', 'type')
-      adjStore.createIndex('by-date', 'createdAt')
+  _db = await openDB<MADESDb>('mades-db', 2, {
+    upgrade(db, oldVersion) {
+      if (!db.objectStoreNames.contains('adjustments')) {
+        const adjStore = db.createObjectStore('adjustments', { keyPath: 'id' })
+        adjStore.createIndex('by-product', 'productId')
+        adjStore.createIndex('by-type', 'type')
+        adjStore.createIndex('by-date', 'createdAt')
+      }
 
-      db.createObjectStore('products', { keyPath: 'id' })
+      if (!db.objectStoreNames.contains('products')) {
+        db.createObjectStore('products', { keyPath: 'id' })
+      }
+
+      if (oldVersion < 2) {
+        db.createObjectStore('sizeTypes', { keyPath: 'id' })
+
+        const sizeValuesStore = db.createObjectStore('sizeValues', { keyPath: 'id' })
+        sizeValuesStore.createIndex('by-sizeTypeId', 'sizeTypeId', { unique: false })
+      }
     },
   })
 

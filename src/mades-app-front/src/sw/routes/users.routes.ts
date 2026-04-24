@@ -8,7 +8,7 @@ import { offlineErrorPlugin } from '../plugins/offline-error.plugin'
 export function registerUsersRoutes() {
   registerRoute(
     ({ url, request }) =>
-      url.pathname.startsWith('/api/users/') &&
+      url.pathname.startsWith('/api/users/') || url.pathname.startsWith('/api/users/') &&
       !url.pathname.includes('admin-exists') &&
       request.method === 'GET',
     new NetworkFirst({
