@@ -22,6 +22,7 @@ const REPORTS_ALLOWED_ROLES = [ADMIN_ROLE_ID];
 const EMPLOYEES_ALLOWED_ROLES = [ADMIN_ROLE_ID];
 
 //Rutas backend
+const BACKEND_BASE_URL = (import.meta.env.VITE_BACKEND_BASE_URL ?? "").trim();
 const BACKEND_LOGIN_URL = "/api/auth/login";
 const BACKEND_REGISTER_ADMIN_URL = "/api/users/register-initial-admin";
 const BACKEND_CHECK_ADMIN_URL = "/api/users/admin-exists";
@@ -44,6 +45,7 @@ export const constants = {
   EMPLOYEES_ALLOWED_ROLES,
   ADMIN_HOME_ALLOWED_ROLES,
   EMPLOYEE_HOME_ALLOWED_ROLES,
+  BACKEND_BASE_URL,
   BACKEND_LOGIN_URL,
   BACKEND_REGISTER_ADMIN_URL,
   BACKEND_CHECK_ADMIN_URL,
