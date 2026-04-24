@@ -13,7 +13,7 @@ export const SideBar = () => {
     const navigate = useNavigate();
 
     return (
-        <div className="flex flex-col w-full min-h-screen max-w-[250px] px-4 py-5 bg-gradient-to-tr from-side-panel to-side-panel2 shadow-md">
+        <div className="sticky top-0 z-50 flex flex-col w-full max-w-[250px] h-screen px-4 py-5 bg-gradient-to-tr from-side-panel to-side-panel2 shadow-md">
             <div className="flex flex-row items-start justify-start">
                 <Icon className="mr-3" size={50} />
                 <div className="my-auto flex justify-start flex-col">

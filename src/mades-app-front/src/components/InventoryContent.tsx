@@ -191,6 +191,9 @@ export const InventoryContent = () => {
                 <InventoryAdjustComponent
                     product={getProductById(productIdToAdjust)!}
                     onClose={closeAdjustModal}
+                    onAdjusted={() => {
+                        void loadProducts();
+                    }}
                 />
             )}
         </div>
