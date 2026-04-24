@@ -55,21 +55,24 @@ export const InventoryContent = () => {
         return products.find(product => product.barcode === code);
     }
     return (
-        <div className="px-10">
-            <div className=" w-full flex flex-row justify-start">
-                <div>
-                    <h2 className="text-3xl font-semibold text-gray-800">Inventario de productos</h2>
-                    <p className="text-gray-600 mt-2">Administra los precios y niveles de stock del inventario.</p>
+        <div className="px-4 sm:px-6 lg:px-10">
+            <div className="flex w-full flex-col gap-4 md:flex-row md:items-center md:justify-between">
+                <div className="min-w-0">
+                    <h2 className="text-2xl font-semibold text-gray-800 sm:text-3xl">Inventario de productos</h2>
+                    <p className="mt-2 text-gray-600">Administra los precios y niveles de stock del inventario.</p>
                 </div>
-                <Button className="ml-auto my-auto" onClick={() => setIsCreateOpen(true)}>
+                <Button className="w-full md:w-auto" onClick={() => setIsCreateOpen(true)}>
                     Agregar producto
                 </Button>
-
             </div>
 
-            <div className="flex flex-row w-full rounded-lg bg-white p-3 mt-4">
-                <Input type="text" placeholder="Buscar producto..." onChange={() => { }} value="" icon={<Search />} height="h-8" />
-                <Combobox className="ml-4" options={ORDER_TYPES} placeholder="Ordenar por..." onChange={() => { }} value="" height="h-8" />
+            <div className="mt-4 flex w-full flex-col gap-3 rounded-lg bg-white p-3 md:flex-row md:items-end">
+                <div className="w-full">
+                    <Input type="text" placeholder="Buscar producto..." onChange={() => { }} value="" icon={<Search />} height="h-8" />
+                </div>
+                <div className="w-full md:w-64">
+                    <Combobox options={ORDER_TYPES} placeholder="Ordenar por..." onChange={() => { }} value="" height="h-8" />
+                </div>
             </div>
 
             <ProductsTable json={products} setEditOpen={setIsEditOpen} setProductCodeToEdit={setProductCodeToEdit} deactivateProduct={deactivateProduct} />
