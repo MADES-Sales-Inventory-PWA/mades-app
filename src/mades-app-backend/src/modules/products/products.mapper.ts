@@ -15,7 +15,7 @@ export const productsMapper = {
             state:         product.state,
             sizeTypeId:    Number(product.sizeTypeId),
             sizeValueId:   Number(product.sizeValueId),
-            barcode:       product.barcode      ?? null,
+            barcode:       product.barcode,
             description:   product.description  ?? null,
             imageUrl:      product.imageUrl     ?? null,
             purchasePrice: Number(product.productDetails?.purchasePrice ?? 0),
@@ -29,7 +29,7 @@ export const productsMapper = {
         return {
             name:         dto.name,
             sellingPrice: dto.purchasePrice,
-            barcode:      dto.barcode     ?? null,
+            barcode:      dto.barcode,
             description:  dto.description ?? null,
             imageUrl:     dto.imageUrl    ?? null,
             lastUpdate:   now,
