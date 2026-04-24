@@ -1,8 +1,11 @@
 import { XCircle, TriangleAlert, DollarSignIcon, Text } from "lucide-react";
 import { SummaryCard } from "../components/SummaryCard";
 import { BasicButton } from "../components/BasicButton";
+import { useNavigate } from "react-router";
+import { constants } from "../constants/Constants";
 
 export const AdminHomeContent = () => {
+    const navigate = useNavigate();
     return (
         <div className="flex-1 px-4 py-4 sm:px-6 lg:px-10">
             <h2 className="text-2xl font-semibold text-gray-800 sm:text-3xl">Resumen General</h2>
@@ -11,7 +14,8 @@ export const AdminHomeContent = () => {
             <div className="mt-7 rounded-2xl border border-slate-200/80 bg-white p-4 shadow-sm">
                 <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
                     <h3 className="text-xl font-semibold text-gray-700">Alertas de stock</h3>
-                    <BasicButton onClick={() => { }} className="sm:ml-auto text-primary-blue hover:text-primary-blue-hover font-bold active:text-primary-blue-active">Ver todo el inventario</BasicButton>
+                    <BasicButton onClick={() => {navigate(constants.INVENTORY_PATH, { replace: true });
+                                                return;}} className="sm:ml-auto text-primary-blue hover:text-primary-blue-hover font-bold active:text-primary-blue-active">Ver todo el inventario</BasicButton>
                 </div>
                 <div className="mt-4 flex flex-col gap-4 lg:flex-row lg:items-center">
                     <div className="flex flex-row items-center gap-3 lg:flex-1">

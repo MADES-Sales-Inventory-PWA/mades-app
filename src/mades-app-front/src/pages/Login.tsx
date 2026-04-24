@@ -59,8 +59,6 @@ export default function Login() {
 
       saveSession({ token, user });
 
-      console.log('Sesión guardada:', localStorage.getItem('mades.auth.session'));
-
       const roleId = Number(user.roleId);
 
       if (roleId === 1) {

@@ -33,32 +33,32 @@ export default function HomePage() {
     {
       label: "Inventario",
       icon: <Box size={18} />,
-      path: "/inventario",
-      enabled: true,
+      path: constants.INVENTORY_PATH,
+      enabled: constants.INVENTORY_ALLOWED_ROLES.includes(roleId),
     },
     {
       label: "Carrito",
       icon: <ShoppingCart size={18} />,
-      path: "/carrito",
-      enabled: false,
+      path: constants.SALES_PATH,
+      enabled: constants.SALES_ALLOWED_ROLES.includes(roleId),
     },
     {
       label: "Reportes",
       icon: <BarChart3 size={18} />,
-      path: "/reportes",
-      enabled: false,
+      path: constants.REPORTS_PATH,
+      enabled: constants.REPORTS_ALLOWED_ROLES.includes(roleId),
     },
     {
       label: "Empleados",
       icon: <Users size={18} />,
-      path: "/empleados",
-      enabled: false,
+      path: constants.EMPLOYEES_PATH,
+      enabled: constants.EMPLOYEES_ALLOWED_ROLES.includes(roleId),
     },
   ];
 
   return (
-    <div className="min-h-screen w-full bg-gradient-to-tr from-background to-background-2">
-      <div className="mx-auto flex min-h-screen w-full max-w-[1600px]">
+    <div className="min-h-screen w-full overflow-x-hidden bg-gradient-to-tr from-background to-background-2">
+      <div className="mx-auto flex min-h-screen w-full max-w-[1600px] overflow-x-hidden">
         <aside className="hidden lg:block">
           <SideBar />
         </aside>

@@ -222,7 +222,7 @@ export const EmployeeManagementContent = () => {
   };
 
   return (
-    <div className="px-4 sm:px-6 lg:px-10">
+    <div className="overflow-x-hidden px-4 sm:px-6 lg:px-10">
       <div className="flex w-full flex-col gap-4 md:flex-row md:items-center md:justify-between">
         <div className="min-w-0">
           <h2 className="text-2xl font-semibold text-gray-800 sm:text-3xl">Gestión de empleados</h2>
@@ -233,8 +233,8 @@ export const EmployeeManagementContent = () => {
         </Button>
       </div>
 
-      <div className="mt-4 rounded-lg bg-white p-3 shadow-sm">
-        <div className="flex flex-col gap-3 md:flex-row md:items-center">
+      <div className="mt-4 max-w-full rounded-lg bg-white p-3 shadow-sm">
+        <div className="flex min-w-0 flex-col gap-3 lg:flex-row lg:items-center">
           <div className="min-w-0 flex-1">
             <span className="mb-1 block text-sm font-medium text-slate-700">Buscar empleado</span>
             <Input
@@ -246,12 +246,12 @@ export const EmployeeManagementContent = () => {
               height="h-8"
             />
           </div>
-          <label className="w-full md:w-72">
+          <label className="w-full min-w-0 lg:w-72 lg:flex-shrink-0">
             <span className="mb-1 block text-sm font-medium text-slate-700">Ordenar por</span>
             <select
               value={sortOption}
               onChange={(event) => setSortOption(event.target.value as EmployeeSortOption)}
-              className="h-10 w-full rounded-default border border-input-border bg-input-login px-3 text-sm text-gray-700 shadow-sm focus:border-primary focus:outline-none focus:ring focus:ring-primary focus:ring-opacity-50"
+              className="h-10 w-full min-w-0 rounded-default border border-input-border bg-input-login px-3 text-sm text-gray-700 shadow-sm focus:border-primary focus:outline-none focus:ring focus:ring-primary focus:ring-opacity-50"
             >
               <option value="recent">Más recientes</option>
               <option value="oldest">Más antiguos</option>
@@ -285,28 +285,28 @@ export const EmployeeManagementContent = () => {
 
             <div className="space-y-3">
               {activeEmployees.map((employee) => (
-                <article key={employee.id} className="rounded-xl border border-slate-200 p-4">
+                <article key={employee.id} className="overflow-hidden rounded-xl border border-slate-200 p-4">
                   <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
                     <div className="min-w-0">
                       <h4 className="truncate text-base font-semibold text-slate-900">{employee.name} {employee.lastName}</h4>
-                      <p className="mt-1 flex items-center gap-2 text-sm text-slate-600"><Mail size={14} />{employee.email}</p>
-                      <p className="mt-1 flex items-center gap-2 text-sm text-slate-600"><CreditCard size={14} />{documentTypeLabels[employee.documentType] ?? employee.documentType} {employee.documentNumber}</p>
-                      <p className="mt-1 flex items-center gap-2 text-sm text-slate-600"><Phone size={14} />{employee.phoneNumber}</p>
+                      <p className="mt-1 flex min-w-0 items-start gap-2 text-sm text-slate-600"><Mail size={14} className="mt-0.5 shrink-0" /><span className="min-w-0 break-all">{employee.email}</span></p>
+                      <p className="mt-1 flex min-w-0 items-start gap-2 text-sm text-slate-600"><CreditCard size={14} className="mt-0.5 shrink-0" /><span className="min-w-0 break-words">{documentTypeLabels[employee.documentType] ?? employee.documentType} {employee.documentNumber}</span></p>
+                      <p className="mt-1 flex min-w-0 items-start gap-2 text-sm text-slate-600"><Phone size={14} className="mt-0.5 shrink-0" /><span className="min-w-0 break-all">{employee.phoneNumber}</span></p>
                     </div>
-                    <div className="flex flex-col items-start gap-2 sm:items-end">
+                    <div className="flex w-full flex-col items-stretch gap-2 sm:w-auto sm:items-end">
                       <span className="inline-flex items-center gap-2 rounded-full bg-emerald-50 px-3 py-1 text-xs font-semibold text-emerald-700">
                         <ShieldCheck size={14} />
                         Activo
                       </span>
                       <BasicButton
                         onClick={() => void handleToggleStatus(employee)}
-                        className="px-3 py-2 text-sm"
+                        className="w-full px-3 py-2 text-sm sm:w-auto"
                       >
                         {isUpdatingId === employee.id ? "Cambiando..." : "Desactivar"}
                       </BasicButton>
                       <BasicButton
                         onClick={() => openEditEmployee(employee)}
-                        className="px-3 py-2 text-sm"
+                        className="w-full px-3 py-2 text-sm sm:w-auto"
                       >
                         <span className="inline-flex items-center gap-2">
                           <Pencil size={14} />
@@ -329,28 +329,28 @@ export const EmployeeManagementContent = () => {
 
             <div className="space-y-3">
               {inactiveEmployees.map((employee) => (
-                <article key={employee.id} className="rounded-xl border border-slate-200 p-4">
+                <article key={employee.id} className="overflow-hidden rounded-xl border border-slate-200 p-4">
                   <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
                     <div className="min-w-0">
                       <h4 className="truncate text-base font-semibold text-slate-900">{employee.name} {employee.lastName}</h4>
-                      <p className="mt-1 flex items-center gap-2 text-sm text-slate-600"><Mail size={14} />{employee.email}</p>
-                      <p className="mt-1 flex items-center gap-2 text-sm text-slate-600"><CreditCard size={14} />{documentTypeLabels[employee.documentType] ?? employee.documentType} {employee.documentNumber}</p>
-                      <p className="mt-1 flex items-center gap-2 text-sm text-slate-600"><Phone size={14} />{employee.phoneNumber}</p>
+                      <p className="mt-1 flex min-w-0 items-start gap-2 text-sm text-slate-600"><Mail size={14} className="mt-0.5 shrink-0" /><span className="min-w-0 break-all">{employee.email}</span></p>
+                      <p className="mt-1 flex min-w-0 items-start gap-2 text-sm text-slate-600"><CreditCard size={14} className="mt-0.5 shrink-0" /><span className="min-w-0 break-words">{documentTypeLabels[employee.documentType] ?? employee.documentType} {employee.documentNumber}</span></p>
+                      <p className="mt-1 flex min-w-0 items-start gap-2 text-sm text-slate-600"><Phone size={14} className="mt-0.5 shrink-0" /><span className="min-w-0 break-all">{employee.phoneNumber}</span></p>
                     </div>
-                    <div className="flex flex-col items-start gap-2 sm:items-end">
+                    <div className="flex w-full flex-col items-stretch gap-2 sm:w-auto sm:items-end">
                       <span className="inline-flex items-center gap-2 rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold text-slate-600">
                         <ShieldOff size={14} />
                         Inactivo
                       </span>
                       <BasicButton
                         onClick={() => void handleToggleStatus(employee)}
-                        className="px-3 py-2 text-sm"
+                        className="w-full px-3 py-2 text-sm sm:w-auto"
                       >
                         {isUpdatingId === employee.id ? "Cambiando..." : "Activar"}
                       </BasicButton>
                       <BasicButton
                         onClick={() => openEditEmployee(employee)}
-                        className="px-3 py-2 text-sm"
+                        className="w-full px-3 py-2 text-sm sm:w-auto"
                       >
                         <span className="inline-flex items-center gap-2">
                           <Pencil size={14} />
