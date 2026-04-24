@@ -1,171 +1,323 @@
+import { useEffect, useMemo, useState } from "react";
+import { Upload } from "lucide-react";
 import { BasicButton } from "./BasicButton";
-import { Plus, Trash2, Upload } from "lucide-react";
-import { Input } from "./Input";
 import { Button } from "./Button";
-import type { Product, ProductSize, SizeType } from "../types/Types";
-import { useState } from "react";
+import { Input } from "./Input";
+import type { Product } from "../types/Types";
+import { createProduct, updateProduct, type ProductFormValues } from "../services/products";
+import { fetchSizeTypes, fetchSizeValues, type SizeTypeDTO, type SizeValueDTO } from "../services/sizes";
 
+type FormState = {
+    name: string;
+    sizeTypeId: string;
+    sizeValueId: string;
+    barcode: string;
+    description: string;
+    imageUrl: string;
+    purchasePrice: string;
+    quantity: string;
+    minQuantity: string;
+};
 
-export const ProductForm = ({ setIsOpen, title, actionText, product }: { setIsOpen: (isOpen: boolean) => void; title: string; actionText: string; product?: Product }) => {
-    const [form, setForm] = useState({
-        sku: "",
-        nombre: "",
-        descripcion: "",
-        precio: "",
-        imagen: "",
-        tipoTalla: "letras" as SizeType,
-    });
-    const [sizes, setSizes] = useState<ProductSize[]>([
-        { talla: "", cantidadExistente: 0, unidadesAlerta: 0 },
-    ]);
+const emptyForm: FormState = {
+    name: "",
+    sizeTypeId: "",
+    sizeValueId: "",
+    barcode: "",
+    description: "",
+    imageUrl: "",
+    purchasePrice: "",
+    quantity: "",
+    minQuantity: "",
+};
+
+function toNullableText(value: string) {
+    const trimmed = value.trim();
+    return trimmed.length > 0 ? trimmed : null;
+}
+
+function toNumber(value: string) {
+    return Number(value);
+}
+
+export const ProductForm = ({
+    setIsOpen,
+    title,
+    actionText,
+    product,
+    onSaved,
+}: {
+    setIsOpen: (isOpen: boolean) => void;
+    title: string;
+    actionText: string;
+    product?: Product;
+    onSaved?: () => void;
+}) => {
+    const [form, setForm] = useState<FormState>(emptyForm);
+    const [sizeTypes, setSizeTypes] = useState<SizeTypeDTO[]>([]);
+    const [sizeValues, setSizeValues] = useState<SizeValueDTO[]>([]);
+    const [isLoadingSizes, setIsLoadingSizes] = useState(false);
+    const [isSubmitting, setIsSubmitting] = useState(false);
+    const [errorMessage, setErrorMessage] = useState<string | null>(null);
+
+    const selectedSizeTypeId = form.sizeTypeId ? Number(form.sizeTypeId) : null;
+    const selectedSizeValueId = form.sizeValueId ? Number(form.sizeValueId) : null;
+
+    const selectedSizeTypeLabel = useMemo(
+        () => sizeTypes.find((item) => item.id === selectedSizeTypeId)?.name ?? "",
+        [sizeTypes, selectedSizeTypeId]
+    );
+
+    useEffect(() => {
+        setForm(
+            product
+                ? {
+                    name: product.name ?? "",
+                    sizeTypeId: String(product.sizeTypeId ?? ""),
+                    sizeValueId: String(product.sizeValueId ?? ""),
+                    barcode: product.barcode ?? "",
+                    description: product.description ?? "",
+                    imageUrl: product.imageUrl ?? "",
+                    purchasePrice: String(product.purchasePrice ?? ""),
+                    quantity: String(product.quantity ?? ""),
+                    minQuantity: String(product.minQuantity ?? ""),
+                }
+                : emptyForm
+        );
+    }, [product]);
+
+    useEffect(() => {
+        let isMounted = true;
+
+        const loadSizeTypes = async () => {
+            try {
+                setIsLoadingSizes(true);
+                const types = await fetchSizeTypes();
+
+                if (!isMounted) {
+                    return;
+                }
+
+                setSizeTypes(types);
+
+                if (!product && types.length > 0 && !form.sizeTypeId) {
+                    setForm((current) => ({
+                        ...current,
+                        sizeTypeId: String(types[0].id),
+                    }));
+                }
+            } catch {
+                if (isMounted) {
+                    setErrorMessage("No se pudieron cargar los tipos de talla.");
+                }
+            } finally {
+                if (isMounted) {
+                    setIsLoadingSizes(false);
+                }
+            }
+        };
+
+        void loadSizeTypes();
+
+        return () => {
+            isMounted = false;
+        };
+    }, [product, form.sizeTypeId]);
+
+    useEffect(() => {
+        if (!selectedSizeTypeId) {
+            setSizeValues([]);
+            return;
+        }
+
+        let isMounted = true;
+
+        const loadSizeValues = async () => {
+            try {
+                setIsLoadingSizes(true);
+                const values = await fetchSizeValues(selectedSizeTypeId);
+
+                if (!isMounted) {
+                    return;
+                }
+
+                setSizeValues(values);
+
+                setForm((current) => {
+                    const currentValueId = current.sizeValueId ? Number(current.sizeValueId) : null;
+                    const exists = values.some((item) => item.id === currentValueId);
+
+                    if (exists) {
+                        return current;
+                    }
+
+                    return {
+                        ...current,
+                        sizeValueId: values[0] ? String(values[0].id) : "",
+                    };
+                });
+            } catch {
+                if (isMounted) {
+                    setErrorMessage("No se pudieron cargar los valores de talla.");
+                }
+            } finally {
+                if (isMounted) {
+                    setIsLoadingSizes(false);
+                }
+            }
+        };
+
+        void loadSizeValues();
+
+        return () => {
+            isMounted = false;
+        };
+    }, [selectedSizeTypeId]);
+
+    const handleSubmit = async () => {
+        try {
+            setIsSubmitting(true);
+            setErrorMessage(null);
+
+            const payload: ProductFormValues = {
+                name: form.name.trim(),
+                sizeTypeId: Number(form.sizeTypeId),
+                sizeValueId: Number(form.sizeValueId),
+                barcode: toNullableText(form.barcode),
+                description: toNullableText(form.description),
+                imageUrl: toNullableText(form.imageUrl),
+                purchasePrice: toNumber(form.purchasePrice),
+                quantity: toNumber(form.quantity),
+                minQuantity: toNumber(form.minQuantity),
+            };
+
+            if (!product) {
+                await createProduct(payload);
+            } else {
+                await updateProduct(product.id, payload);
+            }
+
+            onSaved?.();
+            setIsOpen(false);
+        } catch {
+            setErrorMessage(product ? "No se pudo actualizar el producto." : "No se pudo crear el producto.");
+        } finally {
+            setIsSubmitting(false);
+        }
+    };
+
     return (
         <div className="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto bg-black/50 p-4">
-            <div className="flex max-h-[90vh] w-full max-w-2/3 flex-col overflow-y-auto rounded-xl bg-white p-6 shadow-lg">
-                <h2 className="text-3xl font-semibold text-gray-800 my-auto">{title}</h2>
+            <div className="flex max-h-[90vh] w-full max-w-4xl flex-col overflow-y-auto rounded-xl bg-white p-5 shadow-lg sm:p-6">
+                <div className="flex items-start justify-between gap-4">
+                    <div>
+                        <h2 className="text-2xl font-semibold text-gray-800 sm:text-3xl">{title}</h2>
+                    </div>
+                    <BasicButton onClick={() => setIsOpen(false)} className="shrink-0">
+                        Cerrar
+                    </BasicButton>
+                </div>
 
-                <div className="flex flex-row w-full gap-2 mt-4 my-auto">
-                    <div className="flex flex-col gap-2 w-full ">
-                        <p className="text-gray-600">Imagen del producto</p>
-                        <BasicButton onClick={() => alert("Funcionalidad de subir imagen en construcción")} className="w-full h-full flex items-center justify-center">
-                            <div className="w-[13rem] h-[13rem] overflow-hidden rounded-lg bg-tr-bg">
-                                {product?.imageUrl ? (
-                                    <img
-                                        src={product.imageUrl}
-                                        alt="Imagen del producto"
-                                        className="w-full h-full object-cover"
-                                    />
+                {errorMessage && (
+                    <div className="mt-4 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+                        {errorMessage}
+                    </div>
+                )}
+
+                <div className="mt-5 grid gap-5 lg:grid-cols-[280px_1fr]">
+                    <div className="space-y-3">
+                        <p className="text-sm font-semibold text-slate-700">Imagen del producto</p>
+                        <div className="overflow-hidden rounded-2xl border border-slate-200 bg-slate-50">
+                            <div className="flex h-50 w-full items-center justify-center" onClick={() => alert("Funcionalidad de subir imagen en construcción")}>
+                                {form.imageUrl ? (
+                                    <img src={form.imageUrl} alt="Imagen del producto" className="h-full w-full object-cover" />
                                 ) : (
-                                    <div className="flex flex-col w-full h-full items-center justify-center gap-1">
-                                        <Upload size={32} className="text-gray-500" />
-                                        <p className="text-gray-500 text-sm">Subir imagen</p>
+                                    <div className="flex flex-col items-center justify-center gap-2 text-slate-500">
+                                        <Upload size={32} />
+                                        <span className="text-sm font-medium">Subir imagen</span>
                                     </div>
                                 )}
                             </div>
-                        </BasicButton>
-                    </div>
-
-                    <div className="flex flex-col gap-2 w-full">
-                        <Input height="h-9" label="Nombre del producto" type="text" placeholder="Ej: Camisa gris manga larga" onChange={() => { }} value={product?.name || ""} />
-                        <div className="flex flex-row gap-2 w-full">
-                            <Input className="flex-1" height="h-9" label="Código de barras" type="text" placeholder="Ej: 123456789" onChange={() => { }} value={product?.barcode || ""} />
-                            <Input className="flex-1" height="h-9" label="Tamaño" type="number" placeholder="" onChange={() => { }} value={product?.size || ""} />
                         </div>
-                        <label htmlFor="Description">Descripción del producto</label>
-                        <textarea id="Description" className="border border-gray-300 rounded-default p-2" placeholder="Ej: Camisa de algodón de calidad" onChange={() => { }} value={product?.description || ""} />
-                    </div>
-                </div>
-
-                <div className="my-3 my-auto">
-                    <h1 className="text-xl font-bold text-gray-800">Precio e inventario</h1>
-                    <div className="flex flex-row gap-2 w-full mt-2">
-                        <Input className="flex-1" height="h-9" label="Precio de compra" type="number" placeholder="Ej: 15000" onChange={() => { }} value={product?.purchasePrice || ""} />
-                        <Input className="flex-1" height="h-9" label="Precio de venta" type="number" placeholder="Ej: 25000" onChange={() => { }} value={product?.sellingPrice || ""} />
-                        <Input className="flex-1" height="h-9" label="Cantidad en stock" type="number" placeholder="Ej: 50" onChange={() => { }} value={product?.quantity || ""} />
-                        <Input className="flex-1" height="h-9" label="Cantidad mínima" type="number" placeholder="Ej: 10" onChange={() => { }} value={product?.minQuantity || ""} />
-                    </div>
-                </div>
-
-                <label className="space-y-1 my-2">
-                    <span className="text-sm font-semibold text-slate-700">Tipo de talla</span>
-                    <select
-                        value={form.tipoTalla}
-                        onChange={(event) =>
-                            setForm((prev) => ({ ...prev, tipoTalla: event.target.value as SizeType }))
-                        }
-                        className="w-full rounded-xl border border-input-border px-3 py-2 outline-none focus:border-primary-blue"
-                    >
-                        <option value="letras">Letras (XS, S, M, L, XL)</option>
-                        <option value="numerica">Numérica (28, 30, 32, ...)</option>
-                    </select>
-                </label>
-
-                <div className="rounded-xl border border-slate-200 p-4 mb-3">
-
-                    <div className="mb-3 flex items-center justify-between">
-                        <h2 className="text-lg font-bold text-slate-900">Tallas registradas</h2>
-                        <button
-                            type="button"
-                            onClick={() =>
-                                setSizes((prev) => [
-                                    ...prev,
-                                    { talla: "", cantidadExistente: 0, unidadesAlerta: 0 },
-                                ])
-                            }
-                            className="inline-flex items-center gap-2 rounded-lg border border-slate-300 px-3 py-1.5 text-sm font-semibold text-slate-700"
-                        >
-                            <Plus size={16} />
-                            Agregar talla
-                        </button>
+                        <Input label="URL de imagen" type="text" placeholder="https://..." value={form.imageUrl} onChange={(value) => setForm((current) => ({ ...current, imageUrl: value }))} />
                     </div>
 
-                    <div className="space-y-2 mb-3">
-                        {sizes.map((size, index) => (
-                            <div key={`${index}-${size.talla}`} className="grid gap-2 sm:grid-cols-4">
-                                <input
-                                    placeholder={form.tipoTalla === "letras" ? "Ej: M" : "Ej: 32"}
-                                    value={size.talla}
-                                    onChange={(event) =>
-                                        setSizes((prev) =>
-                                            prev.map((item, i) =>
-                                                i === index ? { ...item, talla: event.target.value } : item
-                                            )
-                                        )
-                                    }
-                                    className="rounded-lg border border-input-border px-3 py-2 outline-none focus:border-primary-blue"
-                                />
-                                <input
-                                    type="number"
-                                    min={0}
-                                    placeholder="Existentes"
-                                    value={size.cantidadExistente}
-                                    onChange={(event) =>
-                                        setSizes((prev) =>
-                                            prev.map((item, i) =>
-                                                i === index
-                                                    ? { ...item, cantidadExistente: Number(event.target.value) }
-                                                    : item
-                                            )
-                                        )
-                                    }
-                                    className="rounded-lg border border-input-border px-3 py-2 outline-none focus:border-primary-blue"
-                                />
-                                <input
-                                    type="number"
-                                    min={0}
-                                    placeholder="Alerta"
-                                    value={size.unidadesAlerta}
-                                    onChange={(event) =>
-                                        setSizes((prev) =>
-                                            prev.map((item, i) =>
-                                                i === index ? { ...item, unidadesAlerta: Number(event.target.value) } : item
-                                            )
-                                        )
-                                    }
-                                    className="rounded-lg border border-input-border px-3 py-2 outline-none focus:border-primary-blue"
-                                />
-                                <button
-                                    type="button"
-                                    onClick={() => setSizes((prev) => prev.filter((_, i) => i !== index))}
-                                    disabled={sizes.length === 1}
-                                    className="inline-flex items-center justify-center rounded-lg border border-red-300 text-red-700 transition enabled:hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-40"
+                    <div className="grid gap-1.5">
+                        <div className="grid items-start gap-2 md:grid-cols-2">
+                            <Input label="Nombre del producto" type="text" placeholder="Ej: Camisa gris manga larga" value={form.name} onChange={(value) => setForm((current) => ({ ...current, name: value }))} />
+                            <Input label="Código de barras" type="text" placeholder="Ej: 123456789" value={form.barcode} onChange={(value) => setForm((current) => ({ ...current, barcode: value }))} />
+                        </div>
+
+                        <div className="grid items-start gap-2 md:grid-cols-2">
+                            <label className="space-y-1">
+                                <span className="text-sm font-semibold text-slate-700">Tipo de talla</span>
+                                <select
+                                    value={form.sizeTypeId}
+                                    onChange={(event) => setForm((current) => ({ ...current, sizeTypeId: event.target.value }))}
+                                    className="w-full rounded-xl border border-input-border px-3 py-2 outline-none focus:border-primary-blue"
+                                    disabled={isLoadingSizes}
                                 >
-                                    <Trash2 size={16} />
-                                </button>
-                            </div>
-                        ))}
+                                    <option value="">Selecciona un tipo</option>
+                                    {sizeTypes.map((type) => (
+                                        <option key={type.id} value={type.id}>
+                                            {type.name}
+                                        </option>
+                                    ))}
+                                </select>
+                            </label>
+
+                            <label className="space-y-1">
+                                <span className="text-sm font-semibold text-slate-700">Valor de talla</span>
+                                <select
+                                    value={form.sizeValueId}
+                                    onChange={(event) => setForm((current) => ({ ...current, sizeValueId: event.target.value }))}
+                                    className="w-full rounded-xl border border-input-border px-3 py-2 outline-none focus:border-primary-blue"
+                                    disabled={isLoadingSizes || sizeValues.length === 0}
+                                >
+                                    <option value="">Selecciona un valor</option>
+                                    {sizeValues.map((value) => (
+                                        <option key={value.id} value={value.id}>
+                                            {value.value}
+                                        </option>
+                                    ))}
+                                </select>
+                            </label>
+                        </div>
+
+                        <label className="flex flex-col gap-1">
+                            <span className="text-sm font-semibold text-slate-700">Descripción del producto</span>
+                            <textarea
+                                className="h-full min-h-24 rounded-xl border border-gray-300 p-3 outline-none focus:border-primary-blue"
+                                placeholder="Ej: Camisa de algodón de calidad"
+                                value={form.description}
+                                onChange={(event) => setForm((current) => ({ ...current, description: event.target.value }))}
+                            />
+                        </label>
                     </div>
                 </div>
-                <div className="flex flex-row mt-auto w-full">
-                    <div className="flex flex-row gap-2 ml-auto">
-                        <BasicButton onClick={() => setIsOpen(false)}>
-                            cancelar
-                        </BasicButton>
-                        <Button onClick={() => setIsOpen(false)}>
-                            {actionText}
-                        </Button>
+
+                <div className="mt-5 rounded-xl border border-gray-300 bg-white p-4">
+                    <h3 className="text-lg font-bold text-gray-800">Precio e inventario</h3>
+                    <p className="mt-1 text-sm text-slate-600">Todos los precios se manejan en pesos colombianos (COP).</p>
+                    <div className="mt-2 grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+                        <Input label="Precio de compra (COP)" type="number" placeholder="Ej: 15.000" value={form.purchasePrice} onChange={(value) => setForm((current) => ({ ...current, purchasePrice: value }))} />
+                        <Input label="Cantidad en stock" type="number" placeholder="Ej: 50" value={form.quantity} onChange={(value) => setForm((current) => ({ ...current, quantity: value }))} />
+                        <Input label="Cantidad mínima" type="number" placeholder="Ej: 10" value={form.minQuantity} onChange={(value) => setForm((current) => ({ ...current, minQuantity: value }))} />
                     </div>
                 </div>
+                <div className="flex flex-col gap-2 w-full pt-2 sm:flex-row sm:justify-end">
+                    <BasicButton onClick={() => setIsOpen(false)}>
+                        cancelar
+                    </BasicButton>
+                    <Button onClick={handleSubmit} className="w-full sm:w-auto">
+                        {isSubmitting ? "Guardando..." : actionText}
+                    </Button>
+                </div>
+
+                <p className="mt-4 text-xs text-slate-500">
+                    Talla activa: {selectedSizeTypeLabel || "Sin seleccionar"} {selectedSizeValueId ? `- valor ${selectedSizeValueId}` : ""}
+                </p>
             </div>
         </div>
     );
-}
+};

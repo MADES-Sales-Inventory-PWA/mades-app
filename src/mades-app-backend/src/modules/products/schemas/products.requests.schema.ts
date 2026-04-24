@@ -15,7 +15,7 @@ export const listProductsQueryRequestSchema = z.object({
             .optional(),
 });
 
-export const updateProductRequestSchema = productSchema.omit({ id: true, quantity: true, state: true }).partial();
+export const updateProductRequestSchema = productSchema.omit({ id: true, state: true }).partial();
 
 export const setStateProductRequestSchema = z.object({
     state: z.boolean("El estado debe ser un valor booleano")

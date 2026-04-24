@@ -1,4 +1,5 @@
 import { Edit2, X } from "lucide-react";
+import { formatCOP } from "../utils/currency";
 
 type ProductCardProps = {
   id: string;
@@ -58,7 +59,7 @@ export function ProductCard({
         </div>
         <div className="text-right">
           <p className="text-xs text-slate-600">Precio</p>
-          <p className="text-lg font-bold text-primary-blue">${precio.toLocaleString()}</p>
+          <p className="text-lg font-bold text-primary-blue">{formatCOP(precio)}</p>
         </div>
       </div>
 
