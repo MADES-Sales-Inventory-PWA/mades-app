@@ -10,10 +10,24 @@ export type EmployeeItem = {
   documentNumber: string;
   phoneNumber: string;
   state: boolean;
+  createdAt?: string;
+  updatedAt?: string;
   user: {
     id: number;
     roleId: number;
   };
+};
+
+export type EmployeeFormPayload = {
+  name: string;
+  lastName: string;
+  email: string;
+  phoneNumber: string;
+  documentType: "CC" | "CE" | "PASSPORT";
+  documentNumber: string;
+  state: boolean;
+  rolId: number;
+  password?: string;
 };
 
 type ApiResponse<T> = {
@@ -65,4 +79,40 @@ export async function changeEmployeeStatus(id: number, state: boolean) {
   }
 
   return (await response.json()) as ApiResponse<null>;
+}
+
+export async function createEmployee(payload: EmployeeFormPayload) {
+  const response = await fetch(getUsersUrl(), {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      ...getAuthHeaders(),
+    },
+    body: JSON.stringify(payload),
+  });
+
+  if (!response.ok) {
+    const data = await response.json().catch(() => null);
+    throw new Error(data?.message ?? "No se pudo crear el empleado");
+  }
+
+  return (await response.json()) as ApiResponse<EmployeeItem>;
+}
+
+export async function updateEmployee(userId: number, payload: Partial<EmployeeFormPayload>) {
+  const response = await fetch(`${getUsersUrl()}/${userId}`, {
+    method: "PATCH",
+    headers: {
+      "Content-Type": "application/json",
+      ...getAuthHeaders(),
+    },
+    body: JSON.stringify(payload),
+  });
+
+  if (!response.ok) {
+    const data = await response.json().catch(() => null);
+    throw new Error(data?.message ?? "No se pudo actualizar el empleado");
+  }
+
+  return (await response.json()) as ApiResponse<EmployeeItem>;
 }
