@@ -1,10 +1,23 @@
 import { constants } from "../constants/Constants";
 import { getAuthHeaders } from "../utils/auth";
+import type { Product } from "../types/Types";
 
 export type BackendProduct = {
   id: number;
   name: string;
   state: boolean;
+  sizeTypeId: number;
+  sizeValueId: number;
+  barcode: string | null;
+  description: string | null;
+  imageUrl: string | null;
+  purchasePrice: number;
+  quantity: number;
+  minQuantity: number;
+};
+
+export type ProductFormValues = {
+  name: string;
   sizeTypeId: number;
   sizeValueId: number;
   barcode: string | null;
@@ -33,6 +46,8 @@ export function mapBackendProductToFrontend(product: BackendProduct) {
   return {
     id: product.id,
     name: product.name,
+    sizeTypeId: product.sizeTypeId,
+    sizeValueId: product.sizeValueId,
     sellingPrice: product.purchasePrice,
     size: String(product.sizeValueId),
     barcode: product.barcode ?? "",
@@ -42,7 +57,7 @@ export function mapBackendProductToFrontend(product: BackendProduct) {
     quantity: product.quantity,
     minQuantity: product.minQuantity,
     isActive: product.state,
-  };
+  } satisfies Product;
 }
 
 export async function fetchProducts() {
@@ -75,4 +90,38 @@ export async function toggleProductState(id: number, state: boolean) {
   }
 
   return (await response.json()) as ApiResponse<null>;
+}
+
+export async function createProduct(payload: ProductFormValues) {
+  const response = await fetch(getProductsUrl(), {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      ...getAuthHeaders(),
+    },
+    body: JSON.stringify(payload),
+  });
+
+  if (!response.ok) {
+    throw new Error("No se pudo crear el producto");
+  }
+
+  return (await response.json()) as ApiResponse<BackendProduct>;
+}
+
+export async function updateProduct(id: number, payload: Partial<ProductFormValues>) {
+  const response = await fetch(`${getProductsUrl()}/${id}`, {
+    method: "PATCH",
+    headers: {
+      "Content-Type": "application/json",
+      ...getAuthHeaders(),
+    },
+    body: JSON.stringify(payload),
+  });
+
+  if (!response.ok) {
+    throw new Error("No se pudo actualizar el producto");
+  }
+
+  return (await response.json()) as ApiResponse<BackendProduct>;
 }

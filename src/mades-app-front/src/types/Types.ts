@@ -1,6 +1,8 @@
 export type Product = {
   id: number;
     name: string;
+  sizeTypeId: number;
+  sizeValueId: number;
     sellingPrice: number;
     size: string;
     barcode: string;

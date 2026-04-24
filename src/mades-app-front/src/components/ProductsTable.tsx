@@ -1,8 +1,9 @@
 import type { Product } from "../types/Types";
 import { BasicButton } from "./BasicButton";
 import { Pencil, Diff, Ban } from "lucide-react";
+import { formatCOP } from "../utils/currency";
 
-export const ProductsTable = ({ json, setEditOpen, setProductIdToEdit, deactivateProduct }: { json: Product[]; setEditOpen: (isOpen: boolean) => void; setProductIdToEdit: (id: number) => void; deactivateProduct: (id: number) => void }) => {
+export const ProductsTable = ({ json, setEditOpen, setProductIdToEdit, deactivateProduct, onOpenAdjustModal }: { json: Product[]; setEditOpen: (isOpen: boolean) => void; setProductIdToEdit: (id: number) => void; deactivateProduct: (id: number) => void; onOpenAdjustModal: (id: number) => void }) => {
     const handleEdit = (id: number) => {
         setProductIdToEdit(id);
         setEditOpen(true);
@@ -15,7 +16,7 @@ export const ProductsTable = ({ json, setEditOpen, setProductIdToEdit, deactivat
                     <Pencil size={16} />
                 </div>
             </BasicButton>
-            <BasicButton id={String(id)} title="Registrar ajuste" onClick={() => alert("Funcionalidad de registrar ajuste en construcción")} className="p-1">
+            <BasicButton id={String(id)} title="Registrar ajuste" onClick={() => onOpenAdjustModal(id)} className="p-1">
                 <div className="flex flex-row items-center gap-1 rounded-default bg-gray-300 p-1 hover:bg-gray-200">
                     <Diff size={16} />
                 </div>
@@ -38,7 +39,7 @@ export const ProductsTable = ({ json, setEditOpen, setProductIdToEdit, deactivat
                             <div className={`min-w-0 flex-1 ${product.isActive ? "" : "line-through"}`}>
                                 <h3 className="truncate font-semibold text-gray-800">{product.name}</h3>
                                 <p className="text-sm text-gray-600">Código: {product.barcode}</p>
-                                <p className="text-sm text-gray-700">Precio: ${(product.sellingPrice / 100).toFixed(2)}</p>
+                                <p className="text-sm text-gray-700">Precio: {formatCOP(product.sellingPrice)}</p>
                                 <p className="text-sm text-gray-700">Stock: {product.quantity}</p>
                             </div>
                         </div>
@@ -69,7 +70,7 @@ export const ProductsTable = ({ json, setEditOpen, setProductIdToEdit, deactivat
                                 </td>
                                 <td className="border border-gray-300 p-2">{product.barcode}</td>
                                 <td className="border border-gray-300 p-2">{product.name}</td>
-                                <td className="border border-gray-300 p-2">${(product.sellingPrice / 100).toFixed(2)}</td>
+                                <td className="border border-gray-300 p-2">{formatCOP(product.sellingPrice)}</td>
                                 <td className="border border-gray-300 p-2">{product.quantity}</td>
                                 <td className="border border-gray-300 p-2">
                                     {renderActions(product.id)}
