@@ -59,7 +59,7 @@ export default function HomePage() {
   return (
     <div className="min-h-screen w-full overflow-x-hidden bg-gradient-to-tr from-background to-background-2">
       <div className="mx-auto flex min-h-screen w-full max-w-[1600px] overflow-x-hidden">
-        <aside className="hidden lg:block">
+        <aside className="hidden w-[250px] shrink-0 lg:block">
           <SideBar />
         </aside>
         <div className="flex-1 flex flex-col min-h-screen pb-24 lg:pb-0">

@@ -12,6 +12,7 @@ import {
 import { useState, type ReactNode } from "react";
 import type { Product } from "../types/Types";
 import { createInventoryAdjustment, type CreateInventoryAdjustmentPayload } from "../services/inventory";
+import { useToast } from "./ToastProvider";
 
 type AdjustmentType = {
   id: string;
@@ -32,7 +33,7 @@ export const InventoryAdjustComponent = ({ product, onClose, onAdjusted }: Inven
     const [unitsInput, setUnitsInput] = useState("1");
     const [comments, setComments] = useState("");
     const [isSubmitting, setIsSubmitting] = useState(false);
-    const [errorMessage, setErrorMessage] = useState<string | null>(null);
+    const { showToast } = useToast();
 
     const adjustmentTypes: AdjustmentType[] = [
         {
@@ -117,12 +118,11 @@ export const InventoryAdjustComponent = ({ product, onClose, onAdjusted }: Inven
     const handleConfirmAdjustment = async () => {
         try {
             setIsSubmitting(true);
-            setErrorMessage(null);
             await createInventoryAdjustment(buildPayload());
             onAdjusted?.();
             onClose();
         } catch (error) {
-            setErrorMessage(error instanceof Error ? error.message : "No se pudo registrar el ajuste");
+            showToast(error instanceof Error ? error.message : "No se pudo registrar el ajuste");
         } finally {
             setIsSubmitting(false);
         }
@@ -141,11 +141,6 @@ export const InventoryAdjustComponent = ({ product, onClose, onAdjusted }: Inven
                         <X size={18} />
                     </button>
                 </div>
-            {errorMessage && (
-                <div className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
-                    {errorMessage}
-                </div>
-            )}
             <div className="grid grid-cols-1 gap-5 xl:grid-cols-[320px_1fr]">
                 <article className="rounded-2xl border border-slate-200/80 bg-white p-5 shadow-sm">
                     <p className="mb-4 text-xs font-bold uppercase tracking-wide text-primary-blue">

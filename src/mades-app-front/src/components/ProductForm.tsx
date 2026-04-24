@@ -6,6 +6,7 @@ import { Input } from "./Input";
 import type { Product } from "../types/Types";
 import { createProduct, updateProduct, type ProductFormValues } from "../services/products";
 import { fetchSizeTypes, fetchSizeValues, type SizeTypeDTO, type SizeValueDTO } from "../services/sizes";
+import { useToast } from "./ToastProvider";
 
 type FormState = {
     name: string;
@@ -58,7 +59,7 @@ export const ProductForm = ({
     const [sizeValues, setSizeValues] = useState<SizeValueDTO[]>([]);
     const [isLoadingSizes, setIsLoadingSizes] = useState(false);
     const [isSubmitting, setIsSubmitting] = useState(false);
-    const [errorMessage, setErrorMessage] = useState<string | null>(null);
+    const { showToast } = useToast();
 
     const selectedSizeTypeId = form.sizeTypeId ? Number(form.sizeTypeId) : null;
     const selectedSizeValueId = form.sizeValueId ? Number(form.sizeValueId) : null;
@@ -106,9 +107,9 @@ export const ProductForm = ({
                         sizeTypeId: String(types[0].id),
                     }));
                 }
-            } catch {
+            } catch (error) {
                 if (isMounted) {
-                    setErrorMessage("No se pudieron cargar los tipos de talla.");
+                    showToast(error instanceof Error ? error.message : "No se pudieron cargar los tipos de talla.");
                 }
             } finally {
                 if (isMounted) {
@@ -122,7 +123,7 @@ export const ProductForm = ({
         return () => {
             isMounted = false;
         };
-    }, [product, form.sizeTypeId]);
+    }, [product, form.sizeTypeId, showToast]);
 
     useEffect(() => {
         if (!selectedSizeTypeId) {
@@ -156,9 +157,9 @@ export const ProductForm = ({
                         sizeValueId: values[0] ? String(values[0].id) : "",
                     };
                 });
-            } catch {
+            } catch (error) {
                 if (isMounted) {
-                    setErrorMessage("No se pudieron cargar los valores de talla.");
+                    showToast(error instanceof Error ? error.message : "No se pudieron cargar los valores de talla.");
                 }
             } finally {
                 if (isMounted) {
@@ -172,12 +173,15 @@ export const ProductForm = ({
         return () => {
             isMounted = false;
         };
-    }, [selectedSizeTypeId]);
+    }, [selectedSizeTypeId, showToast]);
 
     const handleSubmit = async () => {
         try {
             setIsSubmitting(true);
-            setErrorMessage(null);
+            if (!form.name.trim() || !form.sizeTypeId || !form.sizeValueId || !form.purchasePrice.trim() || !form.quantity.trim() || !form.minQuantity.trim()) {
+                showToast("Por favor completa todos los campos.");
+                return;
+            }
 
             const payload: ProductFormValues = {
                 name: form.name.trim(),
@@ -199,8 +203,8 @@ export const ProductForm = ({
 
             onSaved?.();
             setIsOpen(false);
-        } catch {
-            setErrorMessage(product ? "No se pudo actualizar el producto." : "No se pudo crear el producto.");
+        } catch (error) {
+            showToast(error instanceof Error ? error.message : (product ? "No se pudo actualizar el producto." : "No se pudo crear el producto."));
         } finally {
             setIsSubmitting(false);
         }
@@ -217,12 +221,6 @@ export const ProductForm = ({
                         Cerrar
                     </BasicButton>
                 </div>
-
-                {errorMessage && (
-                    <div className="mt-4 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
-                        {errorMessage}
-                    </div>
-                )}
 
                 <div className="mt-5 grid gap-5 lg:grid-cols-[280px_1fr]">
                     <div className="space-y-3">
@@ -245,7 +243,7 @@ export const ProductForm = ({
                     <div className="grid gap-1.5">
                         <div className="grid items-start gap-2 md:grid-cols-2">
                             <Input label="Nombre del producto" type="text" placeholder="Ej: Camisa gris manga larga" value={form.name} onChange={(value) => setForm((current) => ({ ...current, name: value }))} />
-                            <Input label="Código de barras" type="text" placeholder="Ej: 123456789" value={form.barcode} onChange={(value) => setForm((current) => ({ ...current, barcode: value }))} />
+                            <Input disabled={Boolean(product)} label="Código de barras" type="text" placeholder="Ej: 123456789" value={form.barcode} onChange={(value) => setForm((current) => ({ ...current, barcode: value }))} />
                         </div>
 
                         <div className="grid items-start gap-2 md:grid-cols-2">
@@ -288,7 +286,7 @@ export const ProductForm = ({
                             <span className="text-sm font-semibold text-slate-700">Descripción del producto</span>
                             <textarea
                                 className="h-full min-h-24 rounded-xl border border-gray-300 p-3 outline-none focus:border-primary-blue"
-                                placeholder="Ej: Camisa de algodón de calidad"
+                                placeholder="Ej: (mínimo 10 caracteres) Camisa de algodón de calidad"
                                 value={form.description}
                                 onChange={(event) => setForm((current) => ({ ...current, description: event.target.value }))}
                             />
