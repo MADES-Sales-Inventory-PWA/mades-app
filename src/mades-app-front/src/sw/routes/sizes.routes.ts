@@ -9,21 +9,19 @@ const authListSizeTypes         = withAuth(listSizeTypes)
 const authListSizeValuesByTypeId = withAuth(listSizeValuesByTypeId)
 
 export function registerSizesRoutes() {
-  // GET /api/sizes/types — disponible offline
+
   registerRoute(
     ({ url }) => url.pathname === '/api/sizes/types',
     ({ request }) => authListSizeTypes(request, createContext()),
     'GET'
   )
 
-  // GET /api/sizes/values/:id — disponible offline
   registerRoute(
     ({ url }) => /^\/api\/sizes\/values\/\d+$/.test(url.pathname),
     ({ request }) => authListSizeValuesByTypeId(request, createContext()),
     'GET'
   )
 
-  // Cualquier escritura a sizes — solo online
   registerRoute(
     ({ url }) => url.pathname.startsWith('/api/sizes/'),
     new NetworkOnly({ plugins: [offlineErrorPlugin] }),

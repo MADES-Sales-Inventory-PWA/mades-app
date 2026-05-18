@@ -3,7 +3,6 @@ import { productsDb } from '../db/products.db'
 import { listProductsQueryRequestSchema, ProductDTO } from './products.schema'
 import { StoredProduct } from '../db/client'
 
-// ── List products ─────────────────────────────────────────────────────────────
 
 export async function listProducts(request: Request, _ctx: SWContext): Promise<Response> {
   try {
@@ -21,7 +20,7 @@ export async function listProducts(request: Request, _ctx: SWContext): Promise<R
 
     return response
   } catch {
-    // Sin conexión — fallback a IndexedDB
+
   }
 
   const url = new URL(request.url)
@@ -56,7 +55,6 @@ export async function listProducts(request: Request, _ctx: SWContext): Promise<R
   })
 }
 
-// ── Get by id ─────────────────────────────────────────────────────────────────
 
 export async function getProductById(request: Request, _ctx: SWContext): Promise<Response> {
   const id = extractPathId(request.url, '/api/products/')
@@ -80,7 +78,7 @@ export async function getProductById(request: Request, _ctx: SWContext): Promise
 
     return response
   } catch {
-    // Sin conexión — fallback a IndexedDB
+
   }
 
   const product = await productsDb.findById(id)
@@ -96,7 +94,6 @@ export async function getProductById(request: Request, _ctx: SWContext): Promise
   })
 }
 
-// ── Mappers ───────────────────────────────────────────────────────────────────
 
 function mapToStored(p: any): StoredProduct {
   return {
@@ -130,7 +127,6 @@ function mapStoredToDTO(p: StoredProduct): ProductDTO {
   }
 }
 
-// ── Utils ─────────────────────────────────────────────────────────────────────
 
 function extractPathId(url: string, prefix: string): number | null {
   const { pathname } = new URL(url)

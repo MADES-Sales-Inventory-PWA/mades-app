@@ -1,7 +1,5 @@
 import { z } from 'zod'
 
-// ── DTOs que espeja el backend ────────────────────────────────────────────────
-
 export const sizeTypeSchema = z.object({
   id:   z.number().int().positive(),
   name: z.string().min(1),

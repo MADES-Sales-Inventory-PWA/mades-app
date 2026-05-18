@@ -9,21 +9,19 @@ const authListProducts    = withAuth(listProducts)
 const authGetProductById  = withAuth(getProductById)
 
 export function registerProductsRoutes() {
-  // GET /api/products 
+
   registerRoute(
     ({ url }) => url.pathname === '/api/products',
     ({ request }) => authListProducts(request, createContext()),
     'GET'
   )
 
-  // GET /api/products/:id
   registerRoute(
     ({ url }) => /^\/api\/products\/\d+$/.test(url.pathname),
     ({ request }) => authGetProductById(request, createContext()),
     'GET'
   )
 
-  // POST y PATCH a productos y tallas — siempre requieren conexión
   registerRoute(
     ({ url }) => url.pathname.startsWith('/api/products/') || url.pathname.startsWith('/api/sizes/'),
     new NetworkOnly({ plugins: [offlineErrorPlugin] }),

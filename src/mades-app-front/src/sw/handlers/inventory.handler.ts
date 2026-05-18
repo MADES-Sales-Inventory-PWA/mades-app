@@ -8,10 +8,7 @@ import {
 } from './inventory.schema'
 import { StoredAdjustment } from '../db/client'
 
-// ── List adjustments ──────────────────────────────────────────────────────────
-
 export async function listAdjustments(request: Request, ctx: SWContext): Promise<Response> {
-  // Intenta red primero y sincroniza IndexedDB
   try {
     const response = await fetch(request.clone())
 
@@ -25,10 +22,8 @@ export async function listAdjustments(request: Request, ctx: SWContext): Promise
       return response
     }
 
-    // Error del servidor (4xx/5xx) — lo devuelve tal cual
     return response
   } catch {
-    // Sin conexión — fallback a IndexedDB
   }
 
   const url = new URL(request.url)
@@ -74,8 +69,6 @@ export async function listAdjustments(request: Request, ctx: SWContext): Promise
   })
 }
 
-// ── Get by id ─────────────────────────────────────────────────────────────────
-
 export async function getAdjustmentById(request: Request, ctx: SWContext): Promise<Response> {
   const id = extractPathId(request.url, '/api/inventory/adjustments/')
 
@@ -98,7 +91,6 @@ export async function getAdjustmentById(request: Request, ctx: SWContext): Promi
 
     return response
   } catch {
-    // Sin conexión — fallback a IndexedDB
   }
 
   const adjustment = await inventoryDb.findById(id)
@@ -109,8 +101,6 @@ export async function getAdjustmentById(request: Request, ctx: SWContext): Promi
 
   return json({ success: true, data: mapStoredToDetail(adjustment) })
 }
-
-// ── Register adjustment ───────────────────────────────────────────────────────
 
 export async function registerAdjustment(request: Request, ctx: SWContext): Promise<Response> {
   let raw: unknown
@@ -130,7 +120,6 @@ export async function registerAdjustment(request: Request, ctx: SWContext): Prom
 
   const dto: CreateInventoryAdjustmentDTO = parsed.data
 
-  // Intenta red primero
   try {
     const response = await fetch(request.clone())
 
@@ -159,7 +148,6 @@ export async function registerAdjustment(request: Request, ctx: SWContext): Prom
 
     return response
   } catch {
-    // Sin conexión — ejecuta localmente
   }
 
   const product = await productsDb.findById(dto.productId)
@@ -210,8 +198,6 @@ export async function registerAdjustment(request: Request, ctx: SWContext): Prom
   )
 }
 
-// ── Mappers ───────────────────────────────────────────────────────────────────
-
 function mapListItemToStored(a: any): StoredAdjustment {
   return {
     id: a.id,
@@ -261,8 +247,6 @@ function mapStoredToDetail(a: StoredAdjustment) {
     createdAt: a.createdAt,
   }
 }
-
-// ── Utils ─────────────────────────────────────────────────────────────────────
 
 function extractPathId(url: string, prefix: string): number | null {
   const { pathname } = new URL(url)

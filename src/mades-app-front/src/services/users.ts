@@ -57,7 +57,7 @@ function getUserStatusUrl(id: number) {
 }
 
 export async function fetchEmployees() {
-  const url = new URL(getUsersUrl());
+  const url = new URL(getUsersUrl(), window.location.origin);
   url.searchParams.set("rolId", String(constants.EMPLOYEE_ROLE_ID));
 
   const response = await fetch(url.toString(), {

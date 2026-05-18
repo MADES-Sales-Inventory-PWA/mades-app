@@ -8,7 +8,7 @@ import { offlineErrorPlugin } from '../plugins/offline-error.plugin'
 export function registerUsersRoutes() {
   registerRoute(
     ({ url, request }) =>
-      url.pathname.startsWith('/api/users/') || url.pathname.startsWith('/api/users/') &&
+      (url.pathname === '/api/users' || url.pathname.startsWith('/api/users/')) &&
       !url.pathname.includes('admin-exists') &&
       request.method === 'GET',
     new NetworkFirst({
@@ -23,19 +23,19 @@ export function registerUsersRoutes() {
   )
 
   registerRoute(
-    ({ url }) => url.pathname.startsWith('/api/users/'),
+    ({ url }) => url.pathname === '/api/users' || url.pathname.startsWith('/api/users/'),
     new NetworkOnly({ plugins: [offlineErrorPlugin] }),
     'POST'
   )
 
   registerRoute(
-    ({ url }) => url.pathname.startsWith('/api/users/'),
+    ({ url }) => url.pathname === '/api/users' || url.pathname.startsWith('/api/users/'),
     new NetworkOnly({ plugins: [offlineErrorPlugin] }),
     'PATCH'
   )
 
   registerRoute(
-    ({ url }) => url.pathname.startsWith('/api/users/'),
+    ({ url }) => url.pathname === '/api/users' || url.pathname.startsWith('/api/users/'),
     new NetworkOnly({ plugins: [offlineErrorPlugin] }),
     'DELETE'
   )

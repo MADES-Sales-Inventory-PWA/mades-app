@@ -12,21 +12,19 @@ const authGetAdjustmentById = withAuth(getAdjustmentById)
 const authRegisterAdjustment = withAuth(registerAdjustment)
 
 export function registerInventoryRoutes() {
-  // GET /api/inventory/adjustments
+
   registerRoute(
     ({ url }) => url.pathname === '/api/inventory/adjustments',
     ({ request }) => authListAdjustments(request, createContext()),
     'GET'
   )
 
-  // GET /api/inventory/adjustments/:id
   registerRoute(
     ({ url }) => /^\/api\/inventory\/adjustments\/\d+$/.test(url.pathname),
     ({ request }) => authGetAdjustmentById(request, createContext()),
     'GET'
   )
 
-  // POST /api/inventory/adjustments
   registerRoute(
     ({ url }) => url.pathname === '/api/inventory/adjustments',
     ({ request }) => authRegisterAdjustment(request, createContext()),

@@ -23,11 +23,9 @@ self.addEventListener('fetch', (event) => {
   console.log('[SW] fetch interceptado:', event.request.url)
 })
 
-// ── Precaching y limpieza ─────────────────────────────────────────────────────
 precacheAndRoute(self.__WB_MANIFEST)
 cleanupOutdatedCaches()
 
-// ── Navegación SPA ────────────────────────────────────────────────────────────
 registerRoute(
   new NavigationRoute(
     new NetworkFirst({
@@ -37,7 +35,6 @@ registerRoute(
   )
 )
 
-// ── Fuentes Google ────────────────────────────────────────────────────────────
 registerRoute(
   ({ url }) => url.hostname === 'fonts.googleapis.com',
   new StaleWhileRevalidate({ cacheName: 'google-fonts-stylesheets' })
@@ -54,7 +51,6 @@ registerRoute(
   })
 )
 
-// ── Assets estáticos ──────────────────────────────────────────────────────────
 registerRoute(
   ({ request }) => ['style', 'script', 'image'].includes(request.destination),
   new CacheFirst({
@@ -66,7 +62,6 @@ registerRoute(
   })
 )
 
-// ── Rutas de API por dominio ──────────────────────────────────────────────────
 registerAuthRoutes()
 registerUsersRoutes()
 registerProductsRoutes()

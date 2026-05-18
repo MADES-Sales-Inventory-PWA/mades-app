@@ -1,7 +1,7 @@
 import { getDb } from './client'
 import { SizeTypeDTO, SizeValueDTO } from '../handlers/sizes.schema'
 
-// ── SizeTypes ─────────────────────────────────────────────────────────────────
+
 
 export const sizeTypesDb = {
 
@@ -22,13 +22,13 @@ export const sizeTypesDb = {
   },
 }
 
-// ── SizeValues ────────────────────────────────────────────────────────────────
+
 
 export const sizeValuesDb = {
 
   async findByTypeId(sizeTypeId: number): Promise<SizeValueDTO[]> {
     const db = await getDb()
-    // Usa el índice 'by-sizeTypeId' definido en el upgrade del cliente IDB
+    
     return db.getAllFromIndex('sizeValues', 'by-sizeTypeId', sizeTypeId)
   },
 

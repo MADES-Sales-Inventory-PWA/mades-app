@@ -1,8 +1,6 @@
-import { SWContext, json, errorResponse } from '../middlewares/types'
-import { sizeTypesDb, sizeValuesDb } from '../db/sizes.db'
-import { sizeTypeIdParamSchema } from './sizes.schema'
-
-// ── List size types ───────────────────────────────────────────────────────────
+import { SWContext, json, errorResponse } from '../middlewares/types';
+import { sizeTypesDb, sizeValuesDb } from '../db/sizes.db';
+import { sizeTypeIdParamSchema } from './sizes.schema';
 
 export async function listSizeTypes(request: Request, _ctx: SWContext): Promise<Response> {
   try {
@@ -11,7 +9,6 @@ export async function listSizeTypes(request: Request, _ctx: SWContext): Promise<
     if (response.ok) {
       const body = await response.clone().json()
 
-      // Cuando hay red, actualiza IDB con los datos frescos del backend
       if (body.success && Array.isArray(body.data)) {
         await sizeTypesDb.saveMany(body.data)
       }
@@ -21,7 +18,6 @@ export async function listSizeTypes(request: Request, _ctx: SWContext): Promise<
 
     return response
   } catch {
-    // Sin conexión — fallback a IndexedDB
   }
 
   const types = await sizeTypesDb.findAll()
@@ -33,10 +29,7 @@ export async function listSizeTypes(request: Request, _ctx: SWContext): Promise<
   })
 }
 
-// ── List size values by type id ───────────────────────────────────────────────
-
 export async function listSizeValuesByTypeId(request: Request, _ctx: SWContext): Promise<Response> {
-  // Extrae el id del path: /api/sizes/values/:id
   const idParsed = extractSizeTypeId(request.url)
 
   if (idParsed === null) {
@@ -49,10 +42,7 @@ export async function listSizeValuesByTypeId(request: Request, _ctx: SWContext):
     if (response.ok) {
       const body = await response.clone().json()
 
-      // Cuando hay red, actualiza IDB con los valores frescos del backend
       if (body.success && Array.isArray(body.data)) {
-        // Adjunta el sizeTypeId a cada valor antes de guardar en IDB
-        // (el backend no siempre lo incluye en la respuesta)
         const withTypeId = body.data.map((v: any) => ({
           ...v,
           sizeTypeId: idParsed,
@@ -65,10 +55,8 @@ export async function listSizeValuesByTypeId(request: Request, _ctx: SWContext):
 
     return response
   } catch {
-    // Sin conexión — fallback a IndexedDB
   }
 
-  // Verifica que el tipo de talla existe en IDB antes de buscar valores
   const sizeType = await sizeTypesDb.findById(idParsed)
 
   if (!sizeType) {
@@ -84,11 +72,8 @@ export async function listSizeValuesByTypeId(request: Request, _ctx: SWContext):
   })
 }
 
-// ── Utils ─────────────────────────────────────────────────────────────────────
-
 function extractSizeTypeId(url: string): number | null {
   const { pathname } = new URL(url)
-  // Soporta: /api/sizes/values/:id
   const match = pathname.match(/^\/api\/sizes\/values\/(\d+)$/)
   if (!match) return null
 
