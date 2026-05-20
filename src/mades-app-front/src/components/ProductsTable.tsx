@@ -3,29 +3,49 @@ import { BasicButton } from "./BasicButton";
 import { Pencil, Diff, Ban } from "lucide-react";
 import { formatCOP } from "../utils/currency";
 
-export const ProductsTable = ({ json, setEditOpen, setProductIdToEdit, deactivateProduct, onOpenAdjustModal, canManageProducts = true }: { json: Product[]; setEditOpen: (isOpen: boolean) => void; setProductIdToEdit: (id: number) => void; deactivateProduct: (id: number) => void; onOpenAdjustModal: (id: number) => void; canManageProducts?: boolean }) => {
+export const ProductsTable = ({ json, setEditOpen, setProductIdToEdit, deactivateProduct, onOpenAdjustModal, canManageProducts = true, isOnline = true }: { json: Product[]; setEditOpen: (isOpen: boolean) => void; setProductIdToEdit: (id: number) => void; deactivateProduct: (id: number) => void; onOpenAdjustModal: (id: number) => void; canManageProducts?: boolean; isOnline?: boolean }) => {
     const handleEdit = (id: number) => {
         setProductIdToEdit(id);
         setEditOpen(true);
     };
 
+    const offlineTitle = "Solo disponible con conexión a internet";
+
     const renderActions = (product: Product) => (
         <div className="flex flex-row gap-1">
             {canManageProducts && (
-                <BasicButton id={String(product.id)} title="Editar producto" onClick={() => handleEdit(product.id)} className="p-1">
-                    <div className="flex flex-row items-center gap-1 rounded-default bg-gray-300 p-1 hover:bg-gray-200">
+                <BasicButton
+                    id={String(product.id)}
+                    title={isOnline ? "Editar producto" : offlineTitle}
+                    onClick={() => isOnline && handleEdit(product.id)}
+                    className="p-1"
+                    disabled={!isOnline}
+                >
+                    <div className={`flex flex-row items-center gap-1 rounded-default p-1 ${isOnline ? "bg-gray-300 hover:bg-gray-200" : "cursor-not-allowed bg-gray-100 text-gray-400"}`}>
                         <Pencil size={16} />
                     </div>
                 </BasicButton>
             )}
-            <BasicButton id={String(product.id)} title="Registrar ajuste" onClick={() => onOpenAdjustModal(product.id)} className="p-1">
-                <div className="flex flex-row items-center gap-1 rounded-default bg-gray-300 p-1 hover:bg-gray-200">
+            <BasicButton
+                id={String(product.id)}
+                title={isOnline ? "Registrar ajuste" : offlineTitle}
+                onClick={() => isOnline && onOpenAdjustModal(product.id)}
+                className="p-1"
+                disabled={!isOnline}
+            >
+                <div className={`flex flex-row items-center gap-1 rounded-default p-1 ${isOnline ? "bg-gray-300 hover:bg-gray-200" : "cursor-not-allowed bg-gray-100 text-gray-400"}`}>
                     <Diff size={16} />
                 </div>
             </BasicButton>
             {canManageProducts && (
-                <BasicButton id={String(product.id)} title={product.isActive ? "Desactivar producto" : "Activar producto"} onClick={() => deactivateProduct(product.id)} className="p-1">
-                    <div className="flex flex-row items-center gap-1 rounded-default bg-gray-300 p-1 hover:bg-gray-200">
+                <BasicButton
+                    id={String(product.id)}
+                    title={isOnline ? (product.isActive ? "Desactivar producto" : "Activar producto") : offlineTitle}
+                    onClick={() => isOnline && deactivateProduct(product.id)}
+                    className="p-1"
+                    disabled={!isOnline}
+                >
+                    <div className={`flex flex-row items-center gap-1 rounded-default p-1 ${isOnline ? "bg-gray-300 hover:bg-gray-200" : "cursor-not-allowed bg-gray-100 text-gray-400"}`}>
                         <Ban size={16} />
                     </div>
                 </BasicButton>
