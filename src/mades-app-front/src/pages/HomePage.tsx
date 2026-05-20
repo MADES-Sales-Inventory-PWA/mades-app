@@ -7,6 +7,7 @@ import { SideBar } from "../components/SideBar";
 import { constants } from "../constants/Constants";
 import { getSession } from "../utils/auth";
 import { InventoryContent } from "../components/InventoryContent";
+import { SalesContent } from "../components/SalesContent";
 import { BarChart3, Box, House, ShoppingCart, Users } from "lucide-react";
 import type { ReactNode } from "react";
 
@@ -75,9 +76,7 @@ export default function HomePage() {
           )}
 
           {location.pathname === constants.SALES_PATH && (
-            <div className="flex items-center justify-center h-full">
-              <h2 className="text-2xl font-bold text-gray-700">Sección de Ventas (en construcción)</h2>
-            </div>
+            <SalesContent />
           )}
 
           {location.pathname === constants.REPORTS_PATH && (
