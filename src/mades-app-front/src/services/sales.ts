@@ -1,12 +1,6 @@
 import { constants } from "../constants/Constants";
 import { getAuthHeaders } from "../utils/auth";
-import { fetchProducts } from "./products";
-import {
-  cacheProducts,
-  getPendingSales,
-  deletePendingSale,
-  updatePendingSaleStatus,
-} from "../db/salesDB";
+import { salesDb } from "../sw/db/sales.db";
 
 export type SaleItem = {
   productId: number;
@@ -24,6 +18,7 @@ export type RegisteredSale = {
   invoiceNumber: string;
   total: number;
   itemCount: number;
+  offline?: boolean;
 };
 
 type ApiResponse<T> = {
@@ -66,13 +61,12 @@ export async function createSale(payload: CreateSalePayload): Promise<Registered
   return res.data;
 }
 
-export async function refreshProductsCache(): Promise<void> {
-  const products = await fetchProducts();
-  await cacheProducts(products);
+export async function getPendingSalesCount(): Promise<number> {
+  return salesDb.countPending();
 }
 
 export async function syncPendingSales(): Promise<{ synced: number; failed: number }> {
-  const pending = await getPendingSales();
+  const pending = await salesDb.findPending();
   let synced = 0;
   let failed = 0;
 
@@ -80,12 +74,12 @@ export async function syncPendingSales(): Promise<{ synced: number; failed: numb
     if (sale.id === undefined) continue;
 
     try {
-      await updatePendingSaleStatus(sale.id, "syncing");
+      await salesDb.updateStatus(sale.id, "syncing");
       await createSale({ items: sale.items, notes: sale.notes });
-      await deletePendingSale(sale.id);
+      await salesDb.delete(sale.id);
       synced++;
     } catch {
-      await updatePendingSaleStatus(sale.id, "failed");
+      await salesDb.updateStatus(sale.id, "failed");
       failed++;
     }
   }

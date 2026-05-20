@@ -15,14 +15,9 @@ import type { Product } from "../types/Types";
 import { useOnlineStatus } from "../hooks/useOnlineStatus";
 import { useToast } from "./ToastProvider";
 import { fetchProducts } from "../services/products";
-import { createSale, syncPendingSales, refreshProductsCache } from "../services/sales";
-import {
-  cacheProducts,
-  getCachedProducts,
-  savePendingSale,
-  getPendingSales,
-  updateCachedProductQuantity,
-} from "../db/salesDB";
+import { createSale, syncPendingSales, getPendingSalesCount } from "../services/sales";
+import { productsDb } from "../sw/db/products.db";
+import { salesDb } from "../sw/db/sales.db";
 
 type CartItem = Product & { cartQuantity: number };
 
@@ -42,43 +37,46 @@ export const SalesContent = () => {
   // ── Data loading ────────────────────────────────────────────────────────
 
   const loadPendingCount = React.useCallback(async () => {
-    const pending = await getPendingSales();
-    setPendingCount(
-      pending.filter((s) => s.status === "pending" || s.status === "failed").length
-    );
+    const count = await getPendingSalesCount();
+    setPendingCount(count);
   }, []);
 
-  const loadProducts = React.useCallback(
-    async (forceOnline = false) => {
-      setIsLoading(true);
+  const loadProducts = React.useCallback(async () => {
+    setIsLoading(true);
+    try {
+      const all = await fetchProducts();
+      setProducts(all.filter((p) => p.isActive));
+    } catch {
+      // SW not active or network error — fall back to IndexedDB directly
       try {
-        if (isOnline || forceOnline) {
-          const remote = await fetchProducts();
-          await cacheProducts(remote);
-          setProducts(remote.filter((p) => p.isActive));
-        } else {
-          const cached = await getCachedProducts();
-          setProducts(cached.filter((p) => p.isActive));
-        }
+        const stored = await productsDb.findAll();
+        setProducts(
+          stored
+            .filter((p) => p.state)
+            .map((p) => ({
+              id: p.id,
+              name: p.name,
+              sizeTypeId: p.sizeTypeId,
+              sizeValueId: p.sizeValueId,
+              sellingPrice: p.purchasePrice,
+              size: String(p.sizeValueId),
+              barcode: p.barcode ?? "",
+              description: p.description ?? "",
+              imageUrl: p.imageUrl ?? "",
+              purchasePrice: p.purchasePrice,
+              quantity: p.quantity,
+              minQuantity: p.minQuantity,
+              isActive: p.state,
+            }))
+        );
       } catch {
-        try {
-          const cached = await getCachedProducts();
-          setProducts(cached.filter((p) => p.isActive));
-          if (isOnline) {
-            showToast(
-              "No se pudieron obtener los productos del servidor. Mostrando datos locales.",
-              "info"
-            );
-          }
-        } catch {
-          setProducts([]);
-        }
-      } finally {
-        setIsLoading(false);
+        showToast("No se pudieron cargar los productos", "info");
+        setProducts([]);
       }
-    },
-    [isOnline, showToast]
-  );
+    } finally {
+      setIsLoading(false);
+    }
+  }, [showToast]);
 
   // ── Sync ────────────────────────────────────────────────────────────────
 
@@ -89,12 +87,8 @@ export const SalesContent = () => {
       const { synced, failed } = await syncPendingSales();
 
       if (synced > 0) {
-        showToast(
-          `${synced} venta(s) sincronizada(s) correctamente.`,
-          "success"
-        );
-        await refreshProductsCache();
-        await loadProducts(true);
+        showToast(`${synced} venta(s) sincronizada(s) correctamente.`, "success");
+        await loadProducts();
         await loadPendingCount();
       }
 
@@ -214,46 +208,51 @@ export const SalesContent = () => {
     }));
 
     try {
-      if (isOnline) {
-        await createSale({ items: saleItems });
-
+      if (!isOnline) {
+        // Offline: validate + persist to IndexedDB directly (no SW needed)
         for (const item of cart) {
-          await updateCachedProductQuantity(
-            item.id,
-            item.quantity - item.cartQuantity
-          );
+          const stored = await productsDb.findById(item.id);
+          if (!stored) {
+            showToast(`"${item.name}" no existe en el inventario local.`);
+            return;
+          }
+          if (stored.quantity < item.cartQuantity) {
+            showToast(
+              `Stock insuficiente para "${item.name}". Disponible: ${stored.quantity}`
+            );
+            return;
+          }
         }
 
-        showToast("Venta registrada exitosamente.", "success");
-        await loadProducts(true);
-      } else {
-        await savePendingSale({
+        for (const item of cart) {
+          const stored = await productsDb.findById(item.id);
+          if (stored) {
+            await productsDb.updateStock(item.id, stored.quantity - item.cartQuantity);
+          }
+        }
+
+        await salesDb.save({
           items: saleItems,
           createdAt: new Date().toISOString(),
           status: "pending",
         });
 
-        for (const item of cart) {
-          await updateCachedProductQuantity(
-            item.id,
-            item.quantity - item.cartQuantity
-          );
-        }
-
         setProducts((prev) =>
           prev.map((p) => {
             const inCart = cart.find((c) => c.id === p.id);
-            return inCart
-              ? { ...p, quantity: p.quantity - inCart.cartQuantity }
-              : p;
+            return inCart ? { ...p, quantity: p.quantity - inCart.cartQuantity } : p;
           })
         );
-
         await loadPendingCount();
         showToast(
           "Venta guardada localmente. Se sincronizará al recuperar la conexión.",
           "success"
         );
+      } else {
+        // Online: send to backend
+        await createSale({ items: saleItems });
+        showToast("Venta registrada exitosamente.", "success");
+        await loadProducts();
       }
 
       setCart([]);

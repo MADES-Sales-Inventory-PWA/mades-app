@@ -11,6 +11,7 @@ export class ProductsService {
     public async createProduct(dto: createProductRequestDTO): Promise<productDTO> {
         await this.validateSizeTypeAndValue(dto.sizeTypeId, dto.sizeValueId);
         await this.validateProductSizeUniqueness(dto.name, dto.sizeTypeId, dto.sizeValueId);
+        await this.validateBarcodeUniqueness(dto.barcode);
         return await productsRepository.createProduct(dto);
     }
 
@@ -24,9 +25,17 @@ export class ProductsService {
         const sizeTypeId = dto.sizeTypeId ?? product.sizeTypeId;
         const sizeValueId = dto.sizeValueId ?? product.sizeValueId;
         const name = dto.name ?? product.name;
+        const barcode = dto.barcode ?? product.barcode;
 
         await this.validateSizeChanges(sizeTypeId, sizeValueId, dto);
         await this.validateUniquenessChanges(id, name, sizeTypeId, sizeValueId, dto);
+    }
+
+    private async validateBarcodeUniqueness(barcode: string, excludeId?: number): Promise<void> {
+        const existing = await productsRepository.findProductByBarcode(barcode);
+        if (existing && existing.id !== excludeId) {
+            throw new ConflictError(`Ya existe un producto con el código de barras ${barcode}`)
+        }
     }
 
     private async validateSizeChanges(sizeTypeId: number, sizeValueId: number, dto: updateProductRequestDTO): Promise<void> {
@@ -36,11 +45,12 @@ export class ProductsService {
 
     private async validateUniquenessChanges(id: number, name: string, sizeTypeId: number, sizeValueId: number, dto: updateProductRequestDTO): Promise<void> {
         const uniquenessChanged = dto.name !== undefined || dto.sizeTypeId !== undefined || dto.sizeValueId !== undefined;
-        if (!uniquenessChanged) return;
+        if (uniquenessChanged) {
+            await this.validateProductSizeUniqueness(name, sizeTypeId, sizeValueId, id)
+        }
 
-        const existing = await productsRepository.findProductByNameSizeTypeAndValue(name, sizeTypeId, sizeValueId);
-        if (existing && existing.id !== id) {
-            throw new ConflictError(`Ya existe un producto con el nombre '${name}' y esa combinación de talla`);
+        if (dto.barcode !== undefined) {
+            await this.validateBarcodeUniqueness(dto.barcode, id)
         }
     }
 
@@ -74,10 +84,10 @@ export class ProductsService {
         }
     }
 
-    private async validateProductSizeUniqueness(name: string, sizeTypeId: number, sizeValueId: number): Promise<void> {
+    private async validateProductSizeUniqueness(name: string, sizeTypeId: number, sizeValueId: number, excludeId?: number): Promise<void> {
         const existing = await productsRepository.findProductByNameSizeTypeAndValue(name, sizeTypeId, sizeValueId);
 
-        if (existing) {
+        if (existing && existing.id !== excludeId) {
             throw new ConflictError(
                 `Ya existe un producto con el nombre ${name} y esa combinación de talla`
             );
