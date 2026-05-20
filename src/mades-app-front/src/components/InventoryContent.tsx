@@ -12,6 +12,7 @@ import { fetchProducts, toggleProductState } from "../services/products";
 import { useToast } from "./ToastProvider";
 import { getSession } from "../utils/auth";
 import { constants } from "../constants/Constants";
+import { useOnlineStatus } from "../hooks/useOnlineStatus";
 
 const initialProducts: Product[] = [
     {
@@ -50,6 +51,7 @@ export const InventoryContent = () => {
     const session = getSession();
     const roleId = Number(session?.user?.roleId);
     const isAdmin = roleId === constants.ADMIN_ROLE_ID;
+    const isOnline = useOnlineStatus();
 
     const [products, setProducts] = React.useState<Product[]>([]);
     const [isCreateOpen, setIsCreateOpen] = React.useState(false);
@@ -171,11 +173,22 @@ export const InventoryContent = () => {
                     <p className="mt-2 text-gray-600">Administra los precios y niveles de stock del inventario.</p>
                 </div>
                 {isAdmin && (
-                    <Button className="w-full md:w-auto" onClick={() => setIsCreateOpen(true)}>
+                    <Button
+                        className="w-full md:w-auto"
+                        onClick={() => isOnline && setIsCreateOpen(true)}
+                        disabled={!isOnline}
+                        title={!isOnline ? "Solo disponible con conexión a internet" : undefined}
+                    >
                         Agregar producto
                     </Button>
                 )}
             </div>
+
+            {!isOnline && (
+                <div className="mt-3 rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800">
+                    Sin conexión: la edición de precio, descripción e imagen está deshabilitada hasta recuperar la red.
+                </div>
+            )}
 
             <div className="mt-4 flex w-full flex-col gap-3 rounded-lg bg-white p-3 md:flex-row md:items-end">
                 <div className="w-full">
@@ -208,7 +221,7 @@ export const InventoryContent = () => {
                     No se encontraron productos con los filtros actuales.
                 </div>
             ) : (
-                <ProductsTable json={displayedProducts} setEditOpen={setIsEditOpen} setProductIdToEdit={setProductIdToEdit} deactivateProduct={deactivateProduct} onOpenAdjustModal={openAdjustModal} canManageProducts={isAdmin} />
+                <ProductsTable json={displayedProducts} setEditOpen={setIsEditOpen} setProductIdToEdit={setProductIdToEdit} deactivateProduct={deactivateProduct} onOpenAdjustModal={openAdjustModal} canManageProducts={isAdmin} isOnline={isOnline} />
             )}
 
             {isCreateOpen && (<ProductForm setIsOpen={setIsCreateOpen} title="Crear producto" actionText="Añadir producto" onSaved={loadProducts} />)}

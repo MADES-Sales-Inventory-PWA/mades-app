@@ -13,6 +13,7 @@ import { registerUsersRoutes } from './routes/users.routes'
 import { registerProductsRoutes } from './routes/products.routes'
 import { registerInventoryRoutes } from './routes/inventory.routes'
 import { registerSizesRoutes } from './routes/sizes.routes'
+import { registerSalesRoutes } from './routes/sales.routes'
 
 declare const self: ServiceWorkerGlobalScope
 
@@ -67,3 +68,4 @@ registerUsersRoutes()
 registerProductsRoutes()
 registerInventoryRoutes()
 registerSizesRoutes()
+registerSalesRoutes()

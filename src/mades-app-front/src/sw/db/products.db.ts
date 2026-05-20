@@ -1,4 +1,5 @@
-import { getDb, StoredProduct } from './client'
+import { getDb } from './client'
+import type { StoredProduct } from './client'
 
 export const productsDb = {
   async findById(id: number): Promise<StoredProduct | undefined> {
