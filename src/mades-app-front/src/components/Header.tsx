@@ -1,10 +1,10 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { BasicButton } from "./BasicButton";
-import { OnlineIndicator } from "../components/OnlineIndicator";
-import { useOnlineStatus } from '../hooks/useOnlineStatus';
 import { Bell, LogOut } from "lucide-react";
 import { Icon } from "./Icon";
+import { OnlineIndicator } from "../components/OnlineIndicator";
+import { useOnlineStatus } from "../hooks/useOnlineStatus";
 import { clearSession } from "../utils/auth";
 
 type HeaderProps = {

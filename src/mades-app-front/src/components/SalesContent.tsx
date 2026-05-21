@@ -5,8 +5,6 @@ import {
   Plus,
   Minus,
   Trash2,
-  Wifi,
-  WifiOff,
   Clock,
   RefreshCw,
 } from "lucide-react";
@@ -24,7 +22,6 @@ type CartItem = Product & { cartQuantity: number };
 export const SalesContent = () => {
   const isOnline = useOnlineStatus();
   const { showToast } = useToast();
-  const wasOnlineRef = React.useRef(isOnline);
 
   const [products, setProducts] = React.useState<Product[]>([]);
   const [cart, setCart] = React.useState<CartItem[]>([]);
@@ -89,7 +86,6 @@ export const SalesContent = () => {
       if (synced > 0) {
         showToast(`${synced} venta(s) sincronizada(s) correctamente.`, "success");
         await loadProducts();
-        await loadPendingCount();
       }
 
       if (failed > 0) {
@@ -99,23 +95,25 @@ export const SalesContent = () => {
       if (synced === 0 && failed === 0) {
         showToast("No hay ventas pendientes de sincronizar.", "info");
       }
+
+      await loadPendingCount();
     } catch (error) {
       showToast(
         error instanceof Error ? error.message : "Error al sincronizar ventas"
       );
+      await loadPendingCount();
     } finally {
       setIsSyncing(false);
     }
   }, [isOnline, isSyncing, showToast, loadProducts, loadPendingCount]);
 
-  // ── Auto-sync when connection is restored ───────────────────────────────
+  // ── Auto-sync when there are pending sales and connectivity is available ─
 
   React.useEffect(() => {
-    if (isOnline && !wasOnlineRef.current) {
+    if (isOnline && pendingCount > 0 && !isSyncing) {
       void handleSync();
     }
-    wasOnlineRef.current = isOnline;
-  }, [isOnline, handleSync]);
+  }, [isOnline, pendingCount, isSyncing, handleSync]);
 
   React.useEffect(() => {
     void loadProducts();
@@ -276,24 +274,12 @@ export const SalesContent = () => {
             Registro de ventas
           </h2>
           <p className="mt-1 text-sm text-gray-600">
-            {isOnline
-              ? "Modo online — las ventas se registran en tiempo real."
-              : "Modo offline — las ventas se guardarán localmente."}
+            Las ventas se registran en tiempo real y los pendientes se sincronizan
+            automáticamente cuando vuelve la conexión.
           </p>
         </div>
 
         <div className="flex items-center gap-2">
-          <span
-            className={`flex items-center gap-1.5 rounded-full px-3 py-1.5 text-sm font-medium ${
-              isOnline
-                ? "bg-green-50 text-green-700"
-                : "bg-amber-50 text-amber-700"
-            }`}
-          >
-            {isOnline ? <Wifi size={14} /> : <WifiOff size={14} />}
-            {isOnline ? "Online" : "Offline"}
-          </span>
-
           {pendingCount > 0 && (
             <button
               type="button"
