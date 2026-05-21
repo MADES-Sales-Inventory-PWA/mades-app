@@ -266,7 +266,7 @@ export const SalesContent = () => {
   // ── Render ──────────────────────────────────────────────────────────────
 
   return (
-    <div className="px-4 sm:px-6 lg:px-10">
+    <div className="flex h-[calc(100vh-6rem)] min-h-0 flex-col px-4 sm:px-6 lg:px-10">
       {/* Header */}
       <div className="flex w-full flex-col gap-3 md:flex-row md:items-center md:justify-between">
         <div className="min-w-0">
@@ -307,9 +307,9 @@ export const SalesContent = () => {
         </div>
       )}
 
-      <div className="mt-5 grid grid-cols-1 gap-5 lg:grid-cols-2">
+      <div className="mt-5 grid min-h-0 flex-1 grid-cols-1 gap-5 lg:grid-cols-2">
         {/* ── Product list ─────────────────────────────────────────────── */}
-        <div>
+        <div className="flex min-h-0 flex-col overflow-hidden">
           <div className="mb-3">
             <Input
               type="text"
@@ -330,7 +330,7 @@ export const SalesContent = () => {
               No se encontraron productos.
             </div>
           ) : (
-            <div className="max-h-[calc(100vh-360px)] space-y-2 overflow-y-auto pr-1">
+            <div className="flex min-h-0 flex-1 flex-col gap-2 overflow-y-auto pr-1">
               {displayedProducts.map((product) => (
                 <div
                   key={product.id}
@@ -365,7 +365,7 @@ export const SalesContent = () => {
         </div>
 
         {/* ── Cart ─────────────────────────────────────────────────────── */}
-        <div className="flex flex-col rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
+        <div className="flex min-h-0 flex-col overflow-hidden rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
           <div className="flex items-center gap-2 border-b border-slate-100 pb-3">
             <ShoppingCart size={18} className="text-gray-600" />
             <h3 className="font-semibold text-gray-800">
@@ -378,7 +378,7 @@ export const SalesContent = () => {
               Agrega productos para registrar una venta.
             </div>
           ) : (
-            <div className="mt-3 max-h-72 flex-1 space-y-2 overflow-y-auto">
+            <div className="mt-3 flex min-h-0 flex-1 flex-col gap-2 overflow-y-auto pr-1">
               {cart.map((item) => (
                 <div
                   key={item.id}
