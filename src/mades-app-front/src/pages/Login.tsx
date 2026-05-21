@@ -96,7 +96,13 @@ export default function Login() {
 
         <div className='h-[0.5px] bg-[#6b6b6b] my-4'></div>
 
-        <div className='flex flex-col gap-2'>
+        <form
+          className='flex flex-col gap-2'
+          onSubmit={(event) => {
+            event.preventDefault();
+            void login();
+          }}
+        >
           <Input
             label="Correo electrónico"
             type="email"
@@ -112,13 +118,13 @@ export default function Login() {
             value={password}
             onChange={setPassword}
           />
-        </div>
-        <Button onClick={login} className="w-full mt-2">
-          <div className="flex items-center justify-center">
-            <b>{isLoading ? "Ingresando..." : "Iniciar sesión"}</b>
-            <LogIn className="ml-2" size={18} />
-          </div>
-        </Button>
+          <Button type="submit" onClick={() => {}} className="w-full mt-2" disabled={isLoading}>
+            <div className="flex items-center justify-center">
+              <b>{isLoading ? "Ingresando..." : "Iniciar sesión"}</b>
+              <LogIn className="ml-2" size={18} />
+            </div>
+          </Button>
+        </form>
       </div>
     </div>
   );

@@ -64,7 +64,7 @@ export default function HomePage() {
           <SideBar />
         </aside>
         <div className="flex-1 flex flex-col min-h-screen pb-24 lg:pb-0">
-          <Header />
+          <Header showMobileIcon enableLogoMenu />
           {location.pathname === constants.ADMIN_HOME_PATH && roleId === constants.ADMIN_ROLE_ID ? (
             <AdminHomeContent />
           ) : location.pathname === constants.EMPLOYEE_HOME_PATH && roleId === constants.EMPLOYEE_ROLE_ID && (

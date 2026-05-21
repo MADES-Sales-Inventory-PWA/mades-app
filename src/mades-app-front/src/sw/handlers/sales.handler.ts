@@ -30,6 +30,7 @@ export async function registerSale(request: Request, _ctx: SWContext): Promise<R
   }
 
   const dto = parsed.data
+  const isPendingSync = typeof raw === 'object' && raw !== null && (raw as { syncPendingSale?: unknown }).syncPendingSale === true
 
   try {
     const response = await fetch(request.clone())
@@ -37,7 +38,7 @@ export async function registerSale(request: Request, _ctx: SWContext): Promise<R
     if (response.ok) {
       const body = await response.clone().json()
 
-      if (body.success) {
+      if (body.success && !isPendingSync) {
         for (const item of dto.items) {
           const product = await productsDb.findById(item.productId)
           if (product) {

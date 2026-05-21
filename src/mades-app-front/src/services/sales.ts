@@ -11,6 +11,11 @@ export type SaleItem = {
 export type CreateSalePayload = {
   items: SaleItem[];
   notes?: string;
+  syncPendingSale?: boolean;
+};
+
+export type CreateSaleOptions = {
+  syncPendingSale?: boolean;
 };
 
 export type RegisteredSale = {
@@ -39,14 +44,20 @@ async function getBackendErrorMessage(response: Response, fallback: string) {
   return payload?.message ?? payload?.error?.message ?? fallback;
 }
 
-export async function createSale(payload: CreateSalePayload): Promise<RegisteredSale> {
+export async function createSale(
+  payload: CreateSalePayload,
+  options?: CreateSaleOptions
+): Promise<RegisteredSale> {
   const response = await fetch(getSalesUrl(), {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
       ...getAuthHeaders(),
     },
-    body: JSON.stringify(payload),
+    body: JSON.stringify({
+      ...payload,
+      ...(options?.syncPendingSale ? { syncPendingSale: true } : {}),
+    }),
   });
 
   if (!response.ok) {
@@ -75,7 +86,10 @@ export async function syncPendingSales(): Promise<{ synced: number; failed: numb
 
     try {
       await salesDb.updateStatus(sale.id, "syncing");
-      await createSale({ items: sale.items, notes: sale.notes });
+      await createSale(
+        { items: sale.items, notes: sale.notes },
+        { syncPendingSale: true }
+      );
       await salesDb.delete(sale.id);
       synced++;
     } catch {
