@@ -16,5 +16,6 @@ router.get(
 router.get("/sales-per-day", authMiddleware, adminMiddleware, controller.getSalesPerDay.bind(controller))
 router.get("/sales-per-month", authMiddleware, adminMiddleware, controller.getSalesPerMonth.bind(controller))
 router.get("/sales-per-week", authMiddleware, adminMiddleware, controller.getSalesPerWeek.bind(controller))
+router.get("/sales-per-employee", authMiddleware, adminMiddleware, controller.getSalesPerEmployee.bind(controller))
 
 export default router;
