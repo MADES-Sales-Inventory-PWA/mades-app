@@ -7,6 +7,7 @@ import inventoryRoutes from "./modules/inventory/inventory.routes"
 import sizesRoutes from "./modules/product-sizes/sizes.routes"
 import productsRoutes from "./modules/products/products.routes"
 import salesRoutes from "./modules/sales/sales.routes"
+import reportsRoutes from "./modules/reports/reports.routes"
 import { AuthController } from "./modules/auth/auth.controller"
 
 (BigInt.prototype as any).toJSON = function () {
@@ -26,6 +27,7 @@ app.use("/api/inventory", inventoryRoutes)
 app.use("/api/sizes", sizesRoutes)
 app.use("/api/products", productsRoutes)
 app.use("/api/sales", salesRoutes)
+app.use("/api/reports", reportsRoutes)
 
 // Temporary compatibility aliases while clients migrate to /api/users/login
 app.post("/login", authController.login.bind(authController));
