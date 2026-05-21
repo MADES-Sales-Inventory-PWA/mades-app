@@ -271,7 +271,7 @@ export class ReportsRepository {
       pageSize: filters.pageSize,
     };
   }
-  async findSalesPerDay(startDay:Date, endDay:Date) {
+  async findSalesPerDay(startDay: Date, endDay: Date) {
 
     return await prisma.inventoryMovements.findMany({
       where: {
@@ -312,5 +312,25 @@ export class ReportsRepository {
         creationDate: "asc",
       },
     })
+  }
+  async salesPerEmployee() {
+    return await prisma.inventoryMovements.findMany({
+      where: {
+        movementType: "SALE",
+      }, select: {
+        sellerId: true,
+        Persons: {
+          select: {
+            name: true,
+            lastName: true,
+          },
+        },
+        Invoices: {
+          select: {
+            total: true,
+          },
+        },
+      },
+    });
   }
 }

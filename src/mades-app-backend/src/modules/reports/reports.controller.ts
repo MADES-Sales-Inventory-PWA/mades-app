@@ -110,6 +110,14 @@ export class ReportsController {
       return this.handleError(res, error);
     }
   }
+  async getSalesPerEmployee(req: Request, res: Response) {
+    try {
+      const report = await this.service.getSalesPerEmployee();
+      return res.status(200).json(report);
+    } catch (error: unknown) {
+      return this.handleError(res, error);
+    }
+  }
   private handleError(res: Response, error: unknown) {
     if (error instanceof z.ZodError) {
       return sendError(
@@ -122,7 +130,7 @@ export class ReportsController {
 
     if (error instanceof Error) {
       const statusCode = error.message.includes("futuras") ? 400 : 500;
-      return sendError(res, statusCode, ApiErrorCode.INTERNAL_ERROR, error.message);
+      return sendError(res, statusCode, ApiErrorCode.INTERNAL_ERROR, error.message.substring(0, 250));
     }
 
     return sendError(

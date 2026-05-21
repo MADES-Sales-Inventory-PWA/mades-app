@@ -20,4 +20,20 @@ export class ReportsMapper {
             }))
         };
     }
+    static toSalesPerEmployee(movements: any[]) {
+        const performanceMap: Record<string, any> = {};
+        movements.forEach(mov => {
+            const workerId = mov.sellerId?.toString() || "Desconocido";
+            const workerName = mov.Persons ? `${mov.Persons.name} ${mov.Persons.lastName}` : "Desconocido";
+            const saleTotal = Number(mov.Invoices?.[0]?.total || 0);
+
+            if (!performanceMap[workerId]) {
+                performanceMap[workerId] = { Vendedor: workerName, ventas_realizadas: 0, total_vendido: 0 };
+            }
+
+            performanceMap[workerId].ventas_realizadas += 1;
+            performanceMap[workerId].total_vendido += saleTotal;
+        });
+        return Object.values(performanceMap).sort((a, b) => b.total_vendido - a.total_vendido);
+    }
 }
