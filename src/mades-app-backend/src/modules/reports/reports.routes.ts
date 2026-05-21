@@ -13,5 +13,8 @@ router.get(
   adminMiddleware,
   controller.getInventoryAdjustments.bind(controller)
 );
+router.get("/sales-per-day", authMiddleware, adminMiddleware, controller.getSalesPerDay.bind(controller))
+router.get("/sales-per-month", authMiddleware, adminMiddleware, controller.getSalesPerMonth.bind(controller))
+router.get("/sales-per-week", authMiddleware, adminMiddleware, controller.getSalesPerWeek.bind(controller))
 
 export default router;
