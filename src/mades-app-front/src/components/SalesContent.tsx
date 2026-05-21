@@ -266,20 +266,20 @@ export const SalesContent = () => {
   // ── Render ──────────────────────────────────────────────────────────────
 
   return (
-    <div className="flex h-[calc(100vh-6rem)] min-h-0 flex-col px-4 sm:px-6 lg:px-10">
+    <div className="px-3 py-3 sm:px-6 sm:py-4 lg:flex lg:h-[calc(100vh-6rem)] lg:min-h-0 lg:flex-col lg:px-10">
       {/* Header */}
-      <div className="flex w-full flex-col gap-3 md:flex-row md:items-center md:justify-between">
-        <div className="min-w-0">
-          <h2 className="text-2xl font-semibold text-gray-800 sm:text-3xl">
+      <div className="flex w-full flex-col gap-4 md:flex-row md:items-center md:justify-between lg:flex-none">
+        <div className="min-w-0 space-y-1">
+          <h2 className="text-xl font-semibold text-gray-800 sm:text-3xl">
             Registro de ventas
           </h2>
-          <p className="mt-1 text-sm text-gray-600">
+          <p className="text-sm leading-5 text-gray-600">
             Las ventas se registran en tiempo real y los pendientes se sincronizan
             automáticamente cuando vuelve la conexión.
           </p>
         </div>
 
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 self-start md:self-auto">
           {pendingCount > 0 && (
             <button
               type="button"
@@ -307,9 +307,9 @@ export const SalesContent = () => {
         </div>
       )}
 
-      <div className="mt-5 grid min-h-0 flex-1 grid-cols-1 gap-5 lg:grid-cols-2">
+      <div className="mt-4 grid grid-cols-1 gap-4 lg:mt-5 lg:grid-cols-2 lg:gap-5 lg:min-h-0 lg:flex-1">
         {/* ── Product list ─────────────────────────────────────────────── */}
-        <div className="flex min-h-0 flex-col overflow-hidden">
+        <div className="flex h-[28rem] flex-col overflow-hidden lg:h-auto lg:min-h-0">
           <div className="mb-3">
             <Input
               type="text"
@@ -326,21 +326,21 @@ export const SalesContent = () => {
               Cargando productos...
             </div>
           ) : displayedProducts.length === 0 ? (
-            <div className="rounded-xl border border-slate-200 bg-white p-6 text-center text-sm text-slate-600">
+            <div className="rounded-xl border border-slate-200 bg-white p-5 text-center text-sm text-slate-600 sm:p-6">
               No se encontraron productos.
             </div>
           ) : (
-            <div className="flex min-h-0 flex-1 flex-col gap-2 overflow-y-auto pr-1">
+            <div className="flex-1 space-y-2 overflow-y-auto pr-1 lg:flex lg:min-h-0 lg:flex-col lg:gap-2 lg:space-y-0">
               {displayedProducts.map((product) => (
                 <div
                   key={product.id}
-                  className="flex items-center justify-between rounded-lg border border-slate-200 bg-white p-3 shadow-sm"
+                  className="flex flex-col gap-3 rounded-lg border border-slate-200 bg-white p-3 shadow-sm sm:flex-row sm:items-center sm:justify-between"
                 >
                   <div className="min-w-0 flex-1">
-                    <p className="truncate text-sm font-semibold text-gray-800">
+                    <p className="truncate text-sm font-semibold text-gray-800 sm:text-sm">
                       {product.name}
                     </p>
-                    <p className="text-xs text-gray-500">
+                    <p className="text-xs leading-5 text-gray-500">
                       ${product.sellingPrice.toLocaleString("es-CO")} · Stock:{" "}
                       {product.quantity}
                     </p>
@@ -353,7 +353,7 @@ export const SalesContent = () => {
                     type="button"
                     onClick={() => addToCart(product)}
                     disabled={product.quantity === 0}
-                    className="ml-3 flex items-center gap-1 rounded-lg bg-blue-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-blue-700 disabled:cursor-not-allowed disabled:bg-gray-200 disabled:text-gray-400"
+                    className="flex w-full items-center justify-center gap-1 rounded-lg bg-blue-600 px-3 py-2 text-sm font-medium text-white hover:bg-blue-700 disabled:cursor-not-allowed disabled:bg-gray-200 disabled:text-gray-400 sm:ml-3 sm:w-auto sm:py-1.5"
                   >
                     <Plus size={14} />
                     Añadir
@@ -365,35 +365,35 @@ export const SalesContent = () => {
         </div>
 
         {/* ── Cart ─────────────────────────────────────────────────────── */}
-        <div className="flex min-h-0 flex-col overflow-hidden rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
+        <div className="flex h-[24rem] flex-col overflow-hidden rounded-xl border border-slate-200 bg-white p-3 shadow-sm sm:h-[26rem] sm:p-4 lg:h-auto lg:min-h-0">
           <div className="flex items-center gap-2 border-b border-slate-100 pb-3">
             <ShoppingCart size={18} className="text-gray-600" />
-            <h3 className="font-semibold text-gray-800">
+            <h3 className="text-sm font-semibold text-gray-800 sm:text-base">
               Carrito ({cart.length} producto{cart.length !== 1 ? "s" : ""})
             </h3>
           </div>
 
           {cart.length === 0 ? (
-            <div className="flex flex-1 items-center justify-center py-10 text-sm text-slate-400">
+            <div className="flex flex-1 items-center justify-center py-8 text-sm text-slate-400 sm:py-10">
               Agrega productos para registrar una venta.
             </div>
           ) : (
-            <div className="mt-3 flex min-h-0 flex-1 flex-col gap-2 overflow-y-auto pr-1">
+            <div className="mt-3 flex-1 space-y-2 overflow-y-auto pr-1 lg:flex lg:min-h-0 lg:flex-col lg:gap-2 lg:space-y-0">
               {cart.map((item) => (
                 <div
                   key={item.id}
-                  className="flex items-center gap-2 rounded-lg border border-slate-100 bg-slate-50 p-2"
+                  className="flex flex-col gap-3 rounded-lg border border-slate-100 bg-slate-50 p-3 sm:flex-row sm:items-center sm:gap-2 sm:p-2"
                 >
                   <div className="min-w-0 flex-1">
                     <p className="truncate text-sm font-medium text-gray-800">
                       {item.name}
                     </p>
-                    <p className="text-xs text-gray-500">
+                    <p className="text-xs leading-5 text-gray-500">
                       ${item.sellingPrice.toLocaleString("es-CO")} c/u
                     </p>
                   </div>
 
-                  <div className="flex items-center gap-1">
+                  <div className="flex items-center justify-between gap-1 sm:justify-start">
                     <button
                       type="button"
                       onClick={() => updateCartQuantity(item.id, -1)}
@@ -420,7 +420,7 @@ export const SalesContent = () => {
                     </button>
                   </div>
 
-                  <p className="w-24 shrink-0 text-right text-sm font-semibold text-gray-800">
+                  <p className="shrink-0 text-right text-sm font-semibold text-gray-800 sm:w-24">
                     ${(item.sellingPrice * item.cartQuantity).toLocaleString("es-CO")}
                   </p>
                 </div>
