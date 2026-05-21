@@ -20,3 +20,13 @@ export const reportFiltersSchema = z.object({
 
 export type ReportFiltersDTO = z.infer<typeof reportFiltersSchema>;
 export type ReportReason = z.infer<typeof reasonEnum>;
+
+export const salesPerDay = z.object({
+  date: z
+    .string()
+    .refine((val) => !isNaN(Date.parse(val)), {
+      message: "Formato de fecha invalido",
+    })
+    .transform((val) => new Date(val)),
+});
+export type SalesPerDayDTO = z.infer<typeof salesPerDay>

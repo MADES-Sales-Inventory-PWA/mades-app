@@ -140,12 +140,12 @@ export class ReportsRepository {
         createdAt: movement.creationDate,
         employee: movement.Persons
           ? {
-              id: Number(movement.Persons.id),
-              name: movement.Persons.name,
-              lastName: movement.Persons.lastName,
-              email: movement.Persons.email,
-              documentNumber: movement.Persons.documentNumber,
-            }
+            id: Number(movement.Persons.id),
+            name: movement.Persons.name,
+            lastName: movement.Persons.lastName,
+            email: movement.Persons.email,
+            documentNumber: movement.Persons.documentNumber,
+          }
           : null,
         invoiceNumber: invoice?.invoceNumber ?? null,
         total: invoice ? Number(invoice.total) : 0,
@@ -238,12 +238,12 @@ export class ReportsRepository {
         createdAt: movement.creationDate,
         employee: movement.Persons
           ? {
-              id: Number(movement.Persons.id),
-              name: movement.Persons.name,
-              lastName: movement.Persons.lastName,
-              email: movement.Persons.email,
-              documentNumber: movement.Persons.documentNumber,
-            }
+            id: Number(movement.Persons.id),
+            name: movement.Persons.name,
+            lastName: movement.Persons.lastName,
+            email: movement.Persons.email,
+            documentNumber: movement.Persons.documentNumber,
+          }
           : null,
         type,
         reason,
@@ -253,13 +253,13 @@ export class ReportsRepository {
         notes: parseAdjustmentNotes(movement.description),
         product: detail
           ? {
-              id: Number(detail.Products?.id ?? detail.productId),
-              name: detail.Products?.name ?? "Producto sin nombre",
-              barcode: detail.Products?.barcode ?? "N/A",
-              quantity: Number(detail.quantity),
-              price: Number(detail.price),
-              lineTotal: Number(detail.quantity) * Number(detail.price),
-            }
+            id: Number(detail.Products?.id ?? detail.productId),
+            name: detail.Products?.name ?? "Producto sin nombre",
+            barcode: detail.Products?.barcode ?? "N/A",
+            quantity: Number(detail.quantity),
+            price: Number(detail.price),
+            lineTotal: Number(detail.quantity) * Number(detail.price),
+          }
           : null,
       };
     });
@@ -270,5 +270,47 @@ export class ReportsRepository {
       page: filters.page,
       pageSize: filters.pageSize,
     };
+  }
+  async findSalesPerDay(startDay:Date, endDay:Date) {
+
+    return await prisma.inventoryMovements.findMany({
+      where: {
+        movementType: "SALE",
+        creationDate: {
+          gte: startDay,
+          lte: endDay,
+        }
+      },
+      include: {
+        Persons: {
+          select: {
+            name: true,
+            lastName: true,
+            documentType: true,
+            documentNumber: true
+          },
+        },
+        Invoices: {
+          select: {
+            invoceNumber: true,
+            total: true,
+          },
+        },
+        MovementDetails: {
+          include: {
+            Products: {
+              select: {
+                name: true,
+                barcode: true,
+                sellingPrice: true
+              },
+            },
+          },
+        },
+      },
+      orderBy: {
+        creationDate: "asc",
+      },
+    })
   }
 }
