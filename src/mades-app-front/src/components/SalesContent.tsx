@@ -7,8 +7,10 @@ import {
   Trash2,
   Clock,
   RefreshCw,
+  Barcode,
 } from "lucide-react";
 import { Input } from "./Input";
+import { BarcodeScanner } from "./BarcodeScanner";
 import type { Product } from "../types/Types";
 import { useOnlineStatus } from "../hooks/useOnlineStatus";
 import { useToast } from "./ToastProvider";
@@ -30,6 +32,7 @@ export const SalesContent = () => {
   const [isSyncing, setIsSyncing] = React.useState(false);
   const [pendingCount, setPendingCount] = React.useState(0);
   const [isSubmitting, setIsSubmitting] = React.useState(false);
+  const [showScanner, setShowScanner] = React.useState(false);
 
   // ── Data loading ────────────────────────────────────────────────────────
 
@@ -44,7 +47,6 @@ export const SalesContent = () => {
       const all = await fetchProducts();
       setProducts(all.filter((p) => p.isActive));
     } catch {
-      // SW not active or network error — fall back to IndexedDB directly
       try {
         const stored = await productsDb.findAll();
         setProducts(
@@ -107,7 +109,7 @@ export const SalesContent = () => {
     }
   }, [isOnline, isSyncing, showToast, loadProducts, loadPendingCount]);
 
-  // ── Auto-sync when there are pending sales and connectivity is available ─
+  
 
   React.useEffect(() => {
     if (isOnline && pendingCount > 0 && !isSyncing) {
@@ -189,6 +191,21 @@ export const SalesContent = () => {
     [cart]
   );
 
+  // ── Barcode scanner ─────────────────────────────────────────────────────
+
+  const handleBarcodeDetected = React.useCallback((barcode: string) => {
+    setShowScanner(false);
+    const product = products.find(
+      (p) => p.barcode.toLowerCase() === barcode.toLowerCase()
+    );
+    if (!product) {
+      showToast(`Código "${barcode}" no encontrado en el inventario.`);
+      return;
+    }
+    addToCart(product);
+    showToast(`"${product.name}" agregado al carrito.`, "success");
+  }, [products, showToast]); // eslint-disable-line react-hooks/exhaustive-deps
+
   // ── Register / queue sale ───────────────────────────────────────────────
 
   async function handleRegisterSale() {
@@ -267,6 +284,12 @@ export const SalesContent = () => {
 
   return (
     <div className="px-3 py-3 sm:px-6 sm:py-4 lg:flex lg:h-[calc(100vh-6rem)] lg:min-h-0 lg:flex-col lg:px-10">
+      {showScanner && (
+        <BarcodeScanner
+          onDetected={handleBarcodeDetected}
+          onClose={() => setShowScanner(false)}
+        />
+      )}
       {/* Header */}
       <div className="flex w-full flex-col gap-4 md:flex-row md:items-center md:justify-between lg:flex-none">
         <div className="min-w-0 space-y-1">
@@ -310,15 +333,26 @@ export const SalesContent = () => {
       <div className="mt-4 grid grid-cols-1 gap-4 lg:mt-5 lg:grid-cols-2 lg:gap-5 lg:min-h-0 lg:flex-1">
         {/* ── Product list ─────────────────────────────────────────────── */}
         <div className="flex h-[28rem] flex-col overflow-hidden lg:h-auto lg:min-h-0">
-          <div className="mb-3">
-            <Input
-              type="text"
-              placeholder="Buscar por nombre o código de barras..."
-              onChange={setSearchTerm}
-              value={searchTerm}
-              icon={<Search />}
-              height="h-8"
-            />
+          <div className="mb-3 flex gap-2">
+            <div className="flex-1">
+              <Input
+                type="text"
+                placeholder="Buscar por nombre o código de barras..."
+                onChange={setSearchTerm}
+                value={searchTerm}
+                icon={<Search />}
+                height="h-8"
+              />
+            </div>
+            <button
+              type="button"
+              onClick={() => setShowScanner(true)}
+              title="Escanear código de barras"
+              className="flex h-8 shrink-0 items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-3 text-sm font-medium text-slate-600 hover:bg-slate-50"
+            >
+              <Barcode size={16} />
+              <span className="hidden sm:inline">Escanear</span>
+            </button>
           </div>
 
           {isLoading ? (
