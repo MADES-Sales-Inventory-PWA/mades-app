@@ -11,6 +11,15 @@ export type SessionData = {
 
 const SESSION_STORAGE_KEY = "mades.auth.session";
 
+function isTokenExpired(token: string): boolean {
+  try {
+    const payload = JSON.parse(atob(token.split('.')[1])) as { exp?: number };
+    return typeof payload.exp === 'number' && payload.exp * 1000 < Date.now();
+  } catch {
+    return true;
+  }
+}
+
 export function getSession(): SessionData | null {
   const rawSession = localStorage.getItem(SESSION_STORAGE_KEY);
 
@@ -22,6 +31,11 @@ export function getSession(): SessionData | null {
     const parsed = JSON.parse(rawSession) as SessionData;
 
     if (!parsed?.token || !parsed?.user) {
+      return null;
+    }
+
+    if (isTokenExpired(parsed.token)) {
+      clearSession();
       return null;
     }
 
