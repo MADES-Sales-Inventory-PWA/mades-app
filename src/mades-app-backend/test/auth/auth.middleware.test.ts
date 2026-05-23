@@ -1,10 +1,9 @@
-// test/auth/auth.middleware.test.ts
 import { Response, NextFunction } from 'express';
-import { authMiddleware, AuthRequest } from 'src/core/middleware/auth.middleware';
-import { adminMiddleware } from 'src/core/middleware/admin.middleware';
-import TokenService from 'src/core/services/token.service';
+import { authMiddleware, AuthRequest } from '../../src/core/middleware/auth.middleware';
+import { adminMiddleware } from '../../src/core/middleware/admin.middleware';
+import TokenService from '../../src/core/services/token.service';
 
-jest.mock('src/core/services/token.service');
+jest.mock('../../src/core/services/token.service');
 const MockedTokenService = TokenService as jest.Mocked<typeof TokenService>;
 
 const mockRequest = (overrides: Partial<AuthRequest> = {}): AuthRequest => ({

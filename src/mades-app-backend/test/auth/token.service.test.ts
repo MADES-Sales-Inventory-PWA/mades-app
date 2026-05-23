@@ -1,14 +1,10 @@
-// test/auth/token.service.test.ts
 import jwt from 'jsonwebtoken';
 
-// ── El secret debe estar antes de importar TokenService ──────────────────────
-// TokenService lee process.env.JWT_SECRET como propiedad estática al cargarse,
-// por eso definimos la variable ANTES del import.
 const TEST_SECRET = 'test-secret-key-para-jest';
 process.env.JWT_SECRET = TEST_SECRET;
 
-import TokenService from 'src/core/services/token.service';
-import { TokenPayload } from 'src/shared/models/auth/token-payload.model';
+import TokenService from '../../src/core/services/token.service';
+import { TokenPayload } from '../../src/shared/models/auth/token-payload.model';
 
 afterAll(() => {
   delete process.env.JWT_SECRET;
@@ -52,7 +48,6 @@ describe('TokenService', () => {
       const decoded = jwt.decode(token) as { exp: number; iat: number };
       const expiresInSeconds = decoded.exp - decoded.iat;
 
-      // 9 horas = 32400 segundos, tolerancia de ±5 segundos
       expect(expiresInSeconds).toBeGreaterThanOrEqual(32395);
       expect(expiresInSeconds).toBeLessThanOrEqual(32405);
     });

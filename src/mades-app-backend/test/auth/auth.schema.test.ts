@@ -1,5 +1,4 @@
-// test/auth/auth.schema.test.ts
-import { loginSchema } from 'src/modules/auth/auth.schema';
+import { loginSchema } from '../../src/modules/auth/auth.schema';
 
 describe('auth.schema - loginSchema', () => {
 

@@ -1,10 +1,9 @@
-// test/auth/auth.service.test.ts
-import { AuthService } from 'src/modules/auth/auth.service';
-import { AuthRepository } from 'src/modules/auth/auth.repository';
-import TokenService from 'src/core/services/token.service';
+import { AuthService } from '../../src/modules/auth/auth.service';
+import { AuthRepository } from '../../src/modules/auth/auth.repository';
+import TokenService from '../../src/core/services/token.service';
 
-jest.mock('src/modules/auth/auth.repository');
-jest.mock('src/core/services/token.service');
+jest.mock('../../src/modules/auth/auth.repository');
+jest.mock('../../src/core/services/token.service');
 
 const MockedAuthRepository = AuthRepository as jest.MockedClass<typeof AuthRepository>;
 const MockedTokenService = TokenService as jest.Mocked<typeof TokenService>;

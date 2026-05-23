@@ -1,13 +1,8 @@
-// test/auth/login.test.ts
 import request from 'supertest';
 import express from 'express';
-
-// ── El mock debe declararse ANTES de importar el controller ──────────────────
-// Jest hace hoisting de jest.mock() al inicio del archivo, pero si el controller
-// instancia AuthService en el constructor, necesitamos controlar la instancia.
 const loginMock = jest.fn();
 
-jest.mock('src/modules/auth/auth.service', () => {
+jest.mock('../../src/modules/auth/auth.service', () => {
   return {
     AuthService: jest.fn().mockImplementation(() => ({
       login: loginMock,
@@ -15,9 +10,8 @@ jest.mock('src/modules/auth/auth.service', () => {
   };
 });
 
-import { AuthController } from 'src/modules/auth/auth.controller';
+import { AuthController } from '../../src/modules/auth/auth.controller';
 
-// ── App Express mínima para los tests ────────────────────────────────────────
 const buildApp = () => {
   const app = express();
   app.use(express.json());
@@ -43,8 +37,6 @@ describe('POST /api/auth/login', () => {
     loginMock.mockReset();
     app = buildApp();
   });
-
-  // ─── Login exitoso ──────────────────────────────────────────────────────────
 
   describe('Login exitoso', () => {
     it('debería retornar 200 con token y datos del usuario', async () => {
@@ -72,8 +64,6 @@ describe('POST /api/auth/login', () => {
     });
   });
 
-  // ─── Credenciales inválidas ─────────────────────────────────────────────────
-
   describe('Credenciales inválidas', () => {
     it('debería retornar 401 si el usuario no existe o la clave es incorrecta', async () => {
       loginMock.mockResolvedValue(null);
@@ -87,8 +77,6 @@ describe('POST /api/auth/login', () => {
       expect(res.body.message).toBe('Credenciales inválidas');
     });
   });
-
-  // ─── Errores de validación del schema ──────────────────────────────────────
 
   describe('Errores de validación', () => {
     it('debería retornar 400 si userName está vacío', async () => {
@@ -116,8 +104,6 @@ describe('POST /api/auth/login', () => {
       expect(res.body.code).toBe('VALIDATION_ERROR');
     });
   });
-
-  // ─── Errores internos ───────────────────────────────────────────────────────
 
   describe('Errores internos del servidor', () => {
     it('debería retornar 500 si el servicio lanza una excepción inesperada', async () => {

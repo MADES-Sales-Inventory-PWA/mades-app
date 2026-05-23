@@ -1,0 +1,12 @@
+{
+  "folders": [
+    {
+      "name": "Backend",
+      "path": "src/mades-app-backend"
+    },
+    {
+      "name": "Frontend",
+      "path": "src/mades-app-front"
+    }
+  ]
+}
