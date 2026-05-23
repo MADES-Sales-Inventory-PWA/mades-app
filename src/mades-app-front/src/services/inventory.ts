@@ -1,5 +1,5 @@
 import { constants } from "../constants/Constants";
-import { getAuthHeaders } from "../utils/auth";
+import { authFetch } from "../utils/apiFetch";
 
 export type InventoryAdjustmentType = "LOSS" | "GAIN";
 export type InventoryAdjustmentReason =
@@ -37,12 +37,9 @@ function getInventoryAdjustmentsUrl() {
 }
 
 export async function createInventoryAdjustment(payload: CreateInventoryAdjustmentPayload) {
-  const response = await fetch(getInventoryAdjustmentsUrl(), {
+  const response = await authFetch(getInventoryAdjustmentsUrl(), {
     method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      ...getAuthHeaders(),
-    },
+    headers: { "Content-Type": "application/json" },
     body: JSON.stringify(payload),
   });
 
