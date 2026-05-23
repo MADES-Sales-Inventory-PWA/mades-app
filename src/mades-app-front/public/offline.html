@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Sin conexión — MADES</title>
+    <style>
+      *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+      body {
+        font-family: system-ui, -apple-system, sans-serif;
+        background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%);
+        min-height: 100dvh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 1.5rem;
+      }
+      .card {
+        background: #fff;
+        border-radius: 1rem;
+        box-shadow: 0 4px 24px rgba(0,0,0,.08);
+        padding: 2.5rem 2rem;
+        max-width: 360px;
+        width: 100%;
+        text-align: center;
+      }
+      .icon {
+        width: 64px;
+        height: 64px;
+        background: #eff6ff;
+        border-radius: 50%;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        margin-bottom: 1.25rem;
+      }
+      h1 { font-size: 1.25rem; font-weight: 700; color: #1e293b; margin-bottom: .5rem; }
+      p  { font-size: .9rem; color: #64748b; line-height: 1.6; margin-bottom: 1.75rem; }
+      button {
+        background: #2563eb;
+        color: #fff;
+        border: none;
+        border-radius: .5rem;
+        padding: .65rem 1.5rem;
+        font-size: .9rem;
+        font-weight: 600;
+        cursor: pointer;
+        width: 100%;
+      }
+      button:hover { background: #1d4ed8; }
+      .hint { margin-top: 1rem; font-size: .75rem; color: #94a3b8; }
+    </style>
+  </head>
+  <body>
+    <div class="card">
+      <div class="icon">
+        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="1" y1="1" x2="23" y2="23"/>
+          <path d="M16.72 11.06A10.94 10.94 0 0 1 19 12.55"/>
+          <path d="M5 12.55a10.94 10.94 0 0 1 5.17-2.39"/>
+          <path d="M10.71 5.05A16 16 0 0 1 22.56 9"/>
+          <path d="M1.42 9a15.91 15.91 0 0 1 4.7-2.88"/>
+          <path d="M8.53 16.11a6 6 0 0 1 6.95 0"/>
+          <line x1="12" y1="20" x2="12.01" y2="20"/>
+        </svg>
+      </div>
+      <h1>Sin conexión</h1>
+      <p>
+        No hay conexión a internet. Las ventas registradas se guardarán
+        localmente y se sincronizarán cuando vuelva la red.
+      </p>
+      <button onclick="location.reload()">Reintentar</button>
+      <p class="hint">Si la app estaba abierta antes, regresa con el botón atrás.</p>
+    </div>
+  </body>
+</html>

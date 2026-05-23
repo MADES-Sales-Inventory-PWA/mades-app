@@ -136,6 +136,17 @@ export const BarcodeScanner = ({ onDetected, onClose }: Props) => {
     }
   }, [onDetected])
 
+  const [manualMode, setManualMode] = React.useState(false)
+  const [manualValue, setManualValue] = React.useState('')
+
+  function submitManual(e: React.FormEvent) {
+    e.preventDefault()
+    const value = manualValue.trim()
+    if (!value) return
+    console.log('[BarcodeScanner] Manual:', value)
+    onDetected(value)
+  }
+
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/75 p-4">
       <div className="w-full max-w-sm overflow-hidden rounded-xl bg-black shadow-2xl">
@@ -143,7 +154,9 @@ export const BarcodeScanner = ({ onDetected, onClose }: Props) => {
         <div className="flex items-center justify-between bg-gray-900 px-4 py-3">
           <div className="flex items-center gap-2 text-white">
             <Camera size={16} />
-            <span className="text-sm font-medium">Escanear código de barras</span>
+            <span className="text-sm font-medium">
+              {manualMode ? 'Ingresar código manualmente' : 'Escanear código de barras'}
+            </span>
           </div>
           <button
             type="button"
@@ -154,40 +167,90 @@ export const BarcodeScanner = ({ onDetected, onClose }: Props) => {
           </button>
         </div>
 
-        {/* Camera feed */}
-        <div className="relative aspect-video bg-black">
-          <video ref={videoRef} className="h-full w-full object-cover" />
-
-          {/* Scan guide overlay */}
-          {!error && !isLoading && (
-            <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
-              <div className="relative h-20 w-56 rounded border-2 border-blue-400">
-                <span className="absolute -top-0.5 -left-0.5 block h-4 w-4 rounded-tl border-t-2 border-l-2 border-blue-300" />
-                <span className="absolute -top-0.5 -right-0.5 block h-4 w-4 rounded-tr border-t-2 border-r-2 border-blue-300" />
-                <span className="absolute -bottom-0.5 -left-0.5 block h-4 w-4 rounded-bl border-b-2 border-l-2 border-blue-300" />
-                <span className="absolute -bottom-0.5 -right-0.5 block h-4 w-4 rounded-br border-b-2 border-r-2 border-blue-300" />
-                {/* Scan line animation */}
-                <span className="absolute inset-x-0 top-1/2 h-px -translate-y-1/2 animate-pulse bg-blue-400/70" />
-              </div>
+        {manualMode ? (
+          /* ── Manual input fallback ── */
+          <form onSubmit={submitManual} className="bg-gray-900 px-4 pb-5 pt-4">
+            <p className="mb-3 text-xs text-gray-400">
+              Ingresa el código de barras del producto:
+            </p>
+            <input
+              autoFocus
+              type="text"
+              inputMode="numeric"
+              value={manualValue}
+              onChange={(e) => setManualValue(e.target.value)}
+              placeholder="Ej: 7702061412303"
+              className="w-full rounded-lg border border-gray-600 bg-gray-800 px-3 py-2 text-sm text-white placeholder-gray-500 focus:border-blue-400 focus:outline-none"
+            />
+            <div className="mt-3 flex gap-2">
+              <button
+                type="button"
+                onClick={() => setManualMode(false)}
+                className="flex-1 rounded-lg border border-gray-600 py-2 text-sm text-gray-300 hover:bg-gray-800"
+              >
+                Usar cámara
+              </button>
+              <button
+                type="submit"
+                disabled={!manualValue.trim()}
+                className="flex-1 rounded-lg bg-blue-600 py-2 text-sm font-semibold text-white hover:bg-blue-700 disabled:opacity-50"
+              >
+                Buscar
+              </button>
             </div>
-          )}
+          </form>
+        ) : (
+          <>
+            {/* ── Camera feed ── */}
+            <div className="relative aspect-video bg-black">
+              <video ref={videoRef} className="h-full w-full object-cover" />
 
-          {isLoading && !error && (
-            <div className="absolute inset-0 flex items-center justify-center text-sm text-gray-300">
-              Iniciando cámara...
+              {!error && !isLoading && (
+                <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
+                  <div className="relative h-20 w-56 rounded border-2 border-blue-400">
+                    <span className="absolute -top-0.5 -left-0.5 block h-4 w-4 rounded-tl border-t-2 border-l-2 border-blue-300" />
+                    <span className="absolute -top-0.5 -right-0.5 block h-4 w-4 rounded-tr border-t-2 border-r-2 border-blue-300" />
+                    <span className="absolute -bottom-0.5 -left-0.5 block h-4 w-4 rounded-bl border-b-2 border-l-2 border-blue-300" />
+                    <span className="absolute -bottom-0.5 -right-0.5 block h-4 w-4 rounded-br border-b-2 border-r-2 border-blue-300" />
+                    <span className="absolute inset-x-0 top-1/2 h-px -translate-y-1/2 animate-pulse bg-blue-400/70" />
+                  </div>
+                </div>
+              )}
+
+              {isLoading && !error && (
+                <div className="absolute inset-0 flex items-center justify-center text-sm text-gray-300">
+                  Iniciando cámara...
+                </div>
+              )}
+
+              {error && (
+                <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 p-6 text-center">
+                  <p className="text-sm text-red-400">{error}</p>
+                  <button
+                    type="button"
+                    onClick={() => setManualMode(true)}
+                    className="rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700"
+                  >
+                    Ingresar código manualmente
+                  </button>
+                </div>
+              )}
             </div>
-          )}
 
-          {error && (
-            <div className="absolute inset-0 flex items-center justify-center p-6 text-center text-sm text-red-400">
-              {error}
+            <div className="flex items-center justify-between bg-gray-900 px-4 py-3">
+              <p className="text-xs text-gray-400">
+                Apunta la cámara al código de barras
+              </p>
+              <button
+                type="button"
+                onClick={() => setManualMode(true)}
+                className="text-xs text-blue-400 hover:text-blue-300"
+              >
+                Ingresar manualmente
+              </button>
             </div>
-          )}
-        </div>
-
-        <p className="bg-gray-900 px-4 py-3 text-center text-xs text-gray-400">
-          Apunta la cámara al código de barras del producto
-        </p>
+          </>
+        )}
       </div>
     </div>
   )
