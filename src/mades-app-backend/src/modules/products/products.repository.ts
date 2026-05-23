@@ -23,6 +23,20 @@ export class ProductsRepository {
         });
     }
 
+    public async findProductByBarcode(barcode: string): Promise<productDTO | null> {
+        const product = await prisma.products.findUnique({
+            where: { barcode },
+            include: { productDetails: true },
+        })
+
+        if (!product) return null
+
+        return productsMapper.toProductDTO({
+            ...product,
+            productDetails: product.productDetails[0] ?? null,
+        })
+    }
+
     public async findProductByNameSizeTypeAndValue(name: string, sizeTypeId: number, sizeValueId: number): Promise<productDTO | null> {
         const product = await prisma.products.findFirst({
             where: {
@@ -73,7 +87,7 @@ export class ProductsRepository {
         const updated = await prisma.$transaction(async (tx) => {
             const product = await this.updateProductFields(tx, id, dto);
 
-            if (dto.purchasePrice !== undefined || dto.minQuantity !== undefined) {
+            if (dto.purchasePrice !== undefined || dto.minQuantity !== undefined || dto.quantity !== undefined) {
                 await this.updateProductDetails(tx, id, dto);
                 return tx.products.findUnique({
                     where: { id: BigInt(id) },
@@ -111,6 +125,7 @@ export class ProductsRepository {
             where: { productId: BigInt(id) },
             data: {
                 ...(dto.purchasePrice !== undefined && { purchasePrice: dto.purchasePrice }),
+                ...(dto.quantity !== undefined && { quantity: BigInt(dto.quantity) }),
                 ...(dto.minQuantity !== undefined && { minQuantity: BigInt(dto.minQuantity) }),
             },
         });

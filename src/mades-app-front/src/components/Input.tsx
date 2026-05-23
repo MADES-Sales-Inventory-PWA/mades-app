@@ -9,9 +9,10 @@ type InputProps = {
   icon?: ReactNode;
   height?: string;
   className?: string;
+  disabled?: boolean;
 };
 
-export const Input = ({ label, type, placeholder, value, onChange, icon, height, className }: InputProps) => {
+export const Input = ({ disabled ,label, type, placeholder, value, onChange, icon, height, className }: InputProps) => {
   return (
     <div>
       {label && (
@@ -24,8 +25,9 @@ export const Input = ({ label, type, placeholder, value, onChange, icon, height,
           id={label}
           type={type}
           value={value}
+          disabled={disabled}
           onChange={(event) => onChange(event.target.value)}
-          className={`font-sans text-s text-gray-500 bg-input-login border border-input-border border-[1.5px] mt-1 ${height || 'h-13'} px-2 block w-full rounded-default shadow-sm focus:border-primary focus:ring focus:ring-primary focus:ring-opacity-50 placeholder:font-sans placeholder:text-gray-500 placeholder:italic ${className || ''}`}
+          className={`font-sans text-s text-gray-500 bg-input-login border border-input-border border-[1.5px] mt-1 ${height || 'h-13'} px-2 block w-full rounded-default shadow-sm focus:border-primary focus:ring focus:ring-primary focus:ring-opacity-50 placeholder:font-sans placeholder:text-gray-500 placeholder:italic ${className || ''} ${disabled ? 'cursor-not-allowed' : 'focus:outline-none'}`}
           placeholder={placeholder}
         />
 

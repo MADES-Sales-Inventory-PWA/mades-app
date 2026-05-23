@@ -1,53 +1,113 @@
 import type { Product } from "../types/Types";
 import { BasicButton } from "./BasicButton";
 import { Pencil, Diff, Ban } from "lucide-react";
+import { formatCOP } from "../utils/currency";
 
-export const ProductsTable = ({ json, setEditOpen, setProductCodeToEdit, deactivateProduct }: { json: Product[]; setEditOpen: (isOpen: boolean) => void; setProductCodeToEdit: (code: string) => void; deactivateProduct: (code: string) => void }) => {
+export const ProductsTable = ({ json, setEditOpen, setProductIdToEdit, deactivateProduct, onOpenAdjustModal, canManageProducts = true, isOnline = true }: { json: Product[]; setEditOpen: (isOpen: boolean) => void; setProductIdToEdit: (id: number) => void; deactivateProduct: (id: number) => void; onOpenAdjustModal: (id: number) => void; canManageProducts?: boolean; isOnline?: boolean }) => {
+    const handleEdit = (id: number) => {
+        setProductIdToEdit(id);
+        setEditOpen(true);
+    };
+
+    const offlineTitle = "Solo disponible con conexión a internet";
+
+    const renderActions = (product: Product) => (
+        <div className="flex flex-row gap-1">
+            {canManageProducts && (
+                <BasicButton
+                    id={String(product.id)}
+                    title={isOnline ? "Editar producto" : offlineTitle}
+                    onClick={() => isOnline && handleEdit(product.id)}
+                    className="p-1"
+                    disabled={!isOnline}
+                >
+                    <div className={`flex flex-row items-center gap-1 rounded-default p-1 ${isOnline ? "bg-gray-300 hover:bg-gray-200" : "cursor-not-allowed bg-gray-100 text-gray-400"}`}>
+                        <Pencil size={16} />
+                    </div>
+                </BasicButton>
+            )}
+            <BasicButton
+                id={String(product.id)}
+                title={isOnline ? "Registrar ajuste" : offlineTitle}
+                onClick={() => isOnline && onOpenAdjustModal(product.id)}
+                className="p-1"
+                disabled={!isOnline}
+            >
+                <div className={`flex flex-row items-center gap-1 rounded-default p-1 ${isOnline ? "bg-gray-300 hover:bg-gray-200" : "cursor-not-allowed bg-gray-100 text-gray-400"}`}>
+                    <Diff size={16} />
+                </div>
+            </BasicButton>
+            {canManageProducts && (
+                <BasicButton
+                    id={String(product.id)}
+                    title={isOnline ? (product.isActive ? "Desactivar producto" : "Activar producto") : offlineTitle}
+                    onClick={() => isOnline && deactivateProduct(product.id)}
+                    className="p-1"
+                    disabled={!isOnline}
+                >
+                    <div className={`flex flex-row items-center gap-1 rounded-default p-1 ${isOnline ? "bg-gray-300 hover:bg-gray-200" : "cursor-not-allowed bg-gray-100 text-gray-400"}`}>
+                        <Ban size={16} />
+                    </div>
+                </BasicButton>
+            )}
+        </div>
+    );
+
     return (
-        <table className="w-full mt-5 rounded-xl overflow-hidden">
-            <thead>
-                <tr className="bg-tr-bg">
-                    <th className="text-left p-2">Imagen</th>
-                    <th className="text-left p-2">Código de barras</th>
-                    <th className="text-left p-2">Nombre</th>
-                    <th className="text-left p-2">Precio</th>
-                    <th className="text-left p-2">Stock</th>
-                    <th className="text-left p-2">Acciones</th>
-                </tr>
-            </thead>
-            <tbody>
+        <>
+            <div className="mt-5 grid gap-3 md:hidden">
                 {json.map((product) => (
-                    <tr key={product.barcode} className={product.isActive ? "bg-white" : "line-through text-gray-500"}>
-                        <td className="border border-gray-300 p-2">
-                            <img src={product.imageUrl} alt={product.name} className="w-16 h-16 object-cover" />
-                        </td>
-                        <td className="border border-gray-300 p-2">{product.barcode}</td>
-                        <td className="border border-gray-300 p-2">{product.name}</td>
-                        <td className="border border-gray-300 p-2">${(product.sellingPrice / 100).toFixed(2)}</td>
-                        <td className="border border-gray-300 p-2">{product.quantity}</td>
-                        <td className="border border-gray-300 p-2">
-                            <BasicButton id={product.barcode} title="Editar producto" onClick={() => {
-                                setProductCodeToEdit(product.barcode);
-                                setEditOpen(true);
-                            }} className="p-1">
-                                <div className="flex flex-row items-center gap-1 rounded-default p-1 bg-gray-300 hover:bg-gray-200">
-                                    <Pencil size={16} />
-                                </div>
-                            </BasicButton>
-                                <BasicButton id={product.barcode} title="Registrar ajuste" onClick={() => alert("Funcionalidad de registrar ajuste en construcción")} className="p-1">
-                                    <div className="flex flex-row items-center gap-1 rounded-default p-1 bg-gray-300 hover:bg-gray-200">
-                                        <Diff size={16} />
-                                    </div>
-                                </BasicButton>
-                                <BasicButton id={product.barcode} title="Eliminar producto" onClick={() => deactivateProduct(product.barcode)} className="p-1">
-                                    <div className="flex flex-row items-center gap-1 rounded-default p-1 bg-gray-300 hover:bg-gray-200">
-                                        <Ban size={16} />
-                                    </div>
-                                </BasicButton>
-                        </td>
-                    </tr>
+                    <article key={product.id} className={`rounded-xl border border-gray-300 bg-white p-3 shadow-sm ${product.isActive ? "" : "text-gray-500"}`}>
+                        <div className="flex items-start gap-3">
+                            <img src={product.imageUrl} alt={product.name} className="h-16 w-16 rounded-lg object-cover" />
+                            <div className={`min-w-0 flex-1 ${product.isActive ? "" : "line-through"}`}>
+                                <h3 className="truncate font-semibold text-gray-800">{product.name}</h3>
+                                <p className="text-sm text-gray-600">Código: {product.barcode}</p>
+                                {/* {<p className="text-sm text-gray-600">Talla id: {product.size || "Sin talla"}</p>} */}
+                                <p className="text-sm text-gray-700">Precio: {formatCOP(product.sellingPrice)}</p>
+                                <p className="text-sm text-gray-700">Stock: {product.quantity}</p>
+                            </div>
+                        </div>
+                        <div className="mt-2 flex justify-end">
+                            {renderActions(product)}
+                        </div>
+                    </article>
                 ))}
-            </tbody>
-        </table>
+            </div>
+
+            <div className="mt-5 hidden overflow-x-auto rounded-xl md:block">
+                <table className="w-full min-w-[760px] overflow-hidden">
+                    <thead>
+                        <tr className="bg-tr-bg">
+                            <th className="p-2 text-left">Imagen</th>
+                            <th className="p-2 text-left">Código de barras</th>
+                            <th className="p-2 text-left">Nombre</th>
+                            {/* <th className="p-2 text-left">Talla</th> */}
+                            <th className="p-2 text-left">Precio</th>
+                            <th className="p-2 text-left">Stock</th>
+                            <th className="p-2 text-left">Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {json.map((product) => (
+                            <tr key={product.id} className={product.isActive ? "bg-white" : "line-through text-gray-500"}>
+                                <td className="border border-gray-300 p-2">
+                                    <img src={product.imageUrl} alt={product.name} className="h-16 w-16 object-cover" />
+                                </td>
+                                <td className="border border-gray-300 p-2">{product.barcode}</td>
+                                <td className="border border-gray-300 p-2">{product.name}</td>
+                                {/* <td className="border border-gray-300 p-2">{product.size || "Sin talla"}</td> */}
+                                <td className="border border-gray-300 p-2">{formatCOP(product.sellingPrice)}</td>
+                                <td className="border border-gray-300 p-2">{product.quantity}</td>
+                                <td className="border border-gray-300 p-2">
+                                    {renderActions(product)}
+                                </td>
+                            </tr>
+                        ))}
+                    </tbody>
+                </table>
+            </div>
+        </>
+
     );
 }

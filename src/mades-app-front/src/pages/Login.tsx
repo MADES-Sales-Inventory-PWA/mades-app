@@ -9,22 +9,21 @@ import { Mail, LogIn, WifiOff } from "lucide-react";
 import { saveSession } from '../utils/auth';
 import { useOnlineStatus } from '../hooks/useOnlineStatus';
 import { constants } from '../constants/Constants';
+import { useToast } from '../components/ToastProvider';
 
 export default function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [errorMessage, setErrorMessage] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
   const isOnline = useOnlineStatus();
+  const { showToast } = useToast();
 
   const login = async () => {
     if (isLoading) return;
 
-    setErrorMessage("");
-
     if (!email.trim() || !password.trim()) {
-      setErrorMessage("Debes completar usuario y contraseña.");
+      showToast("Debes completar usuario y contraseña.");
       return;
     }
 
@@ -45,7 +44,7 @@ export default function Login() {
       const data = await res.json();
 
       if (!res.ok || !data?.success) {
-        setErrorMessage(data?.message || "No fue posible iniciar sesión.");
+        showToast(data?.message || "No fue posible iniciar sesión.");
         return;
       }
 
@@ -53,13 +52,11 @@ export default function Login() {
       const user = data?.data?.user;
 
       if (!token || !user) {
-        setErrorMessage("La respuesta del servidor no incluye sesión válida.");
+        showToast("La respuesta del servidor no incluye sesión válida.");
         return;
       }
 
       saveSession({ token, user });
-
-      console.log('Sesión guardada:', localStorage.getItem('mades.auth.session'));
 
       const roleId = Number(user.roleId);
 
@@ -73,9 +70,9 @@ export default function Login() {
         return;
       }
 
-      setErrorMessage("El usuario no tiene un rol válido.");
+      showToast("El usuario no tiene un rol válido.");
     } catch {
-      setErrorMessage("No fue posible conectar con el servidor.");
+      showToast("No fue posible conectar con el servidor.");
     } finally {
       setIsLoading(false);
     }
@@ -99,7 +96,13 @@ export default function Login() {
 
         <div className='h-[0.5px] bg-[#6b6b6b] my-4'></div>
 
-        <div className='flex flex-col gap-2'>
+        <form
+          className='flex flex-col gap-2'
+          onSubmit={(event) => {
+            event.preventDefault();
+            void login();
+          }}
+        >
           <Input
             label="Correo electrónico"
             type="email"
@@ -115,14 +118,13 @@ export default function Login() {
             value={password}
             onChange={setPassword}
           />
-        </div>
-        {errorMessage && <p className="mt-2 text-sm text-red-600">{errorMessage}</p>}
-        <Button onClick={login} className="w-full mt-2">
-          <div className="flex items-center justify-center">
-            <b>{isLoading ? "Ingresando..." : "Iniciar sesión"}</b>
-            <LogIn className="ml-2" size={18} />
-          </div>
-        </Button>
+          <Button type="submit" onClick={() => {}} className="w-full mt-2" disabled={isLoading}>
+            <div className="flex items-center justify-center">
+              <b>{isLoading ? "Ingresando..." : "Iniciar sesión"}</b>
+              <LogIn className="ml-2" size={18} />
+            </div>
+          </Button>
+        </form>
       </div>
     </div>
   );

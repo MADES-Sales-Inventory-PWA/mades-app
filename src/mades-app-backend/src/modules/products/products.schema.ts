@@ -21,8 +21,7 @@ export const productSchema = z.object({
     barcode: z.string()
         .min(8, "El código de barras debe tener al menos 8 dígitos")
         .max(14, "El código de barras no puede superar los 14 dígitos")
-        .regex(/^[0-9]{8,14}$/, "El código de barras debe contener solo dígitos (EAN-8 a EAN-14)")
-        .nullable(),
+        .regex(/^[0-9]{8,14}$/, "El código de barras debe contener solo dígitos (EAN-8 a EAN-14)"),
 
     description: z.string()
         .min(10, "La descripción debe tener al menos 10 caracteres")

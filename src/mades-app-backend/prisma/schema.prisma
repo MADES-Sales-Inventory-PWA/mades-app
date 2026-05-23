@@ -56,7 +56,6 @@ model Persons {
   documentType       document_type
   documentNumber     String
   userId             BigInt               @unique
-  userId             BigInt               @unique
   InventoryMovements InventoryMovements[]
   Users              Users                @relation(fields: [userId], references: [id], onDelete: NoAction)
 }
@@ -67,7 +66,7 @@ model Products {
   name            String
   state           Boolean           @default(true)
   sellingPrice    Decimal           @db.Decimal
-  barcode         String?
+  barcode         String            @unique(map: "Products_barcode_unique")
   description     String?
   imageUrl        String?
   lastUpdate      DateTime          @db.Timestamp(6)
@@ -93,12 +92,8 @@ model Roles {
 model Users {
   id       BigInt   @id @default(autoincrement())
   userName String   @unique
-  id       BigInt   @id @default(autoincrement())
-  userName String   @unique
   password String
   rolId    BigInt
-  Persons  Persons?
-  Roles    Roles    @relation(fields: [rolId], references: [id], onDelete: NoAction)
   Persons  Persons?
   Roles    Roles    @relation(fields: [rolId], references: [id], onDelete: NoAction)
 }

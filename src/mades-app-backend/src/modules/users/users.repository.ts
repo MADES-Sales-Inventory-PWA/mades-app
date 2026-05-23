@@ -123,9 +123,12 @@ export class UserRepository {
         }
         if (filters.documentNumber || filters.state !== undefined) {
             where.Persons = {
+                isNot: null,
                 ...(filters.documentNumber && { documentNumber: { contains: filters.documentNumber } }),
                 ...(filters.state !== undefined && { state: filters.state })
             };
+        } else {
+            where.Persons = { isNot: null };
         }
         return await prisma.users.findMany({
             where,
