@@ -1,32 +1,21 @@
-import type { Config } from "jest";
+import type { Config } from 'jest';
 
 const config: Config = {
-  preset: "ts-jest",
-  testEnvironment: "node",
-
-  roots: ["<rootDir>/src"],
-  testMatch: [
-    "**/__tests__/**/*.test.ts",
-    "**/*.test.ts",
-    "**/*.spec.ts"
-  ],
-  extensionsToTreatAsEsm: [],
-
+  preset: 'ts-jest',
+  testEnvironment: 'node',
+  roots: ['<rootDir>/test'],
+  testMatch: ['**/*.test.ts'],
   transform: {
-    "^.+\\.tsx?$": [
-      "ts-jest",
+    '^.+\\.ts$': [
+      'ts-jest',
       {
-        tsconfig: {
-          module: "CommonJS",
-          moduleResolution: "Node"
-        }
-      }
-    ]
+        tsconfig: 'tsconfig.test.json',
+        isolatedModules: true,
+      },
+    ],
   },
+  moduleDirectories: ['node_modules', '<rootDir>'],
   clearMocks: true,
-  resetMocks: false,
-  restoreMocks: false,
-  verbose: true
 };
 
 export default config;
