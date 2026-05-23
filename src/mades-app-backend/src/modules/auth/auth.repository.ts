@@ -1,3 +1,4 @@
+import bcrypt from "bcryptjs";
 import prisma from "../../config/prisma";
 
 export class AuthRepository {
@@ -5,11 +6,13 @@ export class AuthRepository {
         const cleanUserName = userName.trim().toLowerCase();
         const cleanPassword = password.trim();
 
-        return await prisma.users.findFirst({
-            where: {
-                userName: cleanUserName,
-                password: cleanPassword,
-            },
+        const user = await prisma.users.findFirst({
+            where: { userName: cleanUserName },
         });
+
+        if (!user) return null;
+
+        const valid = await bcrypt.compare(cleanPassword, user.password);
+        return valid ? user : null;
     }
 }

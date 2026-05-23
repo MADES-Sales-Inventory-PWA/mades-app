@@ -1,6 +1,9 @@
+import bcrypt from "bcryptjs";
 import { document_type } from "@prisma/client";
 import prisma from "../../config/prisma";
 import { CreateUserDTO, UpdateUserDTO, UserFiltersDTO } from "./users.schema";
+
+const SALT_ROUNDS = 10;
 
 export class UserRepository {
     async adminExists() {
@@ -30,11 +33,12 @@ export class UserRepository {
         });
     }
     async create(data: CreateUserDTO,) {
+        const hashedPassword = await bcrypt.hash(data.password, SALT_ROUNDS);
         return await prisma.$transaction(async (tx) => {
             const user = await tx.users.create({
                 data: {
                     userName: data.email,
-                    password: data.password,
+                    password: hashedPassword,
                     rolId: data.rolId
                 }
             });
@@ -60,11 +64,14 @@ export class UserRepository {
         })
     }
     async update(id: number, data: UpdateUserDTO) {
+        const hashedPassword = data.password
+            ? await bcrypt.hash(data.password, SALT_ROUNDS)
+            : undefined;
         return await prisma.$transaction(async (tx) => {
             const user = await tx.users.update({
                 where: { id: BigInt(id) },
                 data: {
-                    ...(data.password && { password: data.password }),
+                    ...(hashedPassword && { password: hashedPassword }),
                     ...(data.rolId && { rolId: data.rolId }),
                 }
             });
