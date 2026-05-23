@@ -2,15 +2,17 @@ import { House, Box, ShoppingCart, BarChart, PersonStanding } from "lucide-react
 import { Icon } from "./Icon";
 import { SideButton } from "./SideButton";
 import { Button } from "./Button";
-import { clearSession, getSession } from "../utils/auth";
+import { getSession } from "../utils/auth";
 import { useNavigate } from "react-router-dom";
 import { constants } from "../constants/Constants";
-
+import { useLogout } from "../hooks/useLogout";
+import { ConfirmDialog } from "./ConfirmDialog";
 
 export const SideBar = () => {
     const session = getSession();
     const roleId = Number(session?.user?.roleId);
     const navigate = useNavigate();
+    const { requestLogout, showConfirm, confirmLogout, cancelLogout } = useLogout();
 
     return (
         <div className="fixed inset-y-0 left-0 z-50 flex w-[250px] flex-col bg-gradient-to-tr from-side-panel to-side-panel2 px-4 py-5 shadow-md">
@@ -88,15 +90,20 @@ export const SideBar = () => {
 
             </div>
 
-            <Button
-                className="mt-auto"
-                onClick={() => {
-                    clearSession();
-                    navigate("/", { replace: true });
-                }}>
+            <Button className="mt-auto" onClick={requestLogout}>
                 Cerrar sesión
             </Button>
 
+            {showConfirm && (
+                <ConfirmDialog
+                    title="¿Cerrar sesión sin conexión?"
+                    message="No tienes conexión a internet. Si cierras sesión, no podrás volver a ingresar hasta que recuperes la señal."
+                    confirmLabel="Cerrar sesión"
+                    cancelLabel="Cancelar"
+                    onConfirm={confirmLogout}
+                    onCancel={cancelLogout}
+                />
+            )}
         </div>
     );
 }
