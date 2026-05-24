@@ -9,13 +9,14 @@
     "test:watch": "jest --watch",
     "test:coverage": "jest --coverage",
     "test:auth": "jest src/test/auth",
-    "sonar": "node sonar-scanner.js"
+    "sonar": "dotenv -- sonar-scanner"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "type": "commonjs",
   "devDependencies": {
+    "@sonar/scan": "^4.3.6",
     "@types/bcryptjs": "^2.4.6",
     "@types/cors": "^2.8.19",
     "@types/express": "^5.0.6",
@@ -27,6 +28,7 @@
     "@types/supertest": "^7.2.0",
     "@types/swagger-jsdoc": "^6.0.4",
     "@types/swagger-ui-express": "^4.1.8",
+    "dotenv-cli": "^11.0.0",
     "jest": "^30.4.2",
     "prisma": "^6.19.2",
     "sonarqube-scanner": "^4.3.6",
