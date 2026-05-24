@@ -52,9 +52,9 @@ export async function registerSale(request: Request, _ctx: SWContext): Promise<R
 
     return response
   } catch {
+    // 
   }
 
-  // Offline: validate stock and queue locally
   for (const item of dto.items) {
     const product = await productsDb.findById(item.productId)
 

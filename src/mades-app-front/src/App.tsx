@@ -34,16 +34,6 @@ function AppRoutes({
   adminExists: boolean;
   setAdminExists: React.Dispatch<React.SetStateAction<boolean>>;
 }) {
-  const session = getSession();
-  const currentRoleId = Number(session?.user?.roleId);
-
-  const homePathByRole =
-    currentRoleId === constants.ADMIN_ROLE_ID
-      ? constants.ADMIN_HOME_PATH
-      : currentRoleId === constants.EMPLOYEE_ROLE_ID
-        ? constants.EMPLOYEE_HOME_PATH
-        : null;
-
   return (
     <Routes>
       <Route
@@ -51,8 +41,6 @@ function AppRoutes({
         element={
           !adminExists ? (
             <Navigate to={constants.CREATE_ADMIN_PATH} replace />
-          ) : homePathByRole ? (
-            <Navigate to={homePathByRole} replace />
           ) : (
             <Login />
           )
@@ -130,7 +118,8 @@ function App() {
         const data = await response.json();
         setAdminExists(Boolean(data?.data?.exists));
       } catch {
-        setAdminExists(false);
+        // Network error (offline): if the user has a session, admin must exist
+        setAdminExists(Boolean(getSession()));
       } finally {
         setIsCheckingAdmin(false);
       }

@@ -1,5 +1,5 @@
 import { constants } from "../constants/Constants";
-import { getAuthHeaders } from "../utils/auth";
+import { authFetch } from "../utils/apiFetch";
 import { salesDb } from "../sw/db/sales.db";
 
 export type SaleItem = {
@@ -48,12 +48,9 @@ export async function createSale(
   payload: CreateSalePayload,
   options?: CreateSaleOptions
 ): Promise<RegisteredSale> {
-  const response = await fetch(getSalesUrl(), {
+  const response = await authFetch(getSalesUrl(), {
     method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      ...getAuthHeaders(),
-    },
+    headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
       ...payload,
       ...(options?.syncPendingSale ? { syncPendingSale: true } : {}),

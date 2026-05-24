@@ -1,5 +1,5 @@
 import { constants } from "../constants/Constants";
-import { getAuthHeaders } from "../utils/auth";
+import { authFetch } from "../utils/apiFetch";
 
 export type EmployeeItem = {
   id: number;
@@ -60,11 +60,7 @@ export async function fetchEmployees() {
   const url = new URL(getUsersUrl(), window.location.origin);
   url.searchParams.set("rolId", String(constants.EMPLOYEE_ROLE_ID));
 
-  const response = await fetch(url.toString(), {
-    headers: {
-      ...getAuthHeaders(),
-    },
-  });
+  const response = await authFetch(url.toString());
 
   if (!response.ok) {
     const message = await getBackendErrorMessage(response, "No se pudieron obtener los empleados");
@@ -76,12 +72,9 @@ export async function fetchEmployees() {
 }
 
 export async function changeEmployeeStatus(id: number, state: boolean) {
-  const response = await fetch(getUserStatusUrl(id), {
+  const response = await authFetch(getUserStatusUrl(id), {
     method: "PATCH",
-    headers: {
-      "Content-Type": "application/json",
-      ...getAuthHeaders(),
-    },
+    headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ state }),
   });
 
@@ -95,12 +88,9 @@ export async function changeEmployeeStatus(id: number, state: boolean) {
 }
 
 export async function createEmployee(payload: EmployeeFormPayload) {
-  const response = await fetch(getUsersUrl(), {
+  const response = await authFetch(getUsersUrl(), {
     method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      ...getAuthHeaders(),
-    },
+    headers: { "Content-Type": "application/json" },
     body: JSON.stringify(payload),
   });
 
@@ -113,12 +103,9 @@ export async function createEmployee(payload: EmployeeFormPayload) {
 }
 
 export async function updateEmployee(userId: number, payload: Partial<EmployeeFormPayload>) {
-  const response = await fetch(`${getUsersUrl()}/${userId}`, {
+  const response = await authFetch(`${getUsersUrl()}/${userId}`, {
     method: "PATCH",
-    headers: {
-      "Content-Type": "application/json",
-      ...getAuthHeaders(),
-    },
+    headers: { "Content-Type": "application/json" },
     body: JSON.stringify(payload),
   });
 

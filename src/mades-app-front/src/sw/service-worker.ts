@@ -2,8 +2,8 @@
 /// <reference types="vite-plugin-pwa/vanillajs" />
 
 import { clientsClaim } from 'workbox-core'
-import { precacheAndRoute, cleanupOutdatedCaches } from 'workbox-precaching'
-import { registerRoute, NavigationRoute } from 'workbox-routing'
+import { precacheAndRoute, cleanupOutdatedCaches, matchPrecache } from 'workbox-precaching'
+import { registerRoute, NavigationRoute, setCatchHandler } from 'workbox-routing'
 import { NetworkFirst, CacheFirst, StaleWhileRevalidate } from 'workbox-strategies'
 import { CacheableResponsePlugin } from 'workbox-cacheable-response'
 import { ExpirationPlugin } from 'workbox-expiration'
@@ -69,3 +69,11 @@ registerProductsRoutes()
 registerInventoryRoutes()
 registerSizesRoutes()
 registerSalesRoutes()
+
+setCatchHandler(async ({ event }) => {
+  if ((event as FetchEvent).request.destination === 'document') {
+    const fallback = await matchPrecache('/offline.html')
+    return fallback ?? Response.error()
+  }
+  return Response.error()
+})

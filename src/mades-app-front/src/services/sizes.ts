@@ -1,5 +1,5 @@
 import { constants } from "../constants/Constants";
-import { getAuthHeaders } from "../utils/auth";
+import { authFetch } from "../utils/apiFetch";
 
 export type SizeTypeDTO = {
   id: number;
@@ -38,11 +38,7 @@ function getSizeValuesUrl(sizeTypeId: number) {
 }
 
 export async function fetchSizeTypes() {
-  const response = await fetch(getSizesTypesUrl(), {
-    headers: {
-      ...getAuthHeaders(),
-    },
-  });
+  const response = await authFetch(getSizesTypesUrl());
 
   if (!response.ok) {
     const message = await getBackendErrorMessage(response, "No se pudieron obtener los tipos de talla");
@@ -54,11 +50,7 @@ export async function fetchSizeTypes() {
 }
 
 export async function fetchSizeValues(sizeTypeId: number) {
-  const response = await fetch(getSizeValuesUrl(sizeTypeId), {
-    headers: {
-      ...getAuthHeaders(),
-    },
-  });
+  const response = await authFetch(getSizeValuesUrl(sizeTypeId));
 
   if (!response.ok) {
     const message = await getBackendErrorMessage(response, "No se pudieron obtener los valores de talla");

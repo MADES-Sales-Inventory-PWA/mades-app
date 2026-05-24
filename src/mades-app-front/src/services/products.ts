@@ -1,5 +1,5 @@
 import { constants } from "../constants/Constants";
-import { getAuthHeaders } from "../utils/auth";
+import { authFetch } from "../utils/apiFetch";
 import type { Product } from "../types/Types";
 
 export type BackendProduct = {
@@ -73,11 +73,7 @@ export function mapBackendProductToFrontend(product: BackendProduct) {
 }
 
 export async function fetchProducts() {
-  const response = await fetch(getProductsUrl(), {
-    headers: {
-      ...getAuthHeaders(),
-    },
-  });
+  const response = await authFetch(getProductsUrl());
 
   if (!response.ok) {
     const message = await getBackendErrorMessage(response, "No se pudieron obtener los productos");
@@ -89,12 +85,9 @@ export async function fetchProducts() {
 }
 
 export async function toggleProductState(id: number, state: boolean) {
-  const response = await fetch(getProductStateUrl(id), {
+  const response = await authFetch(getProductStateUrl(id), {
     method: "PATCH",
-    headers: {
-      "Content-Type": "application/json",
-      ...getAuthHeaders(),
-    },
+    headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ state }),
   });
 
@@ -107,12 +100,9 @@ export async function toggleProductState(id: number, state: boolean) {
 }
 
 export async function createProduct(payload: ProductFormValues) {
-  const response = await fetch(getProductsUrl(), {
+  const response = await authFetch(getProductsUrl(), {
     method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      ...getAuthHeaders(),
-    },
+    headers: { "Content-Type": "application/json" },
     body: JSON.stringify(payload),
   });
 
@@ -125,12 +115,9 @@ export async function createProduct(payload: ProductFormValues) {
 }
 
 export async function updateProduct(id: number, payload: Partial<ProductFormValues>) {
-  const response = await fetch(`${getProductsUrl()}/${id}`, {
+  const response = await authFetch(`${getProductsUrl()}/${id}`, {
     method: "PATCH",
-    headers: {
-      "Content-Type": "application/json",
-      ...getAuthHeaders(),
-    },
+    headers: { "Content-Type": "application/json" },
     body: JSON.stringify(payload),
   });
 
