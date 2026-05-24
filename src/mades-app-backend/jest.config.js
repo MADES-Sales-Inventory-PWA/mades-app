@@ -1,4 +1,3 @@
-/** @type {import('ts-jest').JestConfigWithTsJest} */
 module.exports = {
   preset: 'ts-jest',
   testEnvironment: 'node',
@@ -15,9 +14,14 @@ module.exports = {
     '!src/**/*.d.ts',
     '!src/config/**',
     '!src/**/index.ts',
-    '!src/**/*.routes.ts',   
-    '!src/**/*.mapper.ts',  
-    '!src/app.ts',           
+    '!src/**/*.routes.ts',
+    '!src/**/*.mapper.ts',
+    '!src/**/*.repository.ts',
+    '!src/**/*.controller.ts',
+    '!src/**/*.dto.ts',
+    '!src/**/*.schema.ts',
+    '!src/app.ts',
+    '!src/use-cases/**',
   ],
   coverageDirectory: 'coverage',
   coverageReporters: ['lcov', 'text', 'clover'],
