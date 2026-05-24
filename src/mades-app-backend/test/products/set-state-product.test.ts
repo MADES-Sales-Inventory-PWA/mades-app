@@ -75,8 +75,8 @@ describe('ProductsService - Cambiar Estado del Producto', () => {
 
     await service.setProductState(1, { state: true });
 
-    expect(mockProducts.findUnique).toHaveBeenCalledBefore
-      ? expect(mockProducts.findUnique).toHaveBeenCalledBefore(mockProducts.update as jest.Mock)
-      : expect(mockProducts.findUnique).toHaveBeenCalled();
+    const findUniqueOrder = (mockProducts.findUnique as jest.Mock).mock.invocationCallOrder[0];
+    const updateOrder = (mockProducts.update as jest.Mock).mock.invocationCallOrder[0];
+    expect(findUniqueOrder).toBeLessThan(updateOrder);
   });
 });

@@ -33,20 +33,6 @@ const MOCK_EXISTING_PRODUCT = {
   productDetails: [{ purchasePrice: { toNumber: () => 25000 }, quantity: 10n, minQuantity: 2n }],
 };
 
-const MOCK_PRODUCT_DTO = {
-  id: 1,
-  name: 'Camiseta básica',
-  state: true,
-  sizeTypeId: 1,
-  sizeValueId: 1,
-  barcode: '12345678',
-  description: null,
-  imageUrl: null,
-  purchasePrice: 25000,
-  quantity: 10,
-  minQuantity: 2,
-};
-
 describe('ProductsService - Actualizar Producto', () => {
   let service: ProductsService;
 
@@ -87,9 +73,7 @@ describe('ProductsService - Actualizar Producto', () => {
   });
 
   it('debe lanzar error cuando se cambia el tipo de talla a uno que no existe', async () => {
-    (mockProducts.findUnique as jest.Mock)
-      .mockResolvedValueOnce(MOCK_EXISTING_PRODUCT)
-      .mockResolvedValueOnce(null);
+    (mockProducts.findUnique as jest.Mock).mockResolvedValue(MOCK_EXISTING_PRODUCT);
     (mockSizeTypes.findUnique as jest.Mock).mockResolvedValue(null);
 
     await expect(service.updateProduct(1, { sizeTypeId: 99 }))
@@ -98,10 +82,20 @@ describe('ProductsService - Actualizar Producto', () => {
     expect(mockTransaction).not.toHaveBeenCalled();
   });
 
-  it('debe lanzar error cuando el nuevo valor de talla no pertenece al tipo indicado', async () => {
+  it('debe lanzar error cuando el nuevo código de barras ya está en uso por otro producto', async () => {
     (mockProducts.findUnique as jest.Mock)
       .mockResolvedValueOnce(MOCK_EXISTING_PRODUCT)
-      .mockResolvedValueOnce(null);
+      .mockResolvedValueOnce({ ...MOCK_EXISTING_PRODUCT, id: 99n });
+    (mockProducts.findFirst as jest.Mock).mockResolvedValue(null);
+
+    await expect(service.updateProduct(1, { barcode: '99999999' }))
+      .rejects.toThrow('Ya existe un producto con el código de barras');
+
+    expect(mockTransaction).not.toHaveBeenCalled();
+  });
+
+  it('debe lanzar error cuando el nuevo valor de talla no pertenece al tipo indicado', async () => {
+    (mockProducts.findUnique as jest.Mock).mockResolvedValue(MOCK_EXISTING_PRODUCT);
     (mockSizeTypes.findUnique as jest.Mock).mockResolvedValue({ id: 1n, name: 'Talla de ropa' });
     (mockSizeValues.findFirst as jest.Mock).mockResolvedValue(null);
 
@@ -117,18 +111,6 @@ describe('ProductsService - Actualizar Producto', () => {
 
     await expect(service.updateProduct(1, { name: 'Camiseta duplicada' }))
       .rejects.toThrow('Ya existe un producto con el nombre');
-
-    expect(mockTransaction).not.toHaveBeenCalled();
-  });
-
-  it('debe lanzar error cuando el nuevo código de barras ya está en uso por otro producto', async () => {
-    (mockProducts.findUnique as jest.Mock)
-      .mockResolvedValueOnce(MOCK_EXISTING_PRODUCT)
-      .mockResolvedValueOnce({ ...MOCK_EXISTING_PRODUCT, id: 99n });
-    (mockProducts.findFirst as jest.Mock).mockResolvedValue(null);
-
-    await expect(service.updateProduct(1, { barcode: '99999999' }))
-      .rejects.toThrow('Ya existe un producto con el código de barras');
 
     expect(mockTransaction).not.toHaveBeenCalled();
   });

@@ -3,46 +3,52 @@ import { ProductsService } from '../../src/modules/products/products.service';
 jest.mock('../../src/config/prisma', () => ({
   __esModule: true,
   default: {
-    sizeTypes: { findUnique: jest.fn() },
-    sizeValues: { findFirst: jest.fn() },
-    products: { findUnique: jest.fn(), findFirst: jest.fn(), create: jest.fn() },
+    sizeTypes:      { findUnique: jest.fn() },
+    sizeValues:     { findFirst: jest.fn() },
+    products:       { findUnique: jest.fn(), findFirst: jest.fn(), create: jest.fn() },
     productDetails: { create: jest.fn() },
-    $transaction: jest.fn(),
+    $transaction:   jest.fn(),
   }
 }));
 
 import prisma from '../../src/config/prisma';
 
-const mockSizeTypes = prisma.sizeTypes as jest.Mocked<typeof prisma.sizeTypes>;
-const mockSizeValues = prisma.sizeValues as jest.Mocked<typeof prisma.sizeValues>;
-const mockProducts = prisma.products as jest.Mocked<typeof prisma.products>;
+const mockSizeTypes   = prisma.sizeTypes  as jest.Mocked<typeof prisma.sizeTypes>;
+const mockSizeValues  = prisma.sizeValues as jest.Mocked<typeof prisma.sizeValues>;
+const mockProducts    = prisma.products   as jest.Mocked<typeof prisma.products>;
 const mockTransaction = prisma.$transaction as jest.Mock;
 
+// description e imageUrl son requeridos en el DTO (aceptan null)
 const VALID_DTO = {
-  name: 'Camiseta básica',
-  sizeTypeId: 1,
-  sizeValueId: 1,
-  barcode: '12345678',
+  name:          'Camiseta básica',
+  sizeTypeId:    1,
+  sizeValueId:   1,
+  barcode:       '12345678',
   purchasePrice: 25000,
-  quantity: 10,
-  minQuantity: 2,
+  quantity:      10,
+  minQuantity:   2,
+  description:   null as string | null,
+  imageUrl:      null as string | null,
 };
 
-const MOCK_SIZE_TYPE = { id: 1n, name: 'Talla de ropa' };
+const MOCK_SIZE_TYPE  = { id: 1n, name: 'Talla de ropa' };
 const MOCK_SIZE_VALUE = { id: 1n, sizeTypeId: 1n, value: 'M', sortOrder: 0 };
+
 const MOCK_CREATED_PRODUCT = {
-  id: 1n,
-  name: 'Camiseta básica',
-  state: true,
-  sizeTypeId: 1n,
-  sizeValueId: 1n,
-  barcode: '12345678',
-  description: null,
-  imageUrl: null,
+  id:           1n,
+  name:         'Camiseta básica',
+  state:        true,
+  sizeTypeId:   1n,
+  sizeValueId:  1n,
+  barcode:      '12345678',
+  description:  null,
+  imageUrl:     null,
   sellingPrice: { toNumber: () => 25000 },
-  lastUpdate: new Date(),
+  lastUpdate:   new Date(),
   lastSyncDate: new Date(),
-  productDetails: [{ purchasePrice: { toNumber: () => 25000 }, quantity: 10n, minQuantity: 2n }],
+  productDetails: [
+    { purchasePrice: { toNumber: () => 25000 }, quantity: 10n, minQuantity: 2n },
+  ],
 };
 
 describe('ProductsService - Crear Producto', () => {
@@ -62,10 +68,10 @@ describe('ProductsService - Crear Producto', () => {
   });
 
   it('debe retornar el producto creado con su id, nombre y estado activo', async () => {
-    (mockSizeTypes.findUnique as jest.Mock).mockResolvedValue(MOCK_SIZE_TYPE);
-    (mockSizeValues.findFirst as jest.Mock).mockResolvedValue(MOCK_SIZE_VALUE);
-    (mockProducts.findUnique as jest.Mock).mockResolvedValue(null);
-    (mockProducts.findFirst as jest.Mock).mockResolvedValue(null);
+    (mockSizeTypes.findUnique  as jest.Mock).mockResolvedValue(MOCK_SIZE_TYPE);
+    (mockSizeValues.findFirst  as jest.Mock).mockResolvedValue(MOCK_SIZE_VALUE);
+    (mockProducts.findUnique   as jest.Mock).mockResolvedValue(null);
+    (mockProducts.findFirst    as jest.Mock).mockResolvedValue(null);
 
     const result = await service.createProduct(VALID_DTO);
 
@@ -96,7 +102,7 @@ describe('ProductsService - Crear Producto', () => {
   it('debe lanzar error cuando ya existe un producto con el mismo nombre y combinación de talla', async () => {
     (mockSizeTypes.findUnique as jest.Mock).mockResolvedValue(MOCK_SIZE_TYPE);
     (mockSizeValues.findFirst as jest.Mock).mockResolvedValue(MOCK_SIZE_VALUE);
-    (mockProducts.findFirst as jest.Mock).mockResolvedValue({ ...MOCK_CREATED_PRODUCT, id: 99n });
+    (mockProducts.findFirst   as jest.Mock).mockResolvedValue({ ...MOCK_CREATED_PRODUCT, id: 99n });
 
     await expect(service.createProduct(VALID_DTO))
       .rejects.toThrow('Ya existe un producto con el nombre Camiseta básica y esa combinación de talla');
@@ -107,8 +113,8 @@ describe('ProductsService - Crear Producto', () => {
   it('debe lanzar error cuando ya existe un producto con el mismo código de barras', async () => {
     (mockSizeTypes.findUnique as jest.Mock).mockResolvedValue(MOCK_SIZE_TYPE);
     (mockSizeValues.findFirst as jest.Mock).mockResolvedValue(MOCK_SIZE_VALUE);
-    (mockProducts.findFirst as jest.Mock).mockResolvedValue(null);
-    (mockProducts.findUnique as jest.Mock).mockResolvedValue({ ...MOCK_CREATED_PRODUCT, id: 99n });
+    (mockProducts.findFirst   as jest.Mock).mockResolvedValue(null);
+    (mockProducts.findUnique  as jest.Mock).mockResolvedValue({ ...MOCK_CREATED_PRODUCT, id: 99n });
 
     await expect(service.createProduct(VALID_DTO))
       .rejects.toThrow('Ya existe un producto con el código de barras 12345678');
@@ -116,13 +122,30 @@ describe('ProductsService - Crear Producto', () => {
     expect(mockTransaction).not.toHaveBeenCalled();
   });
 
-  it('no debe lanzar error de código de barras duplicado si el producto encontrado es el mismo', async () => {
+  it('no debe lanzar error cuando no hay duplicados y el producto se crea exitosamente', async () => {
     (mockSizeTypes.findUnique as jest.Mock).mockResolvedValue(MOCK_SIZE_TYPE);
     (mockSizeValues.findFirst as jest.Mock).mockResolvedValue(MOCK_SIZE_VALUE);
-    (mockProducts.findFirst as jest.Mock).mockResolvedValue(null);
-    (mockProducts.findUnique as jest.Mock).mockResolvedValue(null);
+    (mockProducts.findFirst   as jest.Mock).mockResolvedValue(null);
+    (mockProducts.findUnique  as jest.Mock).mockResolvedValue(null);
 
     const result = await service.createProduct(VALID_DTO);
+
+    expect(result).toBeDefined();
+  });
+
+  it('debe crear con description y imageUrl cuando se envían', async () => {
+    (mockSizeTypes.findUnique as jest.Mock).mockResolvedValue(MOCK_SIZE_TYPE);
+    (mockSizeValues.findFirst as jest.Mock).mockResolvedValue(MOCK_SIZE_VALUE);
+    (mockProducts.findFirst   as jest.Mock).mockResolvedValue(null);
+    (mockProducts.findUnique  as jest.Mock).mockResolvedValue(null);
+
+    const dtoConExtras = {
+      ...VALID_DTO,
+      description: 'Camiseta de algodón 100%',
+      imageUrl:    'https://example.com/img.jpg',
+    };
+
+    const result = await service.createProduct(dtoConExtras);
 
     expect(result).toBeDefined();
   });
