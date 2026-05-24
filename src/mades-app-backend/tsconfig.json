@@ -8,14 +8,14 @@
     "skipLibCheck": true,
     "strict": true,
     "outDir": "./dist",
-    "rootDir": "./src",
+    "rootDir": ".",
     "sourceMap": true,
     "typeRoots": [
       "./node_modules/@types",
       "./src/types"
-    ]
+    ],
+    "types": ["jest", "node"]
   },
-  "include": ["src/**/*"],
-  "exclude": ["node_modules"],
-  "types": ["jest", "node"]
+  "include": ["src/**/*", "test/**/*"],
+  "exclude": ["node_modules"]
 }
