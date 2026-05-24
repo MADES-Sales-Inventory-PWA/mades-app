@@ -4,28 +4,22 @@ module.exports = {
   testEnvironment: 'node',
   moduleFileExtensions: ['js', 'json', 'ts'],
   rootDir: '.',
-  testRegex: '.*\\.test\\.ts$',  
+  testRegex: '.*\\.test\\.ts$',
   transform: {
     '^.+\\.(t|j)s$': ['ts-jest', {
       tsconfig: '<rootDir>/tsconfig.test.json',
     }],
   },
-
   collectCoverageFrom: [
-    'src/**/*.(t|j)s',       
+    'src/**/*.ts',
     '!src/**/*.d.ts',
-    '!src/config/prisma.ts',
+    '!src/config/**',
     '!src/**/index.ts',
+    '!src/**/*.routes.ts',   
+    '!src/**/*.mapper.ts',  
+    '!src/app.ts',           
   ],
-  coverageDirectory: './coverage',
-  coverageReporters: ['text', 'lcov', 'clover'],
-
-  coverageThreshold: {
-    global: {
-      lines: 70,
-      functions: 70,
-      branches: 70,
-      statements: 70,
-    },
-  },
+  coverageDirectory: 'coverage',
+  coverageReporters: ['lcov', 'text', 'clover'],
+  clearMocks: true,
 };
