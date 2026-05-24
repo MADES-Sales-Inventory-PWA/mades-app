@@ -25,3 +25,11 @@ Thumbs.db
 .vscode/
 
 /src/generated/prisma
+# Coverage
+coverage/
+
+# SonarQube
+.scannerwork/
+
+# Sonar scanner
+sonar-project.properties
