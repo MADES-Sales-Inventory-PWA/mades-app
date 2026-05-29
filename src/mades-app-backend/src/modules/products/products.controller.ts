@@ -48,6 +48,7 @@ export class ProductsController {
             return res.status(200).json(response);
 
         } catch (error) {
+            console.error("[updateProduct] Error:", error);
             if (error instanceof NotFoundError) {
                 return sendError(res, 404, ApiErrorCode.NOT_FOUND, error.message);
             }
