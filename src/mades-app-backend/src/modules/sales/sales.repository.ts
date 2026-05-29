@@ -34,6 +34,22 @@ export class SalesRepository {
     });
   }
 
+  async findProductsWithStockByIds(productIds: number[]) {
+    return prisma.products.findMany({
+      where: { id: { in: productIds.map((id) => BigInt(id)) } },
+      select: {
+        id: true,
+        name: true,
+        barcode: true,
+        state: true,
+        productDetails: {
+          orderBy: { id: "desc" },
+          take: 1,
+        },
+      },
+    });
+  }
+
   async findOperatorPersonIdByUserId(userId: number): Promise<bigint | null> {
     const person = await prisma.persons.findFirst({
       where: { userId: BigInt(userId) },

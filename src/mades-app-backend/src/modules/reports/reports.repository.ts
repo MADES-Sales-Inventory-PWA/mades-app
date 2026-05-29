@@ -92,45 +92,45 @@ export class ReportsRepository {
       where.creationDate = buildDateRange({}, filters.from, filters.to);
     }
 
-    const total = await prisma.inventoryMovements.count({ where });
     const skip = (filters.page - 1) * filters.pageSize;
 
-    const movements = await prisma.inventoryMovements.findMany({
-      where,
-      include: {
-        Persons: {
-          select: {
-            id: true,
-            name: true,
-            lastName: true,
-            email: true,
-            documentNumber: true,
+    const [total, movements] = await prisma.$transaction([
+      prisma.inventoryMovements.count({ where }),
+      prisma.inventoryMovements.findMany({
+        where,
+        include: {
+          Persons: {
+            select: {
+              id: true,
+              name: true,
+              lastName: true,
+              email: true,
+              documentNumber: true,
+            },
           },
-        },
-        Invoices: {
-          select: {
-            invoceNumber: true,
-            total: true,
+          Invoices: {
+            select: {
+              invoceNumber: true,
+              total: true,
+            },
           },
-        },
-        MovementDetails: {
-          include: {
-            Products: {
-              select: {
-                id: true,
-                name: true,
-                barcode: true,
+          MovementDetails: {
+            include: {
+              Products: {
+                select: {
+                  id: true,
+                  name: true,
+                  barcode: true,
+                },
               },
             },
           },
         },
-      },
-      orderBy: {
-        creationDate: "desc",
-      },
-      skip,
-      take: filters.pageSize,
-    });
+        orderBy: { creationDate: "desc" },
+        skip,
+        take: filters.pageSize,
+      }),
+    ]);
 
     const data: SalesHistoryItem[] = movements.map((movement) => {
       const invoice = movement.Invoices[0] ?? null;
@@ -194,39 +194,39 @@ export class ReportsRepository {
       where.creationDate = buildDateRange({}, filters.from, filters.to);
     }
 
-    const total = await prisma.inventoryMovements.count({ where });
     const skip = (filters.page - 1) * filters.pageSize;
 
-    const movements = await prisma.inventoryMovements.findMany({
-      where,
-      include: {
-        Persons: {
-          select: {
-            id: true,
-            name: true,
-            lastName: true,
-            email: true,
-            documentNumber: true,
+    const [total, movements] = await prisma.$transaction([
+      prisma.inventoryMovements.count({ where }),
+      prisma.inventoryMovements.findMany({
+        where,
+        include: {
+          Persons: {
+            select: {
+              id: true,
+              name: true,
+              lastName: true,
+              email: true,
+              documentNumber: true,
+            },
           },
-        },
-        MovementDetails: {
-          include: {
-            Products: {
-              select: {
-                id: true,
-                name: true,
-                barcode: true,
+          MovementDetails: {
+            include: {
+              Products: {
+                select: {
+                  id: true,
+                  name: true,
+                  barcode: true,
+                },
               },
             },
           },
         },
-      },
-      orderBy: {
-        creationDate: "desc",
-      },
-      skip,
-      take: filters.pageSize,
-    });
+        orderBy: { creationDate: "desc" },
+        skip,
+        take: filters.pageSize,
+      }),
+    ]);
 
     const data: InventoryAdjustmentItem[] = movements.map((movement) => {
       const detail = movement.MovementDetails[0] ?? null;
@@ -313,24 +313,28 @@ export class ReportsRepository {
       },
     })
   }
-  async salesPerEmployee() {
-    return await prisma.inventoryMovements.findMany({
-      where: {
-        movementType: "SALE",
-      }, select: {
-        sellerId: true,
-        Persons: {
-          select: {
-            name: true,
-            lastName: true,
-          },
-        },
-        Invoices: {
-          select: {
-            total: true,
-          },
-        },
-      },
-    });
+  async salesPerEmployee(): Promise<Array<{ Vendedor: string; ventas_realizadas: number; total_vendido: number }>> {
+    const rows = await prisma.$queryRaw<Array<{
+      Vendedor: string;
+      ventas_realizadas: bigint;
+      total_vendido: string;
+    }>>`
+      SELECT
+        COALESCE(p.name || ' ' || p."lastName", 'Desconocido') AS "Vendedor",
+        COUNT(im.id)                                            AS ventas_realizadas,
+        COALESCE(SUM(i.total), 0)                              AS total_vendido
+      FROM "InventoryMovements" im
+      LEFT JOIN "Persons"  p ON im."sellerId"   = p.id
+      LEFT JOIN "Invoices" i ON i."movementId"  = im.id
+      WHERE im."movementType" = 'SALE'
+      GROUP BY im."sellerId", p.name, p."lastName"
+      ORDER BY total_vendido DESC
+    `;
+
+    return rows.map((r) => ({
+      Vendedor: r.Vendedor,
+      ventas_realizadas: Number(r.ventas_realizadas),
+      total_vendido: Number(r.total_vendido),
+    }));
   }
 }
