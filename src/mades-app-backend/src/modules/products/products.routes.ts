@@ -4,9 +4,12 @@ import { sizeTypeIdRequestSchema } from "../product-sizes/schemas/sizes.request.
 import { validateMiddleware } from "../../core/middleware/validate-schema.middleware";
 import { createProductRequestSchema, listProductsQueryRequestSchema, updateProductRequestSchema } from "./schemas";
 import { authMiddleware } from "../../core/middleware/auth.middleware";
+import { uploadMiddleware, uploadProductImage } from "./products.upload";
 
 const router = Router();
 const productsController = new ProductsController();
+
+router.post("/upload-image", authMiddleware, uploadMiddleware, uploadProductImage);
 
 router.post("/", authMiddleware,
     validateMiddleware(createProductRequestSchema, "body"),

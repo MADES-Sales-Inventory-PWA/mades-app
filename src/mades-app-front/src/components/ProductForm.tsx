@@ -1,5 +1,5 @@
-import { useEffect, useMemo, useState } from "react";
-import { Upload } from "lucide-react";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { Camera, RefreshCw, Loader2 } from "lucide-react";
 import { BasicButton } from "./BasicButton";
 import { Button } from "./Button";
 import { Input } from "./Input";
@@ -59,7 +59,34 @@ export const ProductForm = ({
     const [sizeValues, setSizeValues] = useState<SizeValueDTO[]>([]);
     const [isLoadingSizes, setIsLoadingSizes] = useState(false);
     const [isSubmitting, setIsSubmitting] = useState(false);
+    const [isUploadingImage, setIsUploadingImage] = useState(false);
+    const fileInputRef = useRef<HTMLInputElement>(null);
     const { showToast } = useToast();
+
+    async function handleImageCapture(e: React.ChangeEvent<HTMLInputElement>) {
+        const file = e.target.files?.[0];
+        if (!file) return;
+        e.target.value = "";
+
+        setIsUploadingImage(true);
+        try {
+            const { getAuthHeaders } = await import("../utils/auth");
+            const formData = new FormData();
+            formData.append("image", file);
+            const res = await fetch("/api/products/upload-image", {
+                method: "POST",
+                headers: getAuthHeaders(),
+                body: formData,
+            });
+            const data = await res.json();
+            if (!res.ok || !data.success) throw new Error(data.message ?? "Error al subir la imagen");
+            setForm((cur) => ({ ...cur, imageUrl: data.data.url }));
+        } catch (err) {
+            showToast(err instanceof Error ? err.message : "No se pudo subir la imagen");
+        } finally {
+            setIsUploadingImage(false);
+        }
+    }
 
     const selectedSizeTypeId = form.sizeTypeId ? Number(form.sizeTypeId) : null;
     const selectedSizeValueId = form.sizeValueId ? Number(form.sizeValueId) : null;
@@ -224,20 +251,58 @@ export const ProductForm = ({
 
                 <div className="mt-5 grid gap-5 lg:grid-cols-[280px_1fr]">
                     <div className="space-y-3">
-                        <p className="text-sm font-semibold text-slate-700">Imagen del producto</p>
-                        <div className="overflow-hidden rounded-2xl border border-slate-200 bg-slate-50">
-                            <div className="flex h-50 w-full items-center justify-center" onClick={() => alert("Funcionalidad de subir imagen en construcción")}>
-                                {form.imageUrl ? (
-                                    <img src={form.imageUrl} alt="Imagen del producto" className="h-full w-full object-cover" />
-                                ) : (
-                                    <div className="flex flex-col items-center justify-center gap-2 text-slate-500">
-                                        <Upload size={32} />
-                                        <span className="text-sm font-medium">Subir imagen</span>
+                        <p className="text-sm font-semibold text-slate-700">Foto del producto</p>
+
+                        <input
+                            ref={fileInputRef}
+                            type="file"
+                            accept="image/*"
+                            capture="environment"
+                            className="hidden"
+                            onChange={handleImageCapture}
+                        />
+
+                        <button
+                            type="button"
+                            onClick={() => !isUploadingImage && fileInputRef.current?.click()}
+                            disabled={isUploadingImage}
+                            className="group relative w-full overflow-hidden rounded-2xl border-2 border-dashed border-slate-200 bg-slate-50 transition hover:border-primary-blue hover:bg-blue-50/40 disabled:cursor-not-allowed"
+                        >
+                            {isUploadingImage ? (
+                                <div className="flex h-52 flex-col items-center justify-center gap-2 text-slate-400">
+                                    <Loader2 size={36} className="animate-spin" />
+                                    <span className="text-sm">Subiendo imagen...</span>
+                                </div>
+                            ) : form.imageUrl ? (
+                                <>
+                                    <img
+                                        src={form.imageUrl}
+                                        alt="Foto del producto"
+                                        className="h-52 w-full object-cover"
+                                    />
+                                    <div className="absolute inset-0 flex flex-col items-center justify-center gap-1 bg-black/40 opacity-0 transition group-hover:opacity-100">
+                                        <RefreshCw size={24} className="text-white" />
+                                        <span className="text-xs font-medium text-white">Cambiar foto</span>
                                     </div>
-                                )}
-                            </div>
-                        </div>
-                        <Input label="URL de imagen" type="text" placeholder="https://..." value={form.imageUrl} onChange={(value) => setForm((current) => ({ ...current, imageUrl: value }))} />
+                                </>
+                            ) : (
+                                <div className="flex h-52 flex-col items-center justify-center gap-2 text-slate-400 group-hover:text-primary-blue">
+                                    <Camera size={36} />
+                                    <span className="text-sm font-medium">Tomar foto o elegir imagen</span>
+                                    <span className="text-xs text-slate-400">Opcional</span>
+                                </div>
+                            )}
+                        </button>
+
+                        {form.imageUrl && (
+                            <button
+                                type="button"
+                                onClick={() => setForm((cur) => ({ ...cur, imageUrl: "" }))}
+                                className="w-full rounded-xl border border-slate-200 py-1.5 text-xs text-slate-500 hover:bg-slate-50"
+                            >
+                                Quitar foto
+                            </button>
+                        )}
                     </div>
 
                     <div className="grid gap-1.5">

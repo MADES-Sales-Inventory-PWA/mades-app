@@ -30,9 +30,8 @@ export const productSchema = z.object({
         .nullable(),
 
     imageUrl: z.string()
-        .min(10, "La URL de la imagen es demasiado corta")
+        .url("Debe ser una URL válida (http o https)")
         .max(500, "La URL de la imagen no puede superar los 500 caracteres")
-        .regex(/^https?:\/\/(www\.)?[-a-zA-Z0-9@:%._+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_+.~#?&/=]*)$/, "Debe ser una URL válida (http o https)")
         .nullable(),
 
     purchasePrice: z.number("El precio de compra debe ser un número")

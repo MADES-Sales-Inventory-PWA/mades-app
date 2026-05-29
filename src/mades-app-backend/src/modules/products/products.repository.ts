@@ -24,7 +24,7 @@ export class ProductsRepository {
     }
 
     public async findProductByBarcode(barcode: string): Promise<productDTO | null> {
-        const product = await prisma.products.findUnique({
+        const product = await prisma.products.findFirst({
             where: { barcode },
             include: { productDetails: true },
         })
