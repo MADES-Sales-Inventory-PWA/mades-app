@@ -53,14 +53,13 @@ export class ReportsService {
   }
   async getSalesPerEmployee() {
     const data = await this.repository.salesPerEmployee();
-    const processedData = ReportsMapper.toSalesPerEmployee(data);
-    const total = processedData.reduce((acc, curr) => acc + curr.total_vendido, 0);
+    const total = data.reduce((acc, curr) => acc + curr.total_vendido, 0);
 
     return {
       success: true,
       label: "Rendimiento General de Empleados",
-      total: total,
-      data: processedData
+      total,
+      data,
     };
   }
 }

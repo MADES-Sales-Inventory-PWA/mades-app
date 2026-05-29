@@ -11,6 +11,10 @@ export class SalesService {
       throw new Error("No se encontró la persona asociada al usuario autenticado");
     }
 
+    const productIds = data.items.map((item) => item.productId);
+    const products = await this.repository.findProductsWithStockByIds(productIds);
+    const productMap = new Map(products.map((p) => [Number(p.id), p]));
+
     const resolvedItems: Array<{
       productId: number;
       quantity: number;
@@ -20,7 +24,7 @@ export class SalesService {
     }> = [];
 
     for (const item of data.items) {
-      const product = await this.repository.findProductWithStockById(item.productId);
+      const product = productMap.get(item.productId);
 
       if (!product) {
         throw new Error(`No se encontró el producto con id ${item.productId}`);
