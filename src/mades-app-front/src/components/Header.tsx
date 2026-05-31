@@ -5,6 +5,9 @@ import { OnlineIndicator } from "../components/OnlineIndicator";
 import { useOnlineStatus } from "../hooks/useOnlineStatus";
 import { useLogout } from "../hooks/useLogout";
 import { ConfirmDialog } from "./ConfirmDialog";
+import { StockAlertsButton } from "./StockAlertsButton";
+import { getSession } from "../utils/auth";
+import { constants } from "../constants/Constants";
 
 type HeaderProps = {
   title?: string;
@@ -21,6 +24,8 @@ export const Header = ({
 }: HeaderProps) => {
   const isOnline = useOnlineStatus();
   const { requestLogout, showConfirm, confirmLogout, cancelLogout } = useLogout();
+  const session = getSession();
+  const isAdmin = Number(session?.user?.roleId) === constants.ADMIN_ROLE_ID;
 
   const shouldShowLogo = showBrandIcon || showMobileIcon;
 
@@ -38,9 +43,7 @@ export const Header = ({
       </div>
 
       <div className="ml-auto flex shrink-0 items-center gap-2 sm:gap-3">
-        {/* <BasicButton onClick={() => {}} className="p-2 hover:bg-gray-200 active:text-gray-500">
-          <Bell />
-        </BasicButton> */}
+        {isAdmin && <StockAlertsButton />}
         <OnlineIndicator isOnline={isOnline} />
         {enableLogoMenu && (
           <BasicButton
