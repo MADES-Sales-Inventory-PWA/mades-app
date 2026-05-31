@@ -68,3 +68,64 @@ export async function getInventoryAdjustments(
   params.set('pageSize', String(filters.pageSize ?? 20))
   return apiFetch<Paginated<InventoryAdjustmentItem>>(`${BASE}/inventory-adjustments?${params}`)
 }
+
+// ── Sales summary (day / week / month) ───────────────────────────────────────
+
+export type SalesSummary = {
+  success: boolean
+  period: string
+  label: string
+  totalSales: number
+  count: number
+  data: Array<{ id: number; date: string; total: number; seller: string }>
+}
+
+export async function getSalesSummary(
+  period: 'day' | 'week' | 'month',
+  date: string
+): Promise<SalesSummary> {
+  const endpoint =
+    period === 'day' ? 'sales-per-day' :
+    period === 'week' ? 'sales-per-week' : 'sales-per-month'
+  return apiFetch<SalesSummary>(`${BASE}/${endpoint}?date=${date}`)
+}
+
+// ── Sales history ─────────────────────────────────────────────────────────────
+
+export type SalesHistoryProduct = {
+  id: number
+  name: string
+  barcode: string
+  quantity: number
+  price: number
+  lineTotal: number
+}
+
+export type SalesHistoryItem = {
+  id: number
+  createdAt: string
+  employee: { id: number; name: string; lastName: string } | null
+  invoiceNumber: string | null
+  total: number
+  products: SalesHistoryProduct[]
+}
+
+export type SalesHistoryFilters = {
+  from?: string
+  to?: string
+  employeeId?: number
+  page?: number
+  pageSize?: number
+}
+
+export async function getSalesHistory(
+  filters: SalesHistoryFilters = {}
+): Promise<Paginated<SalesHistoryItem>> {
+  const params = new URLSearchParams()
+  if (filters.from) params.set('from', filters.from)
+  if (filters.to) params.set('to', filters.to)
+  if (filters.employeeId) params.set('employeeId', String(filters.employeeId))
+  params.set('page', String(filters.page ?? 1))
+  params.set('pageSize', String(filters.pageSize ?? 20))
+  return apiFetch<Paginated<SalesHistoryItem>>(`${BASE}/sales?${params}`)
+}
