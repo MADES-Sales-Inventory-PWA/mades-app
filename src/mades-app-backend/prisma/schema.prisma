@@ -134,7 +134,6 @@ model Notifications {
   id           BigInt   @id(map: "notifications_pkey") @default(autoincrement())
   currentStock Int
   minStock     Int
-  isRead       Boolean  @default(false)
   createdAt    DateTime @default(now()) @db.Timestamptz(6)
   productId    BigInt
   Products     Products @relation(fields: [productId], references: [id], onDelete: Cascade, map: "notifications_productid_fkey")
