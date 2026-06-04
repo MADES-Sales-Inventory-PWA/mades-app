@@ -1,8 +1,12 @@
 import { CreateSaleDTO } from "./sales.schema";
 import { SalesRepository, RegisteredSale } from "./sales.repository";
+import { NotificationsService } from "../notifications/notifications.service";
 
 export class SalesService {
-  constructor(private readonly repository = new SalesRepository()) {}
+  constructor(
+    private readonly repository = new SalesRepository(),
+    private readonly notificationsService = new NotificationsService()
+  ) { }
 
   async registerSale(userId: number, data: CreateSaleDTO): Promise<RegisteredSale> {
     const operatorPersonId = await this.repository.findOperatorPersonIdByUserId(userId);
@@ -21,6 +25,7 @@ export class SalesService {
       price: number;
       newQty: number;
       detailId: bigint;
+      minQuantity: number;
     }> = [];
 
     for (const item of data.items) {
@@ -55,9 +60,28 @@ export class SalesService {
         price: item.price,
         newQty,
         detailId: detail.id,
+        minQuantity: Number(detail.minQuantity),
       });
     }
 
-    return this.repository.registerSale(operatorPersonId, data, resolvedItems);
+    const result = await this.repository.registerSale(operatorPersonId, data, resolvedItems);
+
+    try {
+      for (const item of resolvedItems) {
+        if (item.newQty < item.minQuantity) {
+          await this.notificationsService.createNotification({
+            currentStock: item.newQty,
+            minStock: item.minQuantity,
+            productId: item.productId,
+          });
+        } else {
+          await this.notificationsService.deleteNotificationByProductId(item.productId);
+        }
+      }
+    } catch (notificationError) {
+      console.error("[registerSale] Error al gestionar notificaciones:", notificationError);
+    }
+
+    return result;
   }
 }

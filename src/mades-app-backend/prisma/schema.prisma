@@ -74,6 +74,7 @@ model Products {
   sizeValueId     BigInt
   sizeTypeId      BigInt
   MovementDetails MovementDetails[]
+  Notifications   Notifications[]
   SizeTypes       SizeTypes         @relation(fields: [sizeTypeId], references: [id], onDelete: SetNull, onUpdate: NoAction)
   SizeValues      SizeValues        @relation(fields: [sizeValueId], references: [id], onDelete: SetNull, onUpdate: NoAction)
   productDetails  productDetails[]
@@ -126,6 +127,18 @@ model SizeValues {
   SizeTypes  SizeTypes  @relation(fields: [sizeTypeId], references: [id], onDelete: Cascade, onUpdate: NoAction)
 
   @@unique([sizeTypeId, value], map: "SizeValues_unique")
+}
+
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model Notifications {
+  id           BigInt   @id(map: "notifications_pkey") @default(autoincrement())
+  currentStock Int
+  minStock     Int
+  createdAt    DateTime @default(now()) @db.Timestamptz(6)
+  productId    BigInt
+  Products     Products @relation(fields: [productId], references: [id], onDelete: Cascade, map: "notifications_productid_fkey")
+
+  @@index([productId], map: "notifications_productid_idx")
 }
 
 enum document_type {
