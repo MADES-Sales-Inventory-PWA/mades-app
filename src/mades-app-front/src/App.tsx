@@ -114,7 +114,7 @@ function App() {
   useEffect(() => {
     const checkAdmin = async () => {
       try {
-        const response = await fetch(constants.BACKEND_CHECK_ADMIN_URL);
+        const response = await fetch(constants.getBackendUrl(constants.BACKEND_CHECK_ADMIN_URL));
         const data = await response.json();
         setAdminExists(Boolean(data?.data?.exists));
       } catch {

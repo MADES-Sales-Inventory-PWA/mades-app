@@ -30,11 +30,11 @@ async function getBackendErrorMessage(response: Response, fallbackMessage: strin
 }
 
 function getSizesTypesUrl() {
-  return `${constants.BACKEND_BASE_URL}/api/sizes/types`;
+  return constants.getBackendUrl("/api/sizes/types");
 }
 
 function getSizeValuesUrl(sizeTypeId: number) {
-  return `${constants.BACKEND_BASE_URL}/api/sizes/values/${sizeTypeId}`;
+  return constants.getBackendUrl(`/api/sizes/values/${sizeTypeId}`);
 }
 
 export async function fetchSizeTypes() {

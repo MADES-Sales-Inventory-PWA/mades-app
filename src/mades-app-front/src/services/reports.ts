@@ -1,7 +1,7 @@
 import { constants } from '../constants/Constants'
 import { authFetch } from '../utils/apiFetch'
 
-const BASE = `${constants.BACKEND_BASE_URL}/api/reports`
+const BASE = constants.getBackendUrl("/api/reports")
 
 export type SalesByEmployee = {
   Vendedor: string

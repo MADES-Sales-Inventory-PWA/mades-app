@@ -49,7 +49,7 @@ async function getBackendErrorMessage(response: Response, fallbackMessage: strin
 }
 
 function getUsersUrl() {
-  return `${constants.BACKEND_BASE_URL}/api/users`;
+  return constants.getBackendUrl("/api/users");
 }
 
 function getUserStatusUrl(id: number) {

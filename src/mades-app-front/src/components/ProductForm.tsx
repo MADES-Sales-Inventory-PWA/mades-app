@@ -6,6 +6,7 @@ import { Input } from "./Input";
 import type { Product } from "../types/Types";
 import { createProduct, updateProduct, type ProductFormValues } from "../services/products";
 import { fetchSizeTypes, fetchSizeValues, type SizeTypeDTO, type SizeValueDTO } from "../services/sizes";
+import { constants } from "../constants/Constants";
 import { useToast } from "./ToastProvider";
 
 type FormState = {
@@ -73,7 +74,7 @@ export const ProductForm = ({
             const { getAuthHeaders } = await import("../utils/auth");
             const formData = new FormData();
             formData.append("image", file);
-            const res = await fetch("/api/products/upload-image", {
+            const res = await fetch(constants.getBackendUrl("/api/products/upload-image"), {
                 method: "POST",
                 headers: getAuthHeaders(),
                 body: formData,

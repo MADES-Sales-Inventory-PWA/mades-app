@@ -33,7 +33,7 @@ type ApiResponse<T> = {
 };
 
 function getSalesUrl() {
-  return `${constants.BACKEND_BASE_URL}/api/sales`;
+  return constants.getBackendUrl("/api/sales");
 }
 
 async function getBackendErrorMessage(response: Response, fallback: string) {

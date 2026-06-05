@@ -47,7 +47,7 @@ async function getBackendErrorMessage(response: Response, fallbackMessage: strin
 }
 
 function getProductsUrl() {
-  return `${constants.BACKEND_BASE_URL}/api/products`;
+  return constants.getBackendUrl("/api/products");
 }
 
 function getProductStateUrl(id: number) {

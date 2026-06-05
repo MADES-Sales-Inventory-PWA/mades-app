@@ -41,7 +41,7 @@ export default function Login() {
     try {
       setIsLoading(true);
 
-      const res = await fetch(constants.BACKEND_LOGIN_URL, {
+      const res = await fetch(constants.getBackendUrl(constants.BACKEND_LOGIN_URL), {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

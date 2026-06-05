@@ -68,7 +68,7 @@ export default function CreateAdmin({ onCreated }: CreateAdminProps) {
 
     try {
       setIsCreating(true);
-      const response = await fetch(constants.BACKEND_REGISTER_ADMIN_URL, {
+      const response = await fetch(constants.getBackendUrl(constants.BACKEND_REGISTER_ADMIN_URL), {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

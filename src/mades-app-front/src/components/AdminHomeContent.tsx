@@ -18,7 +18,7 @@ type DailySales = { count: number; totalSales: number };
 async function fetchTodaySales(): Promise<DailySales> {
   const today = new Date().toISOString().split("T")[0];
   const res = await fetch(
-    `${constants.BACKEND_BASE_URL}/api/reports/sales-per-day?date=${today}`,
+    constants.getBackendUrl(`/api/reports/sales-per-day?date=${today}`),
     { headers: getAuthHeaders() }
   );
   if (!res.ok) return { count: 0, totalSales: 0 };
@@ -29,7 +29,7 @@ async function fetchTodaySales(): Promise<DailySales> {
 async function fetchTodayAdjustmentsCount(): Promise<number> {
   const today = new Date().toISOString().split("T")[0];
   const res = await fetch(
-    `${constants.BACKEND_BASE_URL}/api/reports/inventory-adjustments?from=${today}&to=${today}&page=1&pageSize=1`,
+    constants.getBackendUrl(`/api/reports/inventory-adjustments?from=${today}&to=${today}&page=1&pageSize=1`),
     { headers: getAuthHeaders() }
   );
   if (!res.ok) return 0;

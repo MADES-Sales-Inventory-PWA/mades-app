@@ -33,7 +33,7 @@ type RegisteredAdjustment = {
 };
 
 function getInventoryAdjustmentsUrl() {
-  return `${constants.BACKEND_BASE_URL}/api/inventory/adjustments`;
+  return constants.getBackendUrl("/api/inventory/adjustments");
 }
 
 export async function createInventoryAdjustment(payload: CreateInventoryAdjustmentPayload) {

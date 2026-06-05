@@ -27,6 +27,16 @@ const BACKEND_LOGIN_URL = "/api/auth/login";
 const BACKEND_REGISTER_ADMIN_URL = "/api/users/register-initial-admin";
 const BACKEND_CHECK_ADMIN_URL = "/api/users/admin-exists";
 
+function getBackendUrl(path: string) {
+  const normalizedPath = path.startsWith("/") ? path : `/${path}`;
+
+  if (!BACKEND_BASE_URL) {
+    return normalizedPath;
+  }
+
+  return `${BACKEND_BASE_URL.replace(/\/$/, "")}${normalizedPath}`;
+}
+
 export const constants = {
   HOME_PATH,
   ADMIN_HOME_PATH,
@@ -49,4 +59,5 @@ export const constants = {
   BACKEND_LOGIN_URL,
   BACKEND_REGISTER_ADMIN_URL,
   BACKEND_CHECK_ADMIN_URL,
+  getBackendUrl,
 };
