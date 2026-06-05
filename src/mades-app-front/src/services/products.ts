@@ -1,6 +1,8 @@
 import { constants } from "../constants/Constants";
 import { authFetch } from "../utils/apiFetch";
 import type { Product } from "../types/Types";
+import { productsDb } from "../sw/db/products.db";
+import type { StoredProduct } from "../sw/db/client";
 
 export type BackendProduct = {
   id: number;
@@ -72,6 +74,22 @@ export function mapBackendProductToFrontend(product: BackendProduct) {
   } satisfies Product;
 }
 
+function mapBackendProductToStored(product: BackendProduct): StoredProduct {
+  return {
+    id: product.id,
+    name: product.name,
+    state: product.state,
+    sizeTypeId: product.sizeTypeId,
+    sizeValueId: product.sizeValueId,
+    barcode: product.barcode ?? "",
+    description: product.description ?? null,
+    imageUrl: product.imageUrl ?? null,
+    purchasePrice: product.purchasePrice,
+    quantity: product.quantity,
+    minQuantity: product.minQuantity,
+  };
+}
+
 export async function fetchProducts() {
   const response = await authFetch(getProductsUrl());
 
@@ -81,6 +99,7 @@ export async function fetchProducts() {
   }
 
   const payload = (await response.json()) as ApiResponse<BackendProduct[]>;
+  await productsDb.saveMany(payload.data.map(mapBackendProductToStored));
   return payload.data.map(mapBackendProductToFrontend);
 }
 
@@ -96,7 +115,12 @@ export async function toggleProductState(id: number, state: boolean) {
     throw new Error(message);
   }
 
-  return (await response.json()) as ApiResponse<null>;
+  const payload = (await response.json()) as ApiResponse<null>;
+  const storedProduct = await productsDb.findById(id);
+  if (storedProduct) {
+    await productsDb.saveMany([{ ...storedProduct, state }]);
+  }
+  return payload;
 }
 
 export async function createProduct(payload: ProductFormValues) {
@@ -111,7 +135,9 @@ export async function createProduct(payload: ProductFormValues) {
     throw new Error(message);
   }
 
-  return (await response.json()) as ApiResponse<BackendProduct>;
+  const responsePayload = (await response.json()) as ApiResponse<BackendProduct>;
+  await productsDb.saveMany([mapBackendProductToStored(responsePayload.data)]);
+  return responsePayload;
 }
 
 export async function updateProduct(id: number, payload: Partial<ProductFormValues>) {
@@ -126,5 +152,7 @@ export async function updateProduct(id: number, payload: Partial<ProductFormValu
     throw new Error(message);
   }
 
-  return (await response.json()) as ApiResponse<BackendProduct>;
+  const responsePayload = (await response.json()) as ApiResponse<BackendProduct>;
+  await productsDb.saveMany([mapBackendProductToStored(responsePayload.data)]);
+  return responsePayload;
 }

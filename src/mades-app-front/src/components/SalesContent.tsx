@@ -18,6 +18,7 @@ import { createSale, syncPendingSales, getPendingSalesCount } from "../services/
 import { productsDb } from "../sw/db/products.db";
 import { salesDb } from "../sw/db/sales.db";
 import { BarcodeScanner } from "./BarcodeScanner";
+import { dispatchNotificationsRefresh } from "../utils/notificationEvents";
 
 type CartItem = Product & { cartQuantity: number };
 
@@ -251,6 +252,7 @@ export const SalesContent = () => {
             await productsDb.updateStock(item.id, stored.quantity - item.cartQuantity);
           }
         }
+        dispatchNotificationsRefresh();
 
         await salesDb.save({
           items: saleItems,

@@ -52,8 +52,7 @@ describe('ReportsService - Ventas por Empleado', () => {
 
     const result = await service.getSalesPerEmployee();
 
-    const juan = result.data.find((e: any) => e.Vendedor === 'Juan Pérez');
-    expect(juan).toBeDefined();
+    const juan = result.data.find((e: any) => e.Vendedor === 'Juan Pérez')!;
     expect(juan.ventas_realizadas).toBe(2);
     expect(juan.total_vendido).toBe(80000);
   });
