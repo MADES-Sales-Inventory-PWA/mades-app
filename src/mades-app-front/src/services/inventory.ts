@@ -1,5 +1,7 @@
 import { constants } from "../constants/Constants";
 import { authFetch } from "../utils/apiFetch";
+import { dispatchNotificationsRefresh } from "../utils/notificationEvents";
+import { productsDb } from "../sw/db/products.db";
 
 export type InventoryAdjustmentType = "LOSS" | "GAIN";
 export type InventoryAdjustmentReason =
@@ -49,5 +51,8 @@ export async function createInventoryAdjustment(payload: CreateInventoryAdjustme
     throw new Error(message);
   }
 
-  return (await response.json()) as ApiResponse<RegisteredAdjustment>;
+  const responsePayload = (await response.json()) as ApiResponse<RegisteredAdjustment>;
+  await productsDb.updateStock(responsePayload.data.productId, responsePayload.data.newQty);
+  dispatchNotificationsRefresh();
+  return responsePayload;
 }

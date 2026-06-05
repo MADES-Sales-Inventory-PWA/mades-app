@@ -174,13 +174,21 @@ function ResumenReport() {
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-slate-100">
-                    {summary.data.map((sale) => (
-                      <tr key={sale.id} className="hover:bg-slate-50">
-                        <td className="px-4 py-3 text-slate-500">{formatDate(sale.date)}</td>
-                        <td className="px-4 py-3 font-medium text-slate-800">{sale.seller}</td>
-                        <td className="px-4 py-3 text-right font-semibold text-slate-800">{formatCOP(Number(sale.total))}</td>
-                      </tr>
-                    ))}
+                    {summary.data
+                      .filter((sale) => sale.total)
+                      .map((sale) => (
+                        <tr key={sale.id} className="hover:bg-slate-50">
+                          <td className="px-4 py-3 text-slate-500">
+                            {formatDate(sale.date)}
+                          </td>
+                          <td className="px-4 py-3 font-medium text-slate-800">
+                            {sale.seller}
+                          </td>
+                          <td className="px-4 py-3 text-right font-semibold text-slate-800">
+                            {formatCOP(Number(sale.total))}
+                          </td>
+                        </tr>
+                      ))}
                   </tbody>
                 </table>
               </div>
@@ -204,7 +212,7 @@ function SalesHistoryReport() {
   const [expandedId, setExpandedId] = React.useState<number | null>(null)
 
   React.useEffect(() => {
-    fetchEmployees().then(setEmployees).catch(() => {})
+    fetchEmployees().then(setEmployees).catch(() => { })
   }, [])
 
   const load = React.useCallback((f: SalesHistoryFilters) => {
@@ -238,18 +246,20 @@ function SalesHistoryReport() {
     const employeeName = item.employee ? `${item.employee.name} ${item.employee.lastName}` : '—'
     return (
       <React.Fragment key={item.id}>
-        <tr
-          className="cursor-pointer hover:bg-slate-50"
-          onClick={() => setExpandedId(isExpanded ? null : item.id)}
-        >
-          <td className="px-4 py-3 text-slate-500">{formatDate(item.createdAt)}</td>
-          <td className="px-4 py-3 text-slate-500 font-mono text-xs">{item.invoiceNumber ?? '—'}</td>
-          <td className="px-4 py-3 font-medium text-slate-800">{employeeName}</td>
-          <td className="px-4 py-3 text-right font-semibold text-slate-800">{formatCOP(item.total)}</td>
-          <td className="px-4 py-3 text-right text-slate-400">
-            {isExpanded ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
-          </td>
-        </tr>
+        {item.total > 0 && (
+          <tr
+            className="cursor-pointer hover:bg-slate-50"
+            onClick={() => setExpandedId(isExpanded ? null : item.id)}
+          >
+            <td className="px-4 py-3 text-slate-500">{formatDate(item.createdAt)}</td>
+            <td className="px-4 py-3 text-slate-500 font-mono text-xs">{item.invoiceNumber ?? '—'}</td>
+            <td className="px-4 py-3 font-medium text-slate-800">{employeeName}</td>
+            <td className="px-4 py-3 text-right font-semibold text-slate-800">{formatCOP(Number(item.total))}</td>
+            <td className="px-4 py-3 text-right text-slate-400">
+              {isExpanded ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
+            </td>
+          </tr>
+        )}
         {isExpanded && (
           <tr className="bg-slate-50">
             <td colSpan={5} className="px-6 pb-3 pt-1">
@@ -426,14 +436,22 @@ function SalesByEmployeeReport() {
             </tr>
           </thead>
           <tbody className="divide-y divide-slate-100">
-            {data.map((row, i) => (
-              <tr key={row.Vendedor} className="hover:bg-slate-50">
-                <td className="px-4 py-3 text-slate-400">{i + 1}</td>
-                <td className="px-4 py-3 font-medium text-slate-800">{row.Vendedor}</td>
-                <td className="px-4 py-3 text-right text-slate-600">{row.ventas_realizadas}</td>
-                <td className="px-4 py-3 text-right font-semibold text-slate-800">{formatCOP(row.total_vendido)}</td>
-              </tr>
-            ))}
+            {data
+              .filter((row) => row.total_vendido !== null)
+              .map((row, i) => (
+                <tr key={row.Vendedor} className="hover:bg-slate-50">
+                  <td className="px-4 py-3 text-slate-400">{i + 1}</td>
+                  <td className="px-4 py-3 font-medium text-slate-800">
+                    {row.Vendedor}
+                  </td>
+                  <td className="px-4 py-3 text-right text-slate-600">
+                    {row.ventas_realizadas}
+                  </td>
+                  <td className="px-4 py-3 text-right font-semibold text-slate-800">
+                    {formatCOP(row.total_vendido)}
+                  </td>
+                </tr>
+              ))}
           </tbody>
           <tfoot className="border-t border-slate-200 bg-slate-50">
             <tr>
@@ -529,6 +547,11 @@ function InventoryMovementsReport() {
   const [isLoading, setIsLoading] = React.useState(true)
   const [error, setError] = React.useState<string | null>(null)
   const [filters, setFilters] = React.useState<AdjustmentFilters>({ page: 1, pageSize: 20 })
+  const [employees, setEmployees] = React.useState<EmployeeItem[]>([])
+
+  React.useEffect(() => {
+    fetchEmployees().then(setEmployees).catch(() => { })
+  }, [])
 
   const load = React.useCallback((f: AdjustmentFilters) => {
     setIsLoading(true)
@@ -572,6 +595,16 @@ function InventoryMovementsReport() {
         <select value={filters.reason ?? ''} onChange={(e) => applyFilters({ reason: e.target.value || undefined })}
           className="w-full rounded-lg border border-slate-200 px-3 py-1.5 text-sm text-slate-700 focus:outline-none focus:ring-1 focus:ring-blue-400 sm:w-auto">
           {REASONS.map((r) => <option key={r.value} value={r.value}>{r.label}</option>)}
+        </select>
+        <select
+          value={filters.employeeId ?? ''}
+          onChange={(e) => applyFilters({ employeeId: e.target.value ? Number(e.target.value) : undefined })}
+          className="w-full rounded-lg border border-slate-200 px-3 py-1.5 text-sm text-slate-700 focus:outline-none focus:ring-1 focus:ring-blue-400 sm:w-auto"
+        >
+          <option value="">Todos los empleados</option>
+          {employees.map((emp) => (
+            <option key={emp.id} value={emp.id}>{emp.name} {emp.lastName}</option>
+          ))}
         </select>
       </div>
       {renderContent()}
@@ -693,11 +726,11 @@ function StockReport() {
 // ── Main component ────────────────────────────────────────────────────────────
 
 const TABS: { id: Tab; label: string; shortLabel: string; icon: React.ReactNode }[] = [
-  { id: 'summary',   label: 'Resumen general',          shortLabel: 'Resumen',     icon: <TrendingUp size={15} /> },
-  { id: 'history',   label: 'Historial de ventas',      shortLabel: 'Historial',   icon: <History size={15} /> },
-  { id: 'employees', label: 'Ventas por empleado',      shortLabel: 'Empleados',   icon: <Users size={15} /> },
-  { id: 'movements', label: 'Movimientos de inventario',shortLabel: 'Movimientos', icon: <ClipboardList size={15} /> },
-  { id: 'stock',     label: 'Existencias',              shortLabel: 'Existencias', icon: <Package size={15} /> },
+  { id: 'summary', label: 'Resumen general', shortLabel: 'Resumen', icon: <TrendingUp size={15} /> },
+  { id: 'history', label: 'Historial de ventas', shortLabel: 'Historial', icon: <History size={15} /> },
+  { id: 'employees', label: 'Ventas por empleado', shortLabel: 'Empleados', icon: <Users size={15} /> },
+  { id: 'movements', label: 'Movimientos de inventario', shortLabel: 'Movimientos', icon: <ClipboardList size={15} /> },
+  { id: 'stock', label: 'Existencias', shortLabel: 'Existencias', icon: <Package size={15} /> },
 ]
 
 export const ReportsContent = () => {
@@ -760,11 +793,10 @@ export const ReportsContent = () => {
             key={tab.id}
             type="button"
             onClick={() => setActiveTab(tab.id)}
-            className={`flex shrink-0 items-center gap-1.5 px-3 py-2 text-sm font-medium transition lg:px-4 ${
-              activeTab === tab.id
-                ? 'border-b-2 border-blue-600 text-blue-700'
-                : 'text-slate-500 hover:text-slate-700'
-            }`}
+            className={`flex shrink-0 items-center gap-1.5 px-3 py-2 text-sm font-medium transition lg:px-4 ${activeTab === tab.id
+              ? 'border-b-2 border-blue-600 text-blue-700'
+              : 'text-slate-500 hover:text-slate-700'
+              }`}
           >
             {tab.icon}
             <span className="hidden lg:inline">{tab.label}</span>
@@ -774,11 +806,11 @@ export const ReportsContent = () => {
       </div>
 
       {/* Tab content */}
-      {activeTab === 'summary'   && <ResumenReport />}
-      {activeTab === 'history'   && <SalesHistoryReport />}
+      {activeTab === 'summary' && <ResumenReport />}
+      {activeTab === 'history' && <SalesHistoryReport />}
       {activeTab === 'employees' && <SalesByEmployeeReport />}
       {activeTab === 'movements' && <InventoryMovementsReport />}
-      {activeTab === 'stock'     && <StockReport />}
+      {activeTab === 'stock' && <StockReport />}
     </div>
   )
 }

@@ -1,6 +1,7 @@
 import { constants } from "../constants/Constants";
 import { authFetch } from "../utils/apiFetch";
 import { salesDb } from "../sw/db/sales.db";
+import { dispatchNotificationsRefresh } from "../utils/notificationEvents";
 
 export type SaleItem = {
   productId: number;
@@ -66,6 +67,7 @@ export async function createSale(
   }
 
   const res = (await response.json()) as ApiResponse<RegisteredSale>;
+  dispatchNotificationsRefresh();
   return res.data;
 }
 

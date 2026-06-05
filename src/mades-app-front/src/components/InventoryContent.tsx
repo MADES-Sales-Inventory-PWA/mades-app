@@ -1,4 +1,5 @@
 import React from "react";
+import { useLocation } from "react-router-dom";
 import { ORDER_TYPES } from "../constants/documentTypes";
 import { Button } from "./Button";
 import { Combobox } from "./Combobox";
@@ -48,6 +49,7 @@ const initialProducts: Product[] = [
 ];
 
 export const InventoryContent = () => {
+    const location = useLocation();
     const session = getSession();
     const roleId = Number(session?.user?.roleId);
     const isAdmin = roleId === constants.ADMIN_ROLE_ID;
@@ -64,6 +66,7 @@ export const InventoryContent = () => {
     const [searchTerm, setSearchTerm] = React.useState("");
     const [orderType, setOrderType] = React.useState("DESC");
     const { showToast } = useToast();
+    const handledNotificationRef = React.useRef<string | null>(null);
 
     const displayedProducts = React.useMemo(() => {
         const normalizedSearch = searchTerm.trim().toLowerCase();
@@ -105,6 +108,31 @@ export const InventoryContent = () => {
         void loadProducts();
 
     }, [loadProducts]);
+
+    React.useEffect(() => {
+        const state = location.state as { focusProductId?: number; openAdjustment?: boolean } | null;
+        const focusProductId = state?.focusProductId;
+        if (!focusProductId || products.length === 0) {
+            return;
+        }
+
+        const actionKey = `${location.key}-${focusProductId}-${Boolean(state?.openAdjustment)}`;
+        if (handledNotificationRef.current === actionKey) {
+            return;
+        }
+
+        const product = products.find((item) => item.id === focusProductId);
+        if (!product) {
+            return;
+        }
+
+        handledNotificationRef.current = actionKey;
+        setSearchTerm(product.barcode || product.name);
+
+        if (state?.openAdjustment && isOnline) {
+            openAdjustModal(product.id);
+        }
+    }, [isOnline, location.key, location.state, products]);
 
     async function changeProductState(id: number, nextState: boolean) {
         try {

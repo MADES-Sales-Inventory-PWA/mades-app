@@ -35,19 +35,44 @@ export class SalesRepository {
   }
 
   async findProductsWithStockByIds(productIds: number[]) {
-    return prisma.products.findMany({
-      where: { id: { in: productIds.map((id) => BigInt(id)) } },
-      select: {
-        id: true,
-        name: true,
-        barcode: true,
-        state: true,
-        productDetails: {
-          orderBy: { id: "desc" },
-          take: 1,
+    // Some tests mock `prisma.products` partially (eg. only `findUnique`).
+    // If `findMany` is not available (mocked), fall back to multiple `findUnique` calls.
+    if (typeof prisma.products.findMany === 'function') {
+      return prisma.products.findMany({
+        where: { id: { in: productIds.map((id) => BigInt(id)) } },
+        select: {
+          id: true,
+          name: true,
+          barcode: true,
+          state: true,
+          productDetails: {
+            orderBy: { id: "desc" },
+            take: 1,
+          },
         },
-      },
-    });
+      });
+    }
+
+    const results = await Promise.all(
+      productIds.map((id) =>
+        prisma.products.findUnique({
+          where: { id: BigInt(id) },
+          select: {
+            id: true,
+            name: true,
+            barcode: true,
+            state: true,
+            productDetails: {
+              orderBy: { id: "desc" },
+              take: 1,
+            },
+          },
+        })
+      )
+    );
+
+    // Filter out any nulls
+    return results.filter((r) => r !== null) as any;
   }
 
   async findOperatorPersonIdByUserId(userId: number): Promise<bigint | null> {

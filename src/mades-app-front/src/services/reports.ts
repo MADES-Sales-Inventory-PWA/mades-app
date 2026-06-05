@@ -19,12 +19,20 @@ export type InventoryAdjustmentItem = {
   description: string
   notes: string | null
   employee: { name: string; lastName: string; email: string } | null
-  product: { name: string; barcode: string } | null
+  product: {
+    id: number
+    name: string
+    barcode: string
+    quantity: number
+    price: number
+    lineTotal: number
+  } | null
 }
 
 export type AdjustmentFilters = {
   from?: string
   to?: string
+  employeeId?: number
   reason?: string
   page?: number
   pageSize?: number
@@ -63,10 +71,27 @@ export async function getInventoryAdjustments(
   const params = new URLSearchParams()
   if (filters.from) params.set('from', filters.from)
   if (filters.to) params.set('to', filters.to)
+  if (filters.employeeId) params.set('employeeId', String(filters.employeeId))
   if (filters.reason) params.set('reason', filters.reason)
   params.set('page', String(filters.page ?? 1))
   params.set('pageSize', String(filters.pageSize ?? 20))
-  return apiFetch<Paginated<InventoryAdjustmentItem>>(`${BASE}/inventory-adjustments?${params}`)
+  const response = await apiFetch<Paginated<InventoryAdjustmentItem>>(`${BASE}/inventory-adjustments?${params}`)
+  return {
+    ...response,
+    data: response.data.map((item) => ({
+      ...item,
+      createdAt: String(item.createdAt),
+      quantity: Number(item.quantity),
+      product: item.product
+        ? {
+          ...item.product,
+          quantity: Number(item.product.quantity),
+          price: Number(item.product.price),
+          lineTotal: Number(item.product.lineTotal),
+        }
+        : null,
+    })),
+  }
 }
 
 // ── Sales summary (day / week / month) ───────────────────────────────────────
@@ -127,5 +152,19 @@ export async function getSalesHistory(
   if (filters.employeeId) params.set('employeeId', String(filters.employeeId))
   params.set('page', String(filters.page ?? 1))
   params.set('pageSize', String(filters.pageSize ?? 20))
-  return apiFetch<Paginated<SalesHistoryItem>>(`${BASE}/sales?${params}`)
+  const response = await apiFetch<Paginated<SalesHistoryItem>>(`${BASE}/sales?${params}`)
+  return {
+    ...response,
+    data: response.data.map((sale) => ({
+      ...sale,
+      createdAt: String(sale.createdAt),
+      total: Number(sale.total),
+      products: sale.products.map((product) => ({
+        ...product,
+        quantity: Number(product.quantity),
+        price: Number(product.price),
+        lineTotal: Number(product.lineTotal),
+      })),
+    })),
+  }
 }
