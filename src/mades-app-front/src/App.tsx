@@ -39,19 +39,39 @@ function AppRoutes({
       <Route
         path="/"
         element={
-          !adminExists ? (
-            <Navigate to={constants.CREATE_ADMIN_PATH} replace />
-          ) : (
-            <Login />
-          )
+          (() => {
+            const session = getSession();
+
+            if (!adminExists) {
+              return <Navigate to={constants.CREATE_ADMIN_PATH} replace />;
+            }
+
+            if (session?.token) {
+              return Number(session.user?.roleId) === constants.ADMIN_ROLE_ID
+                ? <Navigate to={constants.ADMIN_HOME_PATH} replace />
+                : <Navigate to={constants.EMPLOYEE_HOME_PATH} replace />;
+            }
+
+            return <Login />;
+          })()
         }
       />
       <Route
         path="/create-admin"
         element={
-          adminExists
-            ? <Navigate to={constants.HOME_PATH} replace />
-            : <CreateAdmin onCreated={() => setAdminExists(true)} />
+          (() => {
+            const session = getSession();
+
+            if (session?.token) {
+              return Number(session.user?.roleId) === constants.ADMIN_ROLE_ID
+                ? <Navigate to={constants.ADMIN_HOME_PATH} replace />
+                : <Navigate to={constants.EMPLOYEE_HOME_PATH} replace />;
+            }
+
+            return adminExists
+              ? <Navigate to={constants.HOME_PATH} replace />
+              : <CreateAdmin onCreated={() => setAdminExists(true)} />;
+          })()
         }
       />
       <Route
