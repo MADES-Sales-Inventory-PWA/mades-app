@@ -4,16 +4,6 @@ import { BrowserMultiFormatReader } from '@zxing/browser'
 import { DecodeHintType, BarcodeFormat } from '@zxing/library'
 import type { IScannerControls } from '@zxing/browser'
 
-// Native BarcodeDetector API (Chrome/Edge/Safari)
-interface NativeBarcode { rawValue: string; format: string }
-interface NativeBarcodeDetector {
-  detect(source: HTMLVideoElement): Promise<NativeBarcode[]>
-}
-declare global {
-  interface Window {
-    BarcodeDetector?: new (opts?: { formats?: string[] }) => NativeBarcodeDetector
-  }
-}
 
 const ZXING_HINTS = new Map<DecodeHintType, unknown>([
   [
@@ -37,6 +27,7 @@ type Props = {
 
 export const BarcodeScanner = ({ onDetected, onClose }: Props) => {
   const videoRef = React.useRef<HTMLVideoElement>(null)
+  const canvasRef = React.useRef<HTMLCanvasElement>(null)
   const controlsRef = React.useRef<IScannerControls | null>(null)
   const streamRef = React.useRef<MediaStream | null>(null)
   const rafRef = React.useRef<number>(0)
@@ -54,50 +45,17 @@ export const BarcodeScanner = ({ onDetected, onClose }: Props) => {
       setIsLoading(false)
     }
 
-    async function startNative() {
-      try {
-        const stream = await navigator.mediaDevices.getUserMedia({
-          video: { facingMode: { ideal: 'environment' } },
-        })
-        streamRef.current = stream
-        const video = videoRef.current!
-        video.srcObject = stream
-        await video.play()
-        setIsLoading(false)
-
-        const detector = new window.BarcodeDetector!({
-          formats: ['ean_13', 'ean_8', 'code_128', 'code_39', 'upc_a', 'upc_e', 'qr_code'],
-        })
-
-        const scan = async () => {
-          if (detectedRef.current) return
-          try {
-            const results = await detector.detect(video)
-            if (results.length > 0) {
-              const value = results[0].rawValue
-              console.log('[BarcodeScanner] Detectado:', value, '|', results[0].format)
-              detectedRef.current = true
-              onDetected(value)
-              return
-            }
-          } catch {
-            // no barcode in frame — continue
-          }
-          rafRef.current = requestAnimationFrame(() => { void scan() })
-        }
-
-        rafRef.current = requestAnimationFrame(() => { void scan() })
-      } catch (e) {
-        handleError(e)
-      }
-    }
-
     async function startZxing() {
       try {
         const reader = new BrowserMultiFormatReader(ZXING_HINTS)
-        const devices = await BrowserMultiFormatReader.listVideoInputDevices()
+
+        const devices =
+          await BrowserMultiFormatReader.listVideoInputDevices()
+
+        console.log("Cámaras detectadas:", devices)
+
         if (devices.length === 0) {
-          setError('No se encontró ninguna cámara en este dispositivo.')
+          setError("No se encontró ninguna cámara.")
           setIsLoading(false)
           return
         }
@@ -107,12 +65,22 @@ export const BarcodeScanner = ({ onDetected, onClose }: Props) => {
         controlsRef.current = await reader.decodeFromVideoDevice(
           deviceId,
           videoRef.current!,
-          (result) => {
+          (result, error) => {
             if (result && !detectedRef.current) {
               const value = result.getText()
-              console.log('[BarcodeScanner] Detectado (ZXing):', value)
+
+              console.log(
+                "[BarcodeScanner] Detectado (ZXing):",
+                value
+              )
+
               detectedRef.current = true
               onDetected(value)
+            }
+
+            if (error) {
+              // opcional para depuración
+              // console.log(error)
             }
           }
         )
@@ -123,11 +91,7 @@ export const BarcodeScanner = ({ onDetected, onClose }: Props) => {
       }
     }
 
-    if (typeof window.BarcodeDetector !== 'undefined') {
-      void startNative()
-    } else {
-      void startZxing()
-    }
+    void startZxing()
 
     return () => {
       cancelAnimationFrame(rafRef.current)
@@ -145,6 +109,50 @@ export const BarcodeScanner = ({ onDetected, onClose }: Props) => {
     if (!value) return
     console.log('[BarcodeScanner] Manual:', value)
     onDetected(value)
+  }
+
+  async function captureAndScan() {
+    const video = videoRef.current
+    const canvas = canvasRef.current
+
+    if (!video || !canvas) return
+
+    try {
+      const ctx = canvas.getContext("2d")
+
+      if (!ctx) return
+
+      canvas.width = video.videoWidth
+      canvas.height = video.videoHeight
+
+      ctx.drawImage(
+        video,
+        0,
+        0,
+        canvas.width,
+        canvas.height
+      )
+
+      const reader = new BrowserMultiFormatReader(ZXING_HINTS)
+
+      const result = await reader.decodeFromCanvas(canvas)
+
+      if (result) {
+        const value = result.getText()
+
+        console.log(
+          "[BarcodeScanner] Detectado por foto:",
+          value
+        )
+
+        detectedRef.current = true
+        onDetected(value)
+      }
+    } catch {
+      setError(
+        "No se pudo detectar un código de barras en la imagen."
+      )
+    }
   }
 
   return (
@@ -205,9 +213,14 @@ export const BarcodeScanner = ({ onDetected, onClose }: Props) => {
             <div className="relative aspect-video bg-black">
               <video ref={videoRef} className="h-full w-full object-cover" />
 
+              <canvas
+                ref={canvasRef}
+                className="hidden"
+              />
+
               {!error && !isLoading && (
                 <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
-                  <div className="relative h-20 w-56 rounded border-2 border-blue-400">
+                  <div className="relative h-32 w-80 rounded border-2 border-blue-400">
                     <span className="absolute -top-0.5 -left-0.5 block h-4 w-4 rounded-tl border-t-2 border-l-2 border-blue-300" />
                     <span className="absolute -top-0.5 -right-0.5 block h-4 w-4 rounded-tr border-t-2 border-r-2 border-blue-300" />
                     <span className="absolute -bottom-0.5 -left-0.5 block h-4 w-4 rounded-bl border-b-2 border-l-2 border-blue-300" />
@@ -237,17 +250,27 @@ export const BarcodeScanner = ({ onDetected, onClose }: Props) => {
               )}
             </div>
 
-            <div className="flex items-center justify-between bg-gray-900 px-4 py-3">
+            <div className="flex items-center justify-between bg-gray-900 px-4 py-3 gap-2">
               <p className="text-xs text-gray-400">
                 Apunta la cámara al código de barras
               </p>
-              <button
-                type="button"
-                onClick={() => setManualMode(true)}
-                className="text-xs text-blue-400 hover:text-blue-300"
-              >
-                Ingresar manualmente
-              </button>
+              <div className="flex gap-2">
+                <button
+                  type="button"
+                  onClick={() => void captureAndScan()}
+                  className="rounded-lg bg-blue-600 px-3 py-1 text-xs font-medium text-white hover:bg-blue-700"
+                >
+                  Tomar foto
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => setManualMode(true)}
+                  className="text-xs text-blue-400 hover:text-blue-300"
+                >
+                  Manual
+                </button>
+              </div>
             </div>
           </>
         )}
