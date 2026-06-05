@@ -1,4 +1,4 @@
-import { useState, useLayoutEffect } from 'react'
+import { useState } from 'react'
 import { useNavigate } from 'react-router-dom';
 import '../App.css'
 import { Button } from '../components/Button';
@@ -6,7 +6,7 @@ import { Icon } from '../components/Icon';
 import { Input } from '../components/Input';
 import { InputPassword } from '../components/InputPassword';
 import { Mail, LogIn, WifiOff } from "lucide-react";
-import { saveSession, getSession } from '../utils/auth';
+import { saveSession } from '../utils/auth';
 import { useOnlineStatus } from '../hooks/useOnlineStatus';
 import { constants } from '../constants/Constants';
 import { useToast } from '../components/ToastProvider';
@@ -17,16 +17,6 @@ export default function Login() {
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
 
-  useLayoutEffect(() => {
-    const session = getSession();
-    if (!session) return;
-    const roleId = Number(session.user.roleId);
-    if (roleId === constants.ADMIN_ROLE_ID) {
-      navigate(constants.ADMIN_HOME_PATH, { replace: true });
-    } else if (roleId === constants.EMPLOYEE_ROLE_ID) {
-      navigate(constants.EMPLOYEE_HOME_PATH, { replace: true });
-    }
-  }, [navigate]);
   const isOnline = useOnlineStatus();
   const { showToast } = useToast();
 

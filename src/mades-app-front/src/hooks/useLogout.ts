@@ -1,10 +1,10 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+//import { useNavigate } from "react-router-dom";
 import { clearSession } from "../utils/auth";
 import { useOnlineStatus } from "./useOnlineStatus";
 
 export function useLogout() {
-  const navigate = useNavigate();
+  //const navigate = useNavigate();
   const isOnline = useOnlineStatus();
   const [showConfirm, setShowConfirm] = useState(false);
 
@@ -18,7 +18,7 @@ export function useLogout() {
 
   const doLogout = () => {
     clearSession();
-    navigate("/", { replace: true });
+    window.location.replace("/");
   };
 
   const confirmLogout = () => {

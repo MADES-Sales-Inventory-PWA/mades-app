@@ -42,17 +42,21 @@ function AppRoutes({
           (() => {
             const session = getSession();
 
-            if (!adminExists) {
-              return <Navigate to={constants.CREATE_ADMIN_PATH} replace />;
+            if (session) {
+              const roleId = Number(session.user.roleId);
+
+              if (roleId === constants.ADMIN_ROLE_ID) {
+                return <Navigate to={constants.ADMIN_HOME_PATH} replace />;
+              }
+
+              if (roleId === constants.EMPLOYEE_ROLE_ID) {
+                return <Navigate to={constants.EMPLOYEE_HOME_PATH} replace />;
+              }
             }
 
-            if (session?.token) {
-              return Number(session.user?.roleId) === constants.ADMIN_ROLE_ID
-                ? <Navigate to={constants.ADMIN_HOME_PATH} replace />
-                : <Navigate to={constants.EMPLOYEE_HOME_PATH} replace />;
-            }
-
-            return <Login />;
+            return !adminExists
+              ? <Navigate to={constants.CREATE_ADMIN_PATH} replace />
+              : <Login />;
           })()
         }
       />
