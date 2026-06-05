@@ -7,6 +7,7 @@ import {
   Trash2,
   Clock,
   RefreshCw,
+  Camera,
 } from "lucide-react";
 import { Input } from "./Input";
 import type { Product } from "../types/Types";
@@ -16,6 +17,7 @@ import { fetchProducts } from "../services/products";
 import { createSale, syncPendingSales, getPendingSalesCount } from "../services/sales";
 import { productsDb } from "../sw/db/products.db";
 import { salesDb } from "../sw/db/sales.db";
+import { BarcodeScanner } from "./BarcodeScanner";
 
 type CartItem = Product & { cartQuantity: number };
 
@@ -30,6 +32,7 @@ export const SalesContent = () => {
   const [isSyncing, setIsSyncing] = React.useState(false);
   const [pendingCount, setPendingCount] = React.useState(0);
   const [isSubmitting, setIsSubmitting] = React.useState(false);
+  const [isScannerOpen, setIsScannerOpen] = React.useState(false);
 
   // ── Data loading ────────────────────────────────────────────────────────
 
@@ -188,6 +191,27 @@ export const SalesContent = () => {
     [cart]
   );
 
+  const handleBarcodeDetected = React.useCallback((barcode: string) => {
+    const normalizedBarcode = barcode.trim();
+
+    if (!normalizedBarcode) {
+      return;
+    }
+
+    const product = products.find((item) => item.barcode === normalizedBarcode);
+
+    setIsScannerOpen(false);
+    setSearchTerm(normalizedBarcode);
+
+    if (!product) {
+      showToast(`No se encontró un producto con el código ${normalizedBarcode}.`);
+      return;
+    }
+
+    addToCart(product);
+    showToast(`"${product.name}" agregado al carrito.`, "success");
+  }, [products]);
+
   // ── Register / queue sale ───────────────────────────────────────────────
 
   async function handleRegisterSale() {
@@ -320,6 +344,15 @@ export const SalesContent = () => {
                 height="h-8"
               />
             </div>
+            <button
+              type="button"
+              onClick={() => setIsScannerOpen(true)}
+              className="inline-flex h-8 items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-3 text-sm font-medium text-slate-700 shadow-sm hover:bg-slate-50"
+              aria-label="Escanear código de barras"
+            >
+              <Camera size={16} />
+              Escanear
+            </button>
           </div>
 
           {isLoading ? (
@@ -364,6 +397,13 @@ export const SalesContent = () => {
             </div>
           )}
         </div>
+
+        {isScannerOpen && (
+          <BarcodeScanner
+            onDetected={handleBarcodeDetected}
+            onClose={() => setIsScannerOpen(false)}
+          />
+        )}
 
         {/* ── Cart ─────────────────────────────────────────────────────── */}
         <div className="flex h-[24rem] flex-col overflow-hidden rounded-xl border border-slate-200 bg-white p-3 shadow-sm sm:h-[26rem] sm:p-4 lg:h-auto lg:min-h-0">

@@ -4,12 +4,16 @@ import { Bell, AlertTriangle, RefreshCw, X } from 'lucide-react'
 import { useStockAlerts } from '../hooks/useStockAlerts'
 import { useOnlineStatus } from '../hooks/useOnlineStatus'
 
-function formatCOP(n: number) {
-  return new Intl.NumberFormat('es-CO', {
-    style: 'currency',
-    currency: 'COP',
-    maximumFractionDigits: 0,
-  }).format(n)
+function formatDate(value: string) {
+  const date = new Date(value)
+  if (Number.isNaN(date.getTime())) {
+    return ''
+  }
+
+  return new Intl.DateTimeFormat('es-CO', {
+    dateStyle: 'medium',
+    timeStyle: 'short',
+  }).format(date)
 }
 
 export function StockAlertsButton() {
@@ -18,6 +22,15 @@ export function StockAlertsButton() {
   const [open, setOpen] = useState(false)
   const buttonRef = useRef<HTMLButtonElement>(null)
   const [panelStyle, setPanelStyle] = useState<React.CSSProperties>({})
+  const footerLabel = alerts.length === 1 ? 'notificación' : 'notificaciones'
+  const notificationLabel = count === 1 ? 'notificación' : 'notificaciones'
+
+  let emptyState: string | null = null
+  if (isLoading && alerts.length === 0) {
+    emptyState = 'Cargando...'
+  } else if (alerts.length === 0) {
+    emptyState = 'No hay notificaciones pendientes.'
+  }
 
   useEffect(() => {
     if (!open) return
@@ -49,7 +62,7 @@ export function StockAlertsButton() {
         ref={buttonRef}
         type="button"
         onClick={() => setOpen((v) => !v)}
-        aria-label={`${count} productos con stock bajo`}
+        aria-label={`${count} ${notificationLabel}`}
         className="relative flex h-9 w-9 items-center justify-center rounded-full hover:bg-slate-100 active:bg-slate-200"
       >
         <Bell size={20} className="text-slate-600" />
@@ -70,7 +83,7 @@ export function StockAlertsButton() {
             <div className="flex items-center justify-between border-b border-slate-100 px-4 py-3">
               <div className="flex items-center gap-2">
                 <AlertTriangle size={16} className="text-amber-500" />
-                <span className="text-sm font-semibold text-slate-800">Stock bajo</span>
+                <span className="text-sm font-semibold text-slate-800">Notificaciones</span>
                 {count > 0 && (
                   <span className="rounded-full bg-red-100 px-2 py-0.5 text-xs font-semibold text-red-600">
                     {count}
@@ -100,23 +113,23 @@ export function StockAlertsButton() {
 
             {/* List */}
             <div className="max-h-72 overflow-y-auto">
-              {isLoading && alerts.length === 0 ? (
-                <p className="px-4 py-6 text-center text-sm text-slate-400">Cargando...</p>
-              ) : alerts.length === 0 ? (
-                <p className="px-4 py-6 text-center text-sm text-slate-400">
-                  Todos los productos tienen stock suficiente.
-                </p>
+              {emptyState ? (
+                <p className="px-4 py-6 text-center text-sm text-slate-400">{emptyState}</p>
               ) : (
                 <ul className="divide-y divide-slate-100">
-                  {alerts.map((p) => (
-                    <li key={p.id} className="flex items-center justify-between gap-3 px-4 py-2.5">
+                  {alerts.map((notification) => (
+                    <li
+                      key={`${notification.product.id}-${notification.createdAt}`}
+                      className="flex items-center justify-between gap-3 px-4 py-2.5"
+                    >
                       <div className="min-w-0">
-                        <p className="truncate text-sm font-medium text-slate-800">{p.name}</p>
-                        <p className="text-xs text-slate-400">{p.barcode}</p>
+                        <p className="truncate text-sm font-medium text-slate-800">{notification.product.name}</p>
+                        <p className="text-xs text-slate-400">{notification.product.barcode}</p>
+                        <p className="mt-1 text-[11px] text-slate-400">{formatDate(notification.createdAt)}</p>
                       </div>
                       <div className="shrink-0 text-right">
-                        <p className="text-sm font-semibold text-amber-600">{p.quantity} uds.</p>
-                        <p className="text-xs text-slate-400">Mín: {p.minQuantity}</p>
+                        <p className="text-sm font-semibold text-amber-600">{notification.currentStock} uds.</p>
+                        <p className="text-xs text-slate-400">Mín: {notification.minStock}</p>
                       </div>
                     </li>
                   ))}
@@ -124,13 +137,11 @@ export function StockAlertsButton() {
               )}
             </div>
 
-            {/* Footer */}
-            {alerts.length > 0 && (
+            {alerts.length > 0 ? (
               <div className="border-t border-slate-100 px-4 py-2 text-xs text-slate-400">
-                {alerts.length} producto{alerts.length !== 1 ? 's' : ''} requieren reabastecimiento.
-                Precio de venta promedio: {formatCOP(alerts.reduce((s, p) => s + p.sellingPrice, 0) / alerts.length)}.
+                {alerts.length} {footerLabel} pendientes.
               </div>
-            )}
+            ) : null}
           </div>,
           document.body
         )}

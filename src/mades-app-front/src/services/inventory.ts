@@ -1,5 +1,6 @@
 import { constants } from "../constants/Constants";
 import { authFetch } from "../utils/apiFetch";
+import { dispatchNotificationsRefresh } from "../utils/notificationEvents";
 
 export type InventoryAdjustmentType = "LOSS" | "GAIN";
 export type InventoryAdjustmentReason =
@@ -49,5 +50,6 @@ export async function createInventoryAdjustment(payload: CreateInventoryAdjustme
     throw new Error(message);
   }
 
+  dispatchNotificationsRefresh();
   return (await response.json()) as ApiResponse<RegisteredAdjustment>;
 }
